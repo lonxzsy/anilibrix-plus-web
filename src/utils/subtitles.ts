@@ -125,7 +125,7 @@ export function loadSubtitleStyle(): SubtitleStyle {
   try {
     const raw = localStorage.getItem('anilibrixplus-subtitle-style')
     if (raw) return { ...defaultSubtitleStyle, ...JSON.parse(raw) }
-  } catch {}
+  } catch { /* eslint-disable-line no-empty */ }
   return { ...defaultSubtitleStyle }
 }
 
