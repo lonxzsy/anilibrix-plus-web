@@ -2,14 +2,30 @@
   <div class="player-page">
     <div class="player-page__header">
       <button class="player-page__back" @click="goBack">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
         <span class="md3-label-large">Назад</span>
       </button>
       <h2 class="player-page__title md3-title-large">{{ titleName }}</h2>
       <span class="player-page__episode-info md3-body-medium">Эпизод {{ currentOrdinal }}</span>
     </div>
 
-    <div ref="containerRef" class="player-container" @mousemove="showControls" @mouseleave="hideControlsDelayed">
+    <div
+      ref="containerRef"
+      class="player-container"
+      @mousemove="showControls"
+      @mouseleave="hideControlsDelayed"
+    >
       <video
         ref="videoRef"
         class="player-container__video"
@@ -57,70 +73,179 @@
         @close-settings="showSubtitles = false"
       />
 
-      <div class="player-controls" :class="{ 'player-controls--hidden': controlsHidden && isPlaying }">
+      <div
+        class="player-controls"
+        :class="{ 'player-controls--hidden': controlsHidden && isPlaying }"
+      >
         <div class="player-controls__top">
           <div class="player-controls__gradient" />
         </div>
 
-        <div class="player-controls__progress-area" @mousemove="onProgressHover" @mouseleave="hoverTime = null">
+        <div
+          class="player-controls__progress-area"
+          @mousemove="onProgressHover"
+          @mouseleave="hoverTime = null"
+        >
           <div class="player-controls__progress-wrapper">
-            <div
-              class="player-controls__progress-bar"
-              @click="seekTo"
-              ref="progressBarRef"
-            >
+            <div ref="progressBarRef" class="player-controls__progress-bar" @click="seekTo">
               <div class="player-controls__progress-track" />
-              <div class="player-controls__progress-buffer" :style="{ width: `${bufferedPercent}%` }" />
-              <div class="player-controls__progress-fill" :style="{ width: `${progressPercent}%` }" />
-              <div class="player-controls__progress-thumb" :style="{ left: `${progressPercent}%` }" />
+              <div
+                class="player-controls__progress-buffer"
+                :style="{ width: `${bufferedPercent}%` }"
+              />
+              <div
+                class="player-controls__progress-fill"
+                :style="{ width: `${progressPercent}%` }"
+              />
+              <div
+                class="player-controls__progress-thumb"
+                :style="{ left: `${progressPercent}%` }"
+              />
               <div
                 v-if="hoverTime !== null"
                 class="player-controls__progress-hover"
                 :style="{ left: `${hoverPercent}%` }"
               />
             </div>
-            <div v-if="hoverTime !== null" class="player-controls__time-tooltip" :style="{ left: `${hoverPercent}%` }">
+            <div
+              v-if="hoverTime !== null"
+              class="player-controls__time-tooltip"
+              :style="{ left: `${hoverPercent}%` }"
+            >
               {{ formatTime(hoverTime) }}
             </div>
           </div>
           <div class="player-controls__time">
-            <span class="md3-body-small">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+            <span class="md3-body-small"
+              >{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span
+            >
           </div>
         </div>
 
         <div class="player-controls__bottom">
           <div class="player-controls__left">
             <button class="player-controls__btn" @click="togglePlay">
-              <svg v-if="isPlaying" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4h4v16H6zm8 0h4v16h-4z"/></svg>
-              <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg v-if="isPlaying" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
+              </svg>
+              <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
             </button>
 
             <button class="player-controls__btn" @click="skip(-10)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
+              </svg>
             </button>
             <button class="player-controls__btn" @click="skip(10)">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+              </svg>
             </button>
 
             <div class="player-controls__volume">
               <button class="player-controls__btn" @click="toggleMute">
-                <svg v-if="volume === 0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
-                <svg v-else-if="volume < 0.5" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
-                <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>
+                <svg
+                  v-if="volume === 0"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+                <svg
+                  v-else-if="volume < 0.5"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <path d="M15.54 8.46a5 5 0 010 7.07" />
+                </svg>
+                <svg
+                  v-else
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                  <path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" />
+                </svg>
               </button>
               <div class="player-controls__volume-slider">
-                <input type="range" min="0" max="1" step="0.05" v-model.number="volume" @input="setVolume" />
+                <input
+                  v-model.number="volume"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  @input="setVolume"
+                />
               </div>
             </div>
           </div>
 
           <div class="player-controls__right">
-            <button class="player-controls__btn" @click="showSubtitles = !showSubtitles" title="Субтитры">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h8"/></svg>
+            <button
+              class="player-controls__btn"
+              title="Субтитры"
+              @click="showSubtitles = !showSubtitles"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 7h16M4 12h10M4 17h8" />
+              </svg>
             </button>
 
-            <div class="player-controls__dropdown" ref="qualityDropdownRef">
-              <button class="player-controls__btn player-controls__btn--text" @click="showQuality = !showQuality">
+            <div ref="qualityDropdownRef" class="player-controls__dropdown">
+              <button
+                class="player-controls__btn player-controls__btn--text"
+                @click="showQuality = !showQuality"
+              >
                 <span class="md3-label-small">{{ currentQualityLabel }}</span>
               </button>
               <div v-if="showQuality" class="player-controls__menu">
@@ -136,8 +261,11 @@
               </div>
             </div>
 
-            <div class="player-controls__dropdown" ref="speedDropdownRef">
-              <button class="player-controls__btn player-controls__btn--text" @click="showSpeed = !showSpeed">
+            <div ref="speedDropdownRef" class="player-controls__dropdown">
+              <button
+                class="player-controls__btn player-controls__btn--text"
+                @click="showSpeed = !showSpeed"
+              >
                 <span class="md3-label-small">{{ playbackRate }}x</span>
               </button>
               <div v-if="showSpeed" class="player-controls__menu">
@@ -154,11 +282,36 @@
             </div>
 
             <button class="player-controls__btn" @click="togglePip">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z"/><path d="M15 15v-4h4M15 11l4 4"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2z" />
+                <path d="M15 15v-4h4M15 11l4 4" />
+              </svg>
             </button>
 
             <button class="player-controls__btn" @click="toggleFullscreen">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"
+                />
+              </svg>
             </button>
           </div>
         </div>
@@ -175,7 +328,7 @@
           :class="{
             'player-page__episode-btn--active': ep.id === currentEpisodeId,
             'player-page__episode-btn--local': filePath && localFileMap.has(ep.ordinal),
-            'player-page__episode-btn--missing': filePath && !localFileMap.has(ep.ordinal)
+            'player-page__episode-btn--missing': filePath && !localFileMap.has(ep.ordinal),
           }"
           @click="selectEpisode(ep)"
         >
@@ -237,7 +390,9 @@ let saveInterval: ReturnType<typeof setInterval>
 const currentEpisodeId = computed(() => currentEpisode.value?.id || props.episodeId)
 const titleName = computed(() => title.value?.name.main || '')
 const currentOrdinal = computed(() => currentEpisode.value?.ordinal || 1)
-const progressPercent = computed(() => duration.value ? (currentTime.value / duration.value) * 100 : 0)
+const progressPercent = computed(() =>
+  duration.value ? (currentTime.value / duration.value) * 100 : 0
+)
 
 const canSkipOpening = computed(() => {
   const op = currentEpisode.value?.opening
@@ -267,7 +422,9 @@ const qualityOptions = [
   { value: 'hls480', label: '480p' },
 ]
 const currentQuality = ref('hls720')
-const currentQualityLabel = computed(() => qualityOptions.find(q => q.value === currentQuality.value)?.label || 'Auto')
+const currentQualityLabel = computed(
+  () => qualityOptions.find((q) => q.value === currentQuality.value)?.label || 'Auto'
+)
 
 function getHlsUrl(ep: Episode, quality: string): string {
   if (quality === 'hls1080' && ep.hls1080) return ep.hls1080
@@ -283,13 +440,17 @@ async function loadData() {
     title.value = {
       id: 0,
       alias: '',
-      name: { main: decodedPath.split(/[\\/]/).pop() || 'Локальный файл', english: '', alternative: '' },
+      name: {
+        main: decodedPath.split(/[\\/]/).pop() || 'Локальный файл',
+        english: '',
+        alternative: '',
+      },
       year: 0,
       episodesTotal: 0,
       isOngoing: false,
       isInProduction: false,
       updatedAt: 0,
-      freshAt: 0
+      freshAt: 0,
     }
     episodes.value = []
     currentEpisode.value = null
@@ -301,11 +462,11 @@ async function loadData() {
   const id = props.titleId
   if (!id) return
   const cached = titleStore.titleDetails.get(Number(id))
-  title.value = cached || await titleStore.fetchTitle(id)
+  title.value = cached || (await titleStore.fetchTitle(id))
   episodes.value = title.value?.episodes || []
 
   if (props.episodeId) {
-    currentEpisode.value = episodes.value.find(e => e.id === props.episodeId) || episodes.value[0]
+    currentEpisode.value = episodes.value.find((e) => e.id === props.episodeId) || episodes.value[0]
   } else {
     currentEpisode.value = episodes.value[0]
   }
@@ -323,7 +484,8 @@ async function loadLocalVideo(filePath: string) {
 
   // Extract episode number from filename
   const fileName = filePath.split(/[\\/]/).pop() || ''
-  const epMatch = fileName.match(/\[(\d+)\]/) || fileName.match(/_(\d+)_/) || fileName.match(/(\d+)/)
+  const epMatch =
+    fileName.match(/\[(\d+)\]/) || fileName.match(/_(\d+)_/) || fileName.match(/(\d+)/)
   const epOrdinal = epMatch ? parseInt(epMatch[1]) : null
 
   // Try to load associated title and build local file map
@@ -331,12 +493,12 @@ async function loadLocalVideo(filePath: string) {
     const releaseId = await localFilesBridge.getMapping(fileName)
     if (releaseId) {
       const cached = titleStore.titleDetails.get(releaseId)
-      const t = cached || await titleStore.fetchTitle(releaseId)
+      const t = cached || (await titleStore.fetchTitle(releaseId))
       if (t) {
         title.value = t
         episodes.value = t.episodes || []
         if (epOrdinal && episodes.value.length > 0) {
-          const ep = episodes.value.find(e => e.ordinal === epOrdinal)
+          const ep = episodes.value.find((e) => e.ordinal === epOrdinal)
           if (ep) {
             currentEpisode.value = ep
           } else {
@@ -350,7 +512,8 @@ async function loadLocalVideo(filePath: string) {
         const map = new Map<number, string>()
         scanned.forEach((f: any) => {
           if (mappings[f.name] === releaseId) {
-            const match = f.name.match(/\[(\d+)\]/) || f.name.match(/_(\d+)_/) || f.name.match(/(\d+)/)
+            const match =
+              f.name.match(/\[(\d+)\]/) || f.name.match(/_(\d+)_/) || f.name.match(/(\d+)/)
             if (match) {
               map.set(parseInt(match[1]), f.path)
             }
@@ -411,7 +574,7 @@ function loadVideo() {
   // Restore progress
   if (currentEpisode.value) {
     const entry = libraryStore.history.find(
-      h => h.titleId === Number(props.titleId) && h.episodeId === currentEpisode.value!.id
+      (h) => h.titleId === Number(props.titleId) && h.episodeId === currentEpisode.value!.id
     )
     if (entry) {
       videoRef.value.currentTime = entry.timestamp
@@ -450,7 +613,7 @@ function onTimeUpdate() {
 
     // Auto next-episode countdown
     if (duration.value > 0 && duration.value - currentTime.value <= 5 && !showNextEpisode.value) {
-      const idx = episodes.value.findIndex(e => e.id === currentEpisode.value?.id)
+      const idx = episodes.value.findIndex((e) => e.id === currentEpisode.value?.id)
       if (idx >= 0 && idx < episodes.value.length - 1) {
         const nextEp = episodes.value[idx + 1]
         // In local mode, only auto-advance if next episode has local file
@@ -487,7 +650,7 @@ function resetNextEpisodeTimer() {
 
 function autoNextEpisode() {
   resetNextEpisodeTimer()
-  const idx = episodes.value.findIndex(e => e.id === currentEpisode.value?.id)
+  const idx = episodes.value.findIndex((e) => e.id === currentEpisode.value?.id)
   if (idx < 0) return
   for (let i = idx + 1; i < episodes.value.length; i++) {
     const nextEp = episodes.value[i]
@@ -525,7 +688,7 @@ function onVideoPause() {
 
 function onEnded() {
   saveProgress()
-  const idx = episodes.value.findIndex(e => e.id === currentEpisode.value?.id)
+  const idx = episodes.value.findIndex((e) => e.id === currentEpisode.value?.id)
   if (idx >= 0 && idx < episodes.value.length - 1) {
     selectEpisode(episodes.value[idx + 1])
   }
@@ -686,7 +849,7 @@ function updateDiscordPresence() {
     largeImageText: title.value.name.main,
     smallImageKey: isPlaying.value ? 'play' : 'pause',
     smallImageText: isPlaying.value ? 'Смотрит' : 'На паузе',
-    instance: false
+    instance: false,
   })
 }
 
@@ -763,10 +926,18 @@ function onKeyDown(e: KeyboardEvent) {
 watch(volume, setVolume)
 
 function onDocumentClick(e: MouseEvent) {
-  if (showQuality.value && qualityDropdownRef.value && !qualityDropdownRef.value.contains(e.target as Node)) {
+  if (
+    showQuality.value &&
+    qualityDropdownRef.value &&
+    !qualityDropdownRef.value.contains(e.target as Node)
+  ) {
     showQuality.value = false
   }
-  if (showSpeed.value && speedDropdownRef.value && !speedDropdownRef.value.contains(e.target as Node)) {
+  if (
+    showSpeed.value &&
+    speedDropdownRef.value &&
+    !speedDropdownRef.value.contains(e.target as Node)
+  ) {
     showSpeed.value = false
   }
 }
@@ -868,7 +1039,7 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     z-index: 2;
   }
 }
@@ -876,14 +1047,16 @@ onUnmounted(() => {
 .spinner {
   width: 40px;
   height: 40px;
-  border: 2px solid rgba(255,255,255,0.15);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-top-color: var(--md-sys-color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .player-controls {
@@ -896,7 +1069,12 @@ onUnmounted(() => {
   flex-direction: column;
   justify-content: flex-end;
   transition: opacity 300ms var(--md-sys-motion-easing-standard);
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 40%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.85) 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    transparent 100%
+  );
   padding-top: 60px;
 
   &--hidden {
@@ -924,7 +1102,7 @@ onUnmounted(() => {
   &__progress-track {
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.12);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 2px;
   }
 
@@ -933,7 +1111,7 @@ onUnmounted(() => {
     top: 0;
     left: 0;
     height: 100%;
-    background: rgba(255,255,255,0.18);
+    background: rgba(255, 255, 255, 0.18);
     border-radius: 2px;
     transition: width 100ms linear;
   }
@@ -971,7 +1149,7 @@ onUnmounted(() => {
     top: 0;
     width: 2px;
     height: 100%;
-    background: rgba(255,255,255,0.7);
+    background: rgba(255, 255, 255, 0.7);
     transform: translateX(-50%);
   }
 
@@ -979,20 +1157,20 @@ onUnmounted(() => {
     position: absolute;
     bottom: 18px;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.9);
+    background: rgba(0, 0, 0, 0.9);
     color: #fff;
     padding: 4px 10px;
     border-radius: 4px;
     font-size: 12px;
     white-space: nowrap;
     pointer-events: none;
-    border: 1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(8px);
   }
 
   &__time {
     padding: 2px 0 10px;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255, 255, 255, 0.6);
     font-size: 12px;
     letter-spacing: 0.02em;
   }
@@ -1005,7 +1183,8 @@ onUnmounted(() => {
     gap: 8px;
   }
 
-  &__left, &__right {
+  &__left,
+  &__right {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -1019,15 +1198,16 @@ onUnmounted(() => {
     height: 36px;
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.85);
+    color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
     border-radius: var(--md-sys-shape-corner-small);
-    transition: background 150ms var(--md-sys-motion-easing-standard),
-                color 150ms var(--md-sys-motion-easing-standard),
-                transform 150ms var(--md-sys-motion-easing-standard);
+    transition:
+      background 150ms var(--md-sys-motion-easing-standard),
+      color 150ms var(--md-sys-motion-easing-standard),
+      transform 150ms var(--md-sys-motion-easing-standard);
 
     &:hover {
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       color: #fff;
       transform: scale(1.08);
     }
@@ -1056,15 +1236,16 @@ onUnmounted(() => {
     width: 0;
     opacity: 0;
     overflow: hidden;
-    transition: width 200ms var(--md-sys-motion-easing-standard),
-                opacity 200ms var(--md-sys-motion-easing-standard);
+    transition:
+      width 200ms var(--md-sys-motion-easing-standard),
+      opacity 200ms var(--md-sys-motion-easing-standard);
 
-    input[type="range"] {
+    input[type='range'] {
       -webkit-appearance: none;
       appearance: none;
       width: 80px;
       height: 3px;
-      background: rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.15);
       border-radius: 2px;
       outline: none;
 
@@ -1075,7 +1256,7 @@ onUnmounted(() => {
         background: #fff;
         border-radius: 50%;
         cursor: pointer;
-        box-shadow: 0 0 6px rgba(255,255,255,0.3);
+        box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
       }
 
       &::-moz-range-thumb {
@@ -1099,7 +1280,7 @@ onUnmounted(() => {
     right: 0;
     background: rgba(15, 14, 18, 0.92);
     backdrop-filter: blur(24px) saturate(1.3);
-    border: 1px solid rgba(255,255,255,0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: var(--md-sys-shape-corner-small);
     padding: 4px;
     min-width: 100px;
@@ -1107,7 +1288,7 @@ onUnmounted(() => {
     flex-direction: column;
     gap: 2px;
     z-index: 10;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   }
 
   &__menu-item {
@@ -1115,14 +1296,16 @@ onUnmounted(() => {
     border-radius: var(--md-sys-shape-corner-extra-small);
     border: none;
     background: transparent;
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     cursor: pointer;
     font-size: 13px;
     text-align: left;
-    transition: background 150ms, color 150ms;
+    transition:
+      background 150ms,
+      color 150ms;
 
     &:hover {
-      background: rgba(255,255,255,0.06);
+      background: rgba(255, 255, 255, 0.06);
       color: #fff;
     }
 
@@ -1158,8 +1341,9 @@ onUnmounted(() => {
   color: var(--md-sys-color-on-surface);
   cursor: pointer;
   font: var(--md-sys-typescale-label-large);
-  transition: background-color 150ms var(--md-sys-motion-easing-standard),
-              border-color 150ms var(--md-sys-motion-easing-standard);
+  transition:
+    background-color 150ms var(--md-sys-motion-easing-standard),
+    border-color 150ms var(--md-sys-motion-easing-standard);
 
   &:hover {
     background: var(--md-sys-color-surface-container-high);
@@ -1206,14 +1390,17 @@ onUnmounted(() => {
 .player-skip-btn {
   padding: 8px 16px;
   border-radius: var(--md-sys-shape-corner-small);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(15, 14, 18, 0.85);
   backdrop-filter: blur(12px);
   color: var(--md-sys-color-primary);
   cursor: pointer;
   font: var(--md-sys-typescale-label-large);
-  transition: background-color 150ms, color 150ms, transform 200ms var(--md-sys-motion-easing-spring);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition:
+    background-color 150ms,
+    color 150ms,
+    transform 200ms var(--md-sys-motion-easing-spring);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 
   &:hover {
     background: var(--md-sys-color-primary-container);
@@ -1227,14 +1414,17 @@ onUnmounted(() => {
   overflow: hidden;
   padding: 10px 18px;
   border-radius: var(--md-sys-shape-corner-small);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(15, 14, 18, 0.85);
   backdrop-filter: blur(12px);
   color: var(--md-sys-color-primary);
   cursor: pointer;
   font: var(--md-sys-typescale-label-large);
-  transition: background-color 150ms, color 150ms, transform 200ms var(--md-sys-motion-easing-spring);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition:
+    background-color 150ms,
+    color 150ms,
+    transform 200ms var(--md-sys-motion-easing-spring);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   min-width: 170px;
 
   &:hover {
@@ -1249,7 +1439,7 @@ onUnmounted(() => {
     left: 0;
     right: 0;
     height: 3px;
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
   }
 
   &__fill {
@@ -1267,11 +1457,23 @@ onUnmounted(() => {
   animation: skipOut 200ms var(--md-sys-motion-easing-accelerate) forwards;
 }
 @keyframes skipIn {
-  from { opacity: 0; transform: translateY(8px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes skipOut {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(8px) scale(0.96); }
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
 }
 </style>

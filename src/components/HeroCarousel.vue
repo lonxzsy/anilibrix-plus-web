@@ -7,17 +7,14 @@
         class="hero-carousel__slide"
         :class="{ 'hero-carousel__slide--active': index === activeIndex }"
       >
-        <img
-          class="hero-carousel__bg"
-          :src="bgUrl(title)"
-          :alt="title.name.main"
-          loading="eager"
-        />
+        <img class="hero-carousel__bg" :src="bgUrl(title)" :alt="title.name.main" loading="eager" />
         <div class="hero-carousel__vignette" />
         <div class="hero-carousel__content">
           <div class="hero-carousel__metadata">
             <span v-if="title.year" class="hero-carousel__year">{{ title.year }}</span>
-            <span v-if="title.type?.description" class="hero-carousel__type">{{ title.type.description }}</span>
+            <span v-if="title.type?.description" class="hero-carousel__type">{{
+              title.type.description
+            }}</span>
             <span v-if="title.isOngoing" class="hero-carousel__ongoing">Онгоинг</span>
           </div>
           <h2 class="hero-carousel__title md3-headline-large">{{ title.name.main }}</h2>
@@ -25,11 +22,19 @@
             {{ truncate(title.description, 180) }}
           </p>
           <div class="hero-carousel__actions">
-            <button class="hero-carousel__btn hero-carousel__btn--primary glow-hover" @click="$emit('play', title)">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <button
+              class="hero-carousel__btn hero-carousel__btn--primary glow-hover"
+              @click="$emit('play', title)"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
               <span class="md3-label-large">Смотреть</span>
             </button>
-            <button class="hero-carousel__btn hero-carousel__btn--secondary" @click="$emit('details', title)">
+            <button
+              class="hero-carousel__btn hero-carousel__btn--secondary"
+              @click="$emit('details', title)"
+            >
               <span class="md3-label-large">Подробнее</span>
             </button>
           </div>
@@ -101,8 +106,14 @@ function resetProgress() {
 }
 
 function pauseAutoPlay() {
-  if (autoPlayInterval) { clearInterval(autoPlayInterval); autoPlayInterval = null; }
-  if (progressInterval) { clearInterval(progressInterval); progressInterval = null; }
+  if (autoPlayInterval) {
+    clearInterval(autoPlayInterval)
+    autoPlayInterval = null
+  }
+  if (progressInterval) {
+    clearInterval(progressInterval)
+    progressInterval = null
+  }
 }
 
 function truncate(str: string, len: number) {
@@ -165,7 +176,7 @@ onUnmounted(() => pauseAutoPlay())
     inset: 0;
     background:
       linear-gradient(to top, var(--md-sys-color-background) 0%, transparent 50%),
-      linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 40%);
+      linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, transparent 40%);
     z-index: 1;
   }
 
@@ -191,13 +202,14 @@ onUnmounted(() => pauseAutoPlay())
     align-items: center;
   }
 
-  &__year, &__type {
+  &__year,
+  &__type {
     font: var(--md-sys-typescale-label-large);
-    color: rgba(255,255,255,0.75);
+    color: rgba(255, 255, 255, 0.75);
     text-transform: uppercase;
     letter-spacing: 0.06em;
     font-size: 11px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   }
 
   &__ongoing {
@@ -215,7 +227,7 @@ onUnmounted(() => pauseAutoPlay())
     color: var(--md-sys-color-on-background);
     letter-spacing: -0.03em;
     line-height: 1.05;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
   }
 
   &__desc {
@@ -244,9 +256,10 @@ onUnmounted(() => pauseAutoPlay())
     cursor: pointer;
     font: var(--md-sys-typescale-label-large);
     letter-spacing: 0.01em;
-    transition: transform 200ms var(--md-sys-motion-easing-spring),
-                box-shadow 200ms var(--md-sys-motion-easing-standard),
-                opacity 150ms var(--md-sys-motion-easing-standard);
+    transition:
+      transform 200ms var(--md-sys-motion-easing-spring),
+      box-shadow 200ms var(--md-sys-motion-easing-standard),
+      opacity 150ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       transform: translateY(-2px);
@@ -294,8 +307,9 @@ onUnmounted(() => pauseAutoPlay())
     border: none;
     background: rgba(255, 255, 255, 0.12);
     cursor: pointer;
-    transition: background 300ms var(--md-sys-motion-easing-standard),
-                width 300ms var(--md-sys-motion-easing-spring);
+    transition:
+      background 300ms var(--md-sys-motion-easing-standard),
+      width 300ms var(--md-sys-motion-easing-spring);
 
     &--active {
       background: var(--md-sys-color-primary);
@@ -306,7 +320,7 @@ onUnmounted(() => pauseAutoPlay())
 
   &__progress {
     height: 2px;
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
     border-radius: 1px;
     overflow: hidden;
   }

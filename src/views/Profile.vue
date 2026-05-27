@@ -3,17 +3,29 @@
     <div class="profile__card glass">
       <div class="profile__header">
         <div class="profile__avatar-wrap">
-          <img v-if="authStore.user?.avatar" :src="authStore.user.avatar" class="profile__avatar" alt="" />
+          <img
+            v-if="authStore.user?.avatar"
+            :src="authStore.user.avatar"
+            class="profile__avatar"
+            alt=""
+          />
           <div v-else class="profile__avatar-fallback">
             {{ authStore.user?.name?.charAt(0)?.toUpperCase() || '?' }}
           </div>
         </div>
         <div class="profile__info">
           <h2 class="profile__name md3-headline-medium">{{ authStore.user?.name }}</h2>
-          <span class="profile__login md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
+          <span
+            class="profile__login md3-body-large"
+            style="color: var(--md-sys-color-on-surface-variant)"
+          >
             @{{ authStore.user?.login }}
           </span>
-          <span v-if="authStore.user?.email" class="profile__email md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
+          <span
+            v-if="authStore.user?.email"
+            class="profile__email md3-body-medium"
+            style="color: var(--md-sys-color-on-surface-variant)"
+          >
             {{ authStore.user.email }}
           </span>
         </div>
@@ -21,15 +33,21 @@
 
       <div class="profile__stats">
         <div class="profile__stat">
-          <span class="profile__stat-value md3-headline-small">{{ libraryStore.favorites.length }}</span>
+          <span class="profile__stat-value md3-headline-small">{{
+            libraryStore.favorites.length
+          }}</span>
           <span class="profile__stat-label md3-label-medium">Избранное</span>
         </div>
         <div class="profile__stat">
-          <span class="profile__stat-value md3-headline-small">{{ libraryStore.history.length }}</span>
+          <span class="profile__stat-value md3-headline-small">{{
+            libraryStore.history.length
+          }}</span>
           <span class="profile__stat-label md3-label-medium">История</span>
         </div>
         <div class="profile__stat">
-          <span class="profile__stat-value md3-headline-small">{{ libraryStore.playlists.length }}</span>
+          <span class="profile__stat-value md3-headline-small">{{
+            libraryStore.playlists.length
+          }}</span>
           <span class="profile__stat-label md3-label-medium">Плейлисты</span>
         </div>
       </div>
@@ -42,10 +60,19 @@
 
       <div class="profile__actions">
         <button class="profile__logout-btn md3-label-large" @click="logout">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
           Выйти из аккаунта
         </button>
@@ -169,7 +196,9 @@ onMounted(() => {
     border-radius: var(--md-sys-shape-corner-medium);
     background: var(--md-sys-color-surface-container);
     flex: 1;
-    transition: background-color 150ms, transform 150ms;
+    transition:
+      background-color 150ms,
+      transform 150ms;
 
     &:hover {
       background: var(--md-sys-color-surface-container-high);
@@ -204,9 +233,10 @@ onMounted(() => {
     background: var(--md-sys-color-surface-container);
     color: var(--md-sys-color-error);
     cursor: pointer;
-    transition: background-color 150ms var(--md-sys-motion-easing-standard),
-                border-color 150ms var(--md-sys-motion-easing-standard),
-                box-shadow 150ms var(--md-sys-motion-easing-standard);
+    transition:
+      background-color 150ms var(--md-sys-motion-easing-standard),
+      border-color 150ms var(--md-sys-motion-easing-standard),
+      box-shadow 150ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       background: var(--md-sys-color-error-container);

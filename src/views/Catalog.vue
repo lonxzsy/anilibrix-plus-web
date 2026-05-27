@@ -3,15 +3,29 @@
     <div class="catalog__header glass-strong">
       <SearchBar v-model="searchQuery" placeholder="Поиск аниме..." @search="onSearch" />
       <div class="catalog__filters">
-        <select v-model="filters.genre" class="catalog__filter md3-body-medium" @change="applyFilters">
+        <select
+          v-model="filters.genre"
+          class="catalog__filter md3-body-medium"
+          @change="applyFilters"
+        >
           <option value="">Все жанры</option>
-          <option v-for="genre in availableGenres" :key="genre.id" :value="genre.name">{{ genre.name }}</option>
+          <option v-for="genre in availableGenres" :key="genre.id" :value="genre.name">
+            {{ genre.name }}
+          </option>
         </select>
-        <select v-model="filters.year" class="catalog__filter md3-body-medium" @change="applyFilters">
+        <select
+          v-model="filters.year"
+          class="catalog__filter md3-body-medium"
+          @change="applyFilters"
+        >
           <option value="">Все года</option>
           <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
         </select>
-        <select v-model="filters.type" class="catalog__filter md3-body-medium" @change="applyFilters">
+        <select
+          v-model="filters.type"
+          class="catalog__filter md3-body-medium"
+          @change="applyFilters"
+        >
           <option value="">Все типы</option>
           <option v-for="t in availableTypes" :key="t" :value="t">{{ t }}</option>
         </select>
@@ -22,14 +36,37 @@
           :class="{ active: viewMode === 'grid' }"
           @click="viewMode = 'grid'"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" />
+            <rect x="14" y="3" width="7" height="7" />
+            <rect x="3" y="14" width="7" height="7" />
+            <rect x="14" y="14" width="7" height="7" />
+          </svg>
         </button>
         <button
           class="catalog__toggle-btn"
           :class="{ active: viewMode === 'list' }"
           @click="viewMode = 'list'"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
         </button>
       </div>
     </div>
@@ -41,7 +78,7 @@
         :title="title"
         @click="goToDetails(title)"
       />
-      <TitleCard v-if="loading" v-for="n in 12" :key="`sk-${n}`" loading />
+      <TitleCard v-for="n in 12" v-if="loading" :key="`sk-${n}`" loading />
     </div>
 
     <div v-else class="catalog__list">
@@ -55,9 +92,14 @@
         <div class="catalog__list-info">
           <h3 class="md3-title-medium">{{ title.name.main }}</h3>
           <p class="md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
-            {{ title.year }} · {{ title.type?.description }} · {{ title.isOngoing ? 'Онгоинг' : 'Завершён' }}
+            {{ title.year }} · {{ title.type?.description }} ·
+            {{ title.isOngoing ? 'Онгоинг' : 'Завершён' }}
           </p>
-          <p v-if="title.description" class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant); margin-top: 4px">
+          <p
+            v-if="title.description"
+            class="md3-body-small"
+            style="color: var(--md-sys-color-on-surface-variant); margin-top: 4px"
+          >
             {{ truncate(title.description, 180) }}
           </p>
         </div>
@@ -90,32 +132,36 @@ const loading = computed(() => titleStore.loading)
 const filteredTitles = computed(() => {
   let result = titleStore.filteredTitles
   if (filters.value.genre) {
-    result = result.filter(t => t.genres?.some(g => g.name === filters.value.genre))
+    result = result.filter((t) => t.genres?.some((g) => g.name === filters.value.genre))
   }
   if (filters.value.year) {
-    result = result.filter(t => String(t.year) === filters.value.year)
+    result = result.filter((t) => String(t.year) === filters.value.year)
   }
   if (filters.value.type) {
-    result = result.filter(t => t.type?.description === filters.value.type)
+    result = result.filter((t) => t.type?.description === filters.value.type)
   }
   return result
 })
 
 const availableGenres = computed(() => {
   const map = new Map<number, { id: number; name: string }>()
-  titleStore.titles.forEach(t => t.genres?.forEach(g => map.set(g.id, g)))
+  titleStore.titles.forEach((t) => t.genres?.forEach((g) => map.set(g.id, g)))
   return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
 })
 
 const availableYears = computed(() => {
   const set = new Set<string>()
-  titleStore.titles.forEach(t => { if (t.year) set.add(String(t.year)) })
+  titleStore.titles.forEach((t) => {
+    if (t.year) set.add(String(t.year))
+  })
   return Array.from(set).sort((a, b) => Number(b) - Number(a))
 })
 
 const availableTypes = computed(() => {
   const set = new Set<string>()
-  titleStore.titles.forEach(t => { if (t.type?.description) set.add(t.type.description) })
+  titleStore.titles.forEach((t) => {
+    if (t.type?.description) set.add(t.type.description)
+  })
   return Array.from(set).sort()
 })
 
@@ -159,9 +205,12 @@ watch(searchQuery, (val) => {
 onMounted(() => {
   titleStore.fetchTitles(1, 20)
   if (loadMoreTrigger.value) {
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) loadMore()
-    }, { rootMargin: '200px' })
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMore()
+      },
+      { rootMargin: '200px' }
+    )
     observer.observe(loadMoreTrigger.value)
   }
 })
@@ -203,7 +252,9 @@ onMounted(() => {
     outline: none;
     min-width: 140px;
     font-size: 13px;
-    transition: border-color 200ms, background 200ms;
+    transition:
+      border-color 200ms,
+      background 200ms;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a8a3ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 10px center;
@@ -238,7 +289,10 @@ onMounted(() => {
     padding: 6px;
     color: var(--md-sys-color-on-surface-variant);
     cursor: pointer;
-    transition: background 150ms, color 150ms, border-color 150ms;
+    transition:
+      background 150ms,
+      color 150ms,
+      border-color 150ms;
 
     &.active {
       background: var(--md-sys-color-primary-container);
@@ -265,8 +319,9 @@ onMounted(() => {
     padding: 12px;
     border-radius: var(--md-sys-shape-corner-small);
     cursor: pointer;
-    transition: transform 200ms var(--md-sys-motion-easing-standard),
-                box-shadow 200ms var(--md-sys-motion-easing-standard);
+    transition:
+      transform 200ms var(--md-sys-motion-easing-standard),
+      box-shadow 200ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       transform: translateX(4px);

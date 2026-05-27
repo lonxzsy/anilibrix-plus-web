@@ -36,7 +36,7 @@ export const defaultSubtitleStyle: SubtitleStyle = {
   align: 'center',
   lineHeight: 1.4,
   letterSpacing: 0.02,
-  textTransform: 'none'
+  textTransform: 'none',
 }
 
 export function parseSRT(content: string): SubtitleCue[] {
@@ -67,7 +67,10 @@ export function parseSRT(content: string): SubtitleCue[] {
       parseInt(timeMatch[7]) +
       parseInt(timeMatch[8]) / 1000
 
-    const text = lines.slice(2).join('\n').replace(/<[^>]+>/g, '')
+    const text = lines
+      .slice(2)
+      .join('\n')
+      .replace(/<[^>]+>/g, '')
 
     cues.push({ id, start, end, text })
   }

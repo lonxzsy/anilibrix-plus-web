@@ -26,7 +26,7 @@ const router = createRouter({
       return savedPosition
     }
     return { top: 0, behavior: 'smooth' }
-  }
+  },
 })
 
 export default router

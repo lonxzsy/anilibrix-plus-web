@@ -35,22 +35,22 @@ export const db = {
   },
   async deletePlaylist(id: number) {
     return electronAPI.db.deletePlaylist(id)
-  }
+  },
 }
 
 export const appBridge = {
-  getDataPath: () => electronAPI.app.getDataPath()
+  getDataPath: () => electronAPI.app.getDataPath(),
 }
 
 export const windowBridge = {
   minimize: () => electronAPI.window.minimize(),
   maximize: () => electronAPI.window.maximize(),
   close: () => electronAPI.window.close(),
-  isMaximized: () => electronAPI.window.isMaximized()
+  isMaximized: () => electronAPI.window.isMaximized(),
 }
 
 export const notificationBridge = {
-  show: (options: { title: string; body: string }) => electronAPI.notification.show(options)
+  show: (options: { title: string; body: string }) => electronAPI.notification.show(options),
 }
 
 export const playerBridge = {
@@ -59,22 +59,24 @@ export const playerBridge = {
   onSeekBackward: (cb: () => void) => electronAPI.player.onSeekBackward(cb),
   onToggleFullscreen: (cb: () => void) => electronAPI.player.onToggleFullscreen(cb),
   enterPip: () => electronAPI.player.enterPip(),
-  exitPip: () => electronAPI.player.exitPip()
+  exitPip: () => electronAPI.player.exitPip(),
 }
 
 export const discordBridge = {
   updatePresence: (presence: any) => electronAPI.discord.updatePresence(presence),
-  clearPresence: () => electronAPI.discord.clearPresence()
+  clearPresence: () => electronAPI.discord.clearPresence(),
 }
 
 export const torrentBridge = {
-  download: (url: string, filename: string, releaseId: number) => electronAPI.torrent.download(url, filename, releaseId),
-  getDownloadsDir: () => electronAPI.torrent.getDownloadsDir()
+  download: (url: string, filename: string, releaseId: number) =>
+    electronAPI.torrent.download(url, filename, releaseId),
+  getDownloadsDir: () => electronAPI.torrent.getDownloadsDir(),
 }
 
 export const localFilesBridge = {
   scan: () => electronAPI.localFiles.scan(),
   getMappings: () => electronAPI.localFiles.getMappings(),
-  setMapping: (filename: string, releaseId: number) => electronAPI.localFiles.setMapping(filename, releaseId),
-  getMapping: (filename: string) => electronAPI.localFiles.getMapping(filename)
+  setMapping: (filename: string, releaseId: number) =>
+    electronAPI.localFiles.setMapping(filename, releaseId),
+  getMapping: (filename: string) => electronAPI.localFiles.getMapping(filename),
 }

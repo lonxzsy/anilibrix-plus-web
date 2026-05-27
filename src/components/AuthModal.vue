@@ -4,7 +4,16 @@
       <div class="auth-modal__header">
         <h3 class="md3-headline-small">{{ isRegister ? 'Регистрация' : 'Вход' }}</h3>
         <button class="auth-modal__close" @click="close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
@@ -44,12 +53,10 @@
 
         <div v-if="error" class="auth-modal__error md3-body-small">{{ error }}</div>
 
-        <button
-          type="submit"
-          class="auth-modal__submit glow-hover"
-          :disabled="loading"
-        >
-          <span class="md3-label-large">{{ loading ? 'Загрузка...' : (isRegister ? 'Зарегистрироваться' : 'Войти') }}</span>
+        <button type="submit" class="auth-modal__submit glow-hover" :disabled="loading">
+          <span class="md3-label-large">{{
+            loading ? 'Загрузка...' : isRegister ? 'Зарегистрироваться' : 'Войти'
+          }}</span>
         </button>
       </form>
 
@@ -82,14 +89,17 @@ const isRegister = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-watch(() => props.visible, (v) => {
-  if (v) {
-    error.value = ''
-    login.value = ''
-    email.value = ''
-    password.value = ''
+watch(
+  () => props.visible,
+  (v) => {
+    if (v) {
+      error.value = ''
+      login.value = ''
+      email.value = ''
+      password.value = ''
+    }
   }
-})
+)
 
 async function submit() {
   loading.value = true
@@ -124,7 +134,7 @@ function close() {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   animation: fadeIn 200ms var(--md-sys-motion-easing-standard);
 
@@ -176,13 +186,15 @@ function close() {
 
   &__input {
     padding: 10px 14px;
-    background: rgba(255,255,255,0.03);
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
     border-radius: var(--md-sys-shape-corner-small);
     color: var(--md-sys-color-on-surface);
     font-size: 15px;
     outline: none;
-    transition: border-color 200ms, box-shadow 200ms;
+    transition:
+      border-color 200ms,
+      box-shadow 200ms;
 
     &:focus {
       border-color: rgba(184, 165, 232, 0.3);
@@ -206,8 +218,9 @@ function close() {
     border: none;
     border-radius: var(--md-sys-shape-corner-small);
     cursor: pointer;
-    transition: transform 200ms var(--md-sys-motion-easing-spring),
-                box-shadow 200ms var(--md-sys-motion-easing-standard);
+    transition:
+      transform 200ms var(--md-sys-motion-easing-spring),
+      box-shadow 200ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       transform: translateY(-1px);
@@ -237,7 +250,11 @@ function close() {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>

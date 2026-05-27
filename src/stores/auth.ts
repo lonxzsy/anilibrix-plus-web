@@ -71,7 +71,13 @@ export const useAuthStore = defineStore('auth', () => {
     const login = raw?.login || fallbackLogin
     const avatarObj = raw?.avatar
     const avatarUrl = avatarObj
-      ? toAbsoluteImageUrl(avatarObj.preview || avatarObj.thumbnail || avatarObj.optimized?.preview || avatarObj.optimized?.thumbnail || '')
+      ? toAbsoluteImageUrl(
+          avatarObj.preview ||
+            avatarObj.thumbnail ||
+            avatarObj.optimized?.preview ||
+            avatarObj.optimized?.thumbnail ||
+            ''
+        )
       : ''
     return {
       id: raw?.id || 0,
@@ -80,7 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
       name: raw?.nickname || raw?.name || raw?.display_name || login,
       avatar: avatarUrl,
       createdAt: raw?.created_at,
-      updatedAt: raw?.updated_at
+      updatedAt: raw?.updated_at,
     }
   }
 
@@ -113,6 +119,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     init,
-    fetchProfile
+    fetchProfile,
   }
 })

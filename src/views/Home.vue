@@ -23,9 +23,7 @@
     <section class="home__section">
       <div class="home__section-header">
         <h2 class="home__section-title md3-title-large">Новые эпизоды</h2>
-        <router-link to="/catalog" class="home__section-link md3-label-large">
-          Все →
-        </router-link>
+        <router-link to="/catalog" class="home__section-link md3-label-large"> Все → </router-link>
       </div>
       <div class="home__grid">
         <TitleCard
@@ -34,7 +32,7 @@
           :title="title"
           @click="goToDetails(title)"
         />
-        <TitleCard v-if="loading" v-for="n in 6" :key="`sk-${n}`" loading />
+        <TitleCard v-for="n in 6" v-if="loading" :key="`sk-${n}`" loading />
       </div>
     </section>
 
@@ -73,9 +71,15 @@ const heroTitles = computed(() => recentUpdates.value.slice(0, 5))
 const scheduleToday = computed(() => {
   const today = new Date().getDay()
   const dayMap: Record<string, number> = {
-    monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, sunday: 0
+    monday: 1,
+    tuesday: 2,
+    wednesday: 3,
+    thursday: 4,
+    friday: 5,
+    saturday: 6,
+    sunday: 0,
   }
-  return titleStore.schedule.filter(item => {
+  return titleStore.schedule.filter((item) => {
     const day = item.release.publishDay?.value
     if (!day) return false
     return dayMap[day] === today
@@ -83,7 +87,7 @@ const scheduleToday = computed(() => {
 })
 
 function getTitleFromHistory(entry: HistoryEntry): Title {
-  const title = titleStore.titles.find(t => t.id === entry.titleId)
+  const title = titleStore.titles.find((t) => t.id === entry.titleId)
   if (title) return title
   return {
     id: entry.titleId,
@@ -94,7 +98,7 @@ function getTitleFromHistory(entry: HistoryEntry): Title {
     isOngoing: false,
     isInProduction: false,
     updatedAt: 0,
-    freshAt: 0
+    freshAt: 0,
   }
 }
 

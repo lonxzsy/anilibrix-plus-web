@@ -1,13 +1,6 @@
 <template>
-  <div
-    class="subtitle-overlay"
-    :style="overlayStyle"
-  >
-    <div
-      v-if="activeCue"
-      class="subtitle-text"
-      :style="textStyle"
-    >
+  <div class="subtitle-overlay" :style="overlayStyle">
+    <div v-if="activeCue" class="subtitle-text" :style="textStyle">
       {{ activeCue.text }}
     </div>
   </div>
@@ -16,7 +9,16 @@
     <div class="subtitle-settings__header">
       <h4 class="md3-title-small">Субтитры</h4>
       <button class="subtitle-settings__close" @click="emit('closeSettings')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
       </button>
     </div>
 
@@ -26,41 +28,74 @@
         <button class="subtitle-settings__btn md3-label-small" @click="selectFile">
           {{ hasFile ? 'Изменить файл' : 'Выбрать файл (.srt / .vtt)' }}
         </button>
-        <button v-if="hasFile" class="subtitle-settings__btn subtitle-settings__btn--danger md3-label-small" @click="clearFile">
+        <button
+          v-if="hasFile"
+          class="subtitle-settings__btn subtitle-settings__btn--danger md3-label-small"
+          @click="clearFile"
+        >
           Удалить
         </button>
       </div>
-      <input ref="fileInput" type="file" accept=".srt,.vtt" style="display: none" @change="onFileSelected" />
+      <input
+        ref="fileInput"
+        type="file"
+        accept=".srt,.vtt"
+        style="display: none"
+        @change="onFileSelected"
+      />
     </div>
 
     <div class="subtitle-settings__section">
       <label class="subtitle-settings__label md3-label-small">Размер</label>
-      <input type="range" min="12" max="48" step="1" v-model.number="style.fontSize" @input="emitStyle" />
+      <input
+        v-model.number="style.fontSize"
+        type="range"
+        min="12"
+        max="48"
+        step="1"
+        @input="emitStyle"
+      />
       <span class="subtitle-settings__value md3-body-small">{{ style.fontSize }}px</span>
     </div>
 
     <div class="subtitle-settings__row">
       <div class="subtitle-settings__section">
         <label class="subtitle-settings__label md3-label-small">Цвет текста</label>
-        <input type="color" v-model="style.color" @input="emitStyle" />
+        <input v-model="style.color" type="color" @input="emitStyle" />
       </div>
       <div class="subtitle-settings__section">
         <label class="subtitle-settings__label md3-label-small">Цвет фона</label>
-        <input type="color" v-model="style.backgroundColor" @input="emitStyle" />
+        <input v-model="style.backgroundColor" type="color" @input="emitStyle" />
       </div>
     </div>
 
     <div class="subtitle-settings__section">
       <label class="subtitle-settings__label md3-label-small">Прозрачность фона</label>
-      <input type="range" min="0" max="1" step="0.05" v-model.number="style.backgroundOpacity" @input="emitStyle" />
-      <span class="subtitle-settings__value md3-body-small">{{ Math.round(style.backgroundOpacity * 100) }}%</span>
+      <input
+        v-model.number="style.backgroundOpacity"
+        type="range"
+        min="0"
+        max="1"
+        step="0.05"
+        @input="emitStyle"
+      />
+      <span class="subtitle-settings__value md3-body-small"
+        >{{ Math.round(style.backgroundOpacity * 100) }}%</span
+      >
     </div>
 
     <div class="subtitle-settings__section">
       <label class="subtitle-settings__label md3-label-small">Outline</label>
       <div class="subtitle-settings__row">
-        <input type="color" v-model="style.outlineColor" @input="emitStyle" />
-        <input type="range" min="0" max="4" step="0.5" v-model.number="style.outlineWidth" @input="emitStyle" />
+        <input v-model="style.outlineColor" type="color" @input="emitStyle" />
+        <input
+          v-model.number="style.outlineWidth"
+          type="range"
+          min="0"
+          max="4"
+          step="0.5"
+          @input="emitStyle"
+        />
         <span class="subtitle-settings__value md3-body-small">{{ style.outlineWidth }}px</span>
       </div>
     </div>
@@ -73,7 +108,10 @@
           :key="p"
           class="subtitle-settings__chip"
           :class="{ active: style.position === p }"
-          @click="style.position = p as any; emitStyle()"
+          @click="
+            style.position = p as any
+            emitStyle()
+          "
         >
           {{ p === 'top' ? 'Вверху' : p === 'center' ? 'Центр' : 'Внизу' }}
         </button>
@@ -88,7 +126,10 @@
           :key="a"
           class="subtitle-settings__chip"
           :class="{ active: style.align === a }"
-          @click="style.align = a as any; emitStyle()"
+          @click="
+            style.align = a as any
+            emitStyle()
+          "
         >
           {{ a === 'left' ? 'Лево' : a === 'center' ? 'Центр' : 'Право' }}
         </button>
@@ -97,14 +138,28 @@
 
     <div class="subtitle-settings__section">
       <label class="subtitle-settings__label md3-label-small">Межстрочный интервал</label>
-      <input type="range" min="1" max="2.5" step="0.1" v-model.number="style.lineHeight" @input="emitStyle" />
+      <input
+        v-model.number="style.lineHeight"
+        type="range"
+        min="1"
+        max="2.5"
+        step="0.1"
+        @input="emitStyle"
+      />
     </div>
 
     <div class="subtitle-settings__section">
       <label class="subtitle-settings__label md3-label-small">Тень</label>
       <div class="subtitle-settings__row">
-        <input type="color" v-model="style.shadowColor" @input="emitStyle" />
-        <input type="range" min="0" max="20" step="1" v-model.number="style.shadowBlur" @input="emitStyle" />
+        <input v-model="style.shadowColor" type="color" @input="emitStyle" />
+        <input
+          v-model.number="style.shadowBlur"
+          type="range"
+          min="0"
+          max="20"
+          step="1"
+          @input="emitStyle"
+        />
         <span class="subtitle-settings__value md3-body-small">{{ style.shadowBlur }}px</span>
       </div>
     </div>
@@ -132,14 +187,16 @@ const fileInput = ref<HTMLInputElement>()
 
 const activeCue = computed(() => {
   const t = props.currentTime
-  return cues.value.find(c => t >= c.start && t <= c.end) || null
+  return cues.value.find((c) => t >= c.start && t <= c.end) || null
 })
 
 const overlayStyle = computed(() => {
   const s = style.value
   const justify = s.align === 'left' ? 'flex-start' : s.align === 'right' ? 'flex-end' : 'center'
-  const alignItems = s.position === 'top' ? 'flex-start' : s.position === 'bottom' ? 'flex-end' : 'center'
-  const padding = s.position === 'top' ? '48px 24px 20%' : s.position === 'bottom' ? '20% 24px 48px' : '24px'
+  const alignItems =
+    s.position === 'top' ? 'flex-start' : s.position === 'bottom' ? 'flex-end' : 'center'
+  const padding =
+    s.position === 'top' ? '48px 24px 20%' : s.position === 'bottom' ? '20% 24px 48px' : '24px'
 
   return {
     display: 'flex',
@@ -151,7 +208,7 @@ const overlayStyle = computed(() => {
     left: '0',
     right: '0',
     bottom: '0',
-    zIndex: 4
+    zIndex: 4,
   } as any
 })
 
@@ -177,7 +234,7 @@ const textStyle = computed(() => {
     borderRadius: '4px',
     textShadow: `${s.outlineWidth}px ${s.outlineWidth}px 0 ${s.outlineColor}, -${s.outlineWidth}px -${s.outlineWidth}px 0 ${s.outlineColor}, ${s.outlineWidth}px -${s.outlineWidth}px 0 ${s.outlineColor}, -${s.outlineWidth}px ${s.outlineWidth}px 0 ${s.outlineColor}, 0 ${s.shadowBlur}px ${s.shadowBlur}px ${s.shadowColor}`,
     maxWidth: '80%',
-    wordBreak: 'break-word' as any
+    wordBreak: 'break-word' as any,
   }
 })
 
@@ -219,11 +276,24 @@ function parseSRT(content: string): SubtitleCue[] {
     if (lines.length < 3) continue
     const id = parseInt(lines[0], 10)
     if (isNaN(id)) continue
-    const timeMatch = lines[1].match(/(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/)
+    const timeMatch = lines[1].match(
+      /(\d{2}):(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[,.](\d{3})/
+    )
     if (!timeMatch) continue
-    const start = parseInt(timeMatch[1]) * 3600 + parseInt(timeMatch[2]) * 60 + parseInt(timeMatch[3]) + parseInt(timeMatch[4]) / 1000
-    const end = parseInt(timeMatch[5]) * 3600 + parseInt(timeMatch[6]) * 60 + parseInt(timeMatch[7]) + parseInt(timeMatch[8]) / 1000
-    const text = lines.slice(2).join('\n').replace(/<[^>]+>/g, '')
+    const start =
+      parseInt(timeMatch[1]) * 3600 +
+      parseInt(timeMatch[2]) * 60 +
+      parseInt(timeMatch[3]) +
+      parseInt(timeMatch[4]) / 1000
+    const end =
+      parseInt(timeMatch[5]) * 3600 +
+      parseInt(timeMatch[6]) * 60 +
+      parseInt(timeMatch[7]) +
+      parseInt(timeMatch[8]) / 1000
+    const text = lines
+      .slice(2)
+      .join('\n')
+      .replace(/<[^>]+>/g, '')
     result.push({ id, start, end, text })
   }
   return result
@@ -236,8 +306,13 @@ function parseVTT(content: string): SubtitleCue[] {
   while (i < lines.length && !lines[i].includes('-->')) i++
   while (i < lines.length) {
     const timeLine = lines[i]
-    const timeMatch = timeLine.match(/(\d{2}:)?(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}:)?(\d{2}):(\d{2})[,.](\d{3})/)
-    if (!timeMatch) { i++; continue }
+    const timeMatch = timeLine.match(
+      /(\d{2}:)?(\d{2}):(\d{2})[,.](\d{3})\s*-->\s*(\d{2}:)?(\d{2}):(\d{2})[,.](\d{3})/
+    )
+    if (!timeMatch) {
+      i++
+      continue
+    }
     const parseTime = (h: string, m: string, s: string, ms: string) => {
       const hours = h ? parseInt(h) : 0
       return hours * 3600 + parseInt(m) * 60 + parseInt(s) + parseInt(ms) / 1000
@@ -257,11 +332,14 @@ function parseVTT(content: string): SubtitleCue[] {
   return result
 }
 
-watch(() => props.showSettings, (show) => {
-  if (show) {
-    style.value = loadSubtitleStyle()
+watch(
+  () => props.showSettings,
+  (show) => {
+    if (show) {
+      style.value = loadSubtitleStyle()
+    }
   }
-})
+)
 </script>
 
 <style scoped lang="scss">
@@ -343,13 +421,13 @@ watch(() => props.showSettings, (show) => {
     padding: 6px 12px;
     border-radius: var(--md-sys-shape-corner-small);
     border: 1px solid var(--glass-border);
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
     color: var(--md-sys-color-on-surface);
     cursor: pointer;
     transition: background 150ms;
 
     &:hover {
-      background: rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     &--danger {
@@ -381,12 +459,12 @@ watch(() => props.showSettings, (show) => {
     text-align: right;
   }
 
-  input[type="range"] {
+  input[type='range'] {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
     height: 3px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 2px;
     outline: none;
 
@@ -410,7 +488,7 @@ watch(() => props.showSettings, (show) => {
     }
   }
 
-  input[type="color"] {
+  input[type='color'] {
     width: 28px;
     height: 28px;
     border: none;

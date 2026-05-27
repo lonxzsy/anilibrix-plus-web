@@ -1,8 +1,27 @@
 <template>
   <div class="search-bar glass">
-    <svg class="search-bar__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg
+      class="search-bar__icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle
+        cx="11"
+        cy="11"
+        r="8"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+      <path
+        d="M21 21l-4.3-4.3"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
     </svg>
     <input
       ref="input"
@@ -15,7 +34,13 @@
     />
     <button v-if="query" class="search-bar__clear" @click="clear">
       <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M18 6L6 18M6 6l12 12"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
   </div>
@@ -38,9 +63,12 @@ const emit = defineEmits<{
 const query = ref(props.modelValue)
 const input = ref<HTMLInputElement>()
 
-watch(() => props.modelValue, (val) => {
-  query.value = val
-})
+watch(
+  () => props.modelValue,
+  (val) => {
+    query.value = val
+  }
+)
 
 const debouncedEmit = debounce((val: string) => {
   emit('update:modelValue', val)
@@ -74,8 +102,9 @@ function clear() {
   border-radius: var(--md-sys-shape-corner-small);
   padding: 12px 16px;
   border: 1px solid transparent;
-  transition: border-color 200ms var(--md-sys-motion-easing-standard),
-              box-shadow 200ms var(--md-sys-motion-easing-standard);
+  transition:
+    border-color 200ms var(--md-sys-motion-easing-standard),
+    box-shadow 200ms var(--md-sys-motion-easing-standard);
 
   &:focus-within {
     border-color: rgba(184, 165, 232, 0.2);
@@ -113,10 +142,12 @@ function clear() {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 150ms, color 150ms;
+    transition:
+      background 150ms,
+      color 150ms;
 
     &:hover {
-      background-color: rgba(255,255,255,0.06);
+      background-color: rgba(255, 255, 255, 0.06);
       color: var(--md-sys-color-on-surface);
     }
   }

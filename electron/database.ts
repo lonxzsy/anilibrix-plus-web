@@ -44,10 +44,10 @@ export class DatabaseManager {
               titleId: { type: 'number' },
               titleName: { type: 'string' },
               posterUrl: { type: 'string' },
-              addedAt: { type: 'number' }
-            }
+              addedAt: { type: 'number' },
+            },
           },
-          default: []
+          default: [],
         },
         history: {
           type: 'array',
@@ -59,10 +59,10 @@ export class DatabaseManager {
               episodeNumber: { type: 'number' },
               timestamp: { type: 'number' },
               duration: { type: 'number' },
-              watchedAt: { type: 'number' }
-            }
+              watchedAt: { type: 'number' },
+            },
           },
-          default: []
+          default: [],
         },
         playlists: {
           type: 'array',
@@ -78,15 +78,15 @@ export class DatabaseManager {
                   type: 'object',
                   properties: {
                     titleId: { type: 'number' },
-                    titleName: { type: 'string' }
-                  }
-                }
-              }
-            }
+                    titleName: { type: 'string' },
+                  },
+                },
+              },
+            },
           },
-          default: []
-        }
-      }
+          default: [],
+        },
+      },
     })
   }
 
@@ -97,7 +97,7 @@ export class DatabaseManager {
 
   addFavorite(favorite: Favorite) {
     const favorites = this.store.get('favorites')
-    const idx = favorites.findIndex(f => f.titleId === favorite.titleId)
+    const idx = favorites.findIndex((f) => f.titleId === favorite.titleId)
     if (idx >= 0) {
       favorites[idx] = favorite
     } else {
@@ -107,7 +107,7 @@ export class DatabaseManager {
   }
 
   removeFavorite(titleId: number) {
-    const favorites = this.store.get('favorites').filter(f => f.titleId !== titleId)
+    const favorites = this.store.get('favorites').filter((f) => f.titleId !== titleId)
     this.store.set('favorites', favorites)
   }
 
@@ -118,7 +118,9 @@ export class DatabaseManager {
 
   addHistory(entry: HistoryEntry) {
     const history = this.store.get('history')
-    const idx = history.findIndex(h => h.titleId === entry.titleId && h.episodeId === entry.episodeId)
+    const idx = history.findIndex(
+      (h) => h.titleId === entry.titleId && h.episodeId === entry.episodeId
+    )
     if (idx >= 0) {
       history[idx] = entry
     } else {
@@ -146,9 +148,9 @@ export class DatabaseManager {
 
   addToPlaylist(playlistId: number, item: { titleId: number; titleName: string }) {
     const playlists = this.store.get('playlists')
-    const playlist = playlists.find(p => p.id === playlistId)
+    const playlist = playlists.find((p) => p.id === playlistId)
     if (playlist) {
-      if (!playlist.items.find(i => i.titleId === item.titleId)) {
+      if (!playlist.items.find((i) => i.titleId === item.titleId)) {
         playlist.items.push(item)
         this.store.set('playlists', playlists)
       }
@@ -156,7 +158,7 @@ export class DatabaseManager {
   }
 
   deletePlaylist(id: number) {
-    const playlists = this.store.get('playlists').filter(p => p.id !== id)
+    const playlists = this.store.get('playlists').filter((p) => p.id !== id)
     this.store.set('playlists', playlists)
   }
 }

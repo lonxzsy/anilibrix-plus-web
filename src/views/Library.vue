@@ -4,8 +4,12 @@
       <h1 class="library__title md3-headline-medium">Моя библиотека</h1>
       <div v-if="authStore.user" class="library__profile">
         <div class="library__profile-info">
-          <span class="md3-label-large" style="color: var(--md-sys-color-on-surface)">{{ authStore.user.name }}</span>
-          <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{ authStore.user.login }}</span>
+          <span class="md3-label-large" style="color: var(--md-sys-color-on-surface)">{{
+            authStore.user.name
+          }}</span>
+          <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{
+            authStore.user.login
+          }}</span>
         </div>
         <div v-if="authStore.user.avatar" class="library__profile-avatar">
           <img :src="authStore.user.avatar" alt="" />
@@ -47,7 +51,11 @@
       <!-- History -->
       <div v-else-if="activeTab === 'history'" class="library__history">
         <div class="library__sync-bar">
-          <button v-if="authStore.token" class="library__sync-btn md3-label-large" @click="syncData">
+          <button
+            v-if="authStore.token"
+            class="library__sync-btn md3-label-large"
+            @click="syncData"
+          >
             {{ libraryStore.apiLoading ? 'Синхронизация...' : 'Синхронизировать с сервером' }}
           </button>
         </div>
@@ -58,7 +66,12 @@
           @click="continuePlay(entry)"
         >
           <div class="library__history-thumb">
-            <img v-if="getPoster(entry.titleId)" :src="getPoster(entry.titleId)" loading="lazy" alt="" />
+            <img
+              v-if="getPoster(entry.titleId)"
+              :src="getPoster(entry.titleId)"
+              loading="lazy"
+              alt=""
+            />
             <div v-else class="library__history-placeholder">
               <span class="md3-title-large">{{ entry.episodeNumber }}</span>
             </div>
@@ -127,14 +140,37 @@
             @click="playLocalFile(file)"
           >
             <div class="library__local-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                />
+                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
             <div class="library__local-info">
-              <span v-if="file.titleName" class="md3-title-medium" style="color: var(--md-sys-color-primary)">{{ file.titleName }}</span>
+              <span
+                v-if="file.titleName"
+                class="md3-title-medium"
+                style="color: var(--md-sys-color-primary)"
+                >{{ file.titleName }}</span
+              >
               <span v-else class="md3-title-medium">{{ file.name }}</span>
               <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
                 {{ formatBytes(file.size) }}
-                <span v-if="file.releaseId" style="margin-left: 8px; color: var(--md-sys-color-primary)">· Распознано</span>
+                <span
+                  v-if="file.releaseId"
+                  style="margin-left: 8px; color: var(--md-sys-color-primary)"
+                  >· Распознано</span
+                >
               </span>
             </div>
             <button
@@ -147,7 +183,12 @@
           </div>
         </div>
         <div v-else-if="localFilesLoading" class="library__local-skeletons">
-          <div v-for="n in 4" :key="n" class="md3-skeleton" style="height: 56px; border-radius: 8px;" />
+          <div
+            v-for="n in 4"
+            :key="n"
+            class="md3-skeleton"
+            style="height: 56px; border-radius: 8px"
+          />
         </div>
         <div v-else class="library__empty">
           <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
@@ -157,39 +198,60 @@
       </div>
     </div>
 
-  <!-- Local file search modal -->
-  <div v-if="showLocalSearchModal" class="library__modal-overlay" @click.self="showLocalSearchModal = false">
-    <div class="library__modal glass">
-      <h3 class="md3-title-large" style="color: var(--md-sys-color-on-surface); margin-bottom: 16px">
-        Привязать к аниме
-      </h3>
-      <input
-        v-model="localSearchQuery"
-        class="library__modal-input md3-body-medium"
-        placeholder="Название аниме..."
-        @keydown.enter="searchLocalTitle"
-      />
-      <div v-if="localSearchLoading" class="library__modal-loading">
-        <div v-for="n in 3" :key="n" class="md3-skeleton" style="height: 60px; border-radius: 8px;" />
-      </div>
-      <div v-else-if="localSearchResults.length > 0" class="library__modal-list">
-        <div
-          v-for="t in localSearchResults"
-          :key="t.id"
-          class="library__modal-item"
-          @click="assignLocalFile(t)"
+    <!-- Local file search modal -->
+    <div
+      v-if="showLocalSearchModal"
+      class="library__modal-overlay"
+      @click.self="showLocalSearchModal = false"
+    >
+      <div class="library__modal glass">
+        <h3
+          class="md3-title-large"
+          style="color: var(--md-sys-color-on-surface); margin-bottom: 16px"
         >
-          <img v-if="t.poster?.preview" :src="t.poster.preview" class="library__modal-thumb" alt="" />
-          <div v-else class="library__modal-thumb-placeholder" />
-          <span class="md3-body-large">{{ t.name.main }}</span>
+          Привязать к аниме
+        </h3>
+        <input
+          v-model="localSearchQuery"
+          class="library__modal-input md3-body-medium"
+          placeholder="Название аниме..."
+          @keydown.enter="searchLocalTitle"
+        />
+        <div v-if="localSearchLoading" class="library__modal-loading">
+          <div
+            v-for="n in 3"
+            :key="n"
+            class="md3-skeleton"
+            style="height: 60px; border-radius: 8px"
+          />
         </div>
+        <div v-else-if="localSearchResults.length > 0" class="library__modal-list">
+          <div
+            v-for="t in localSearchResults"
+            :key="t.id"
+            class="library__modal-item"
+            @click="assignLocalFile(t)"
+          >
+            <img
+              v-if="t.poster?.preview"
+              :src="t.poster.preview"
+              class="library__modal-thumb"
+              alt=""
+            />
+            <div v-else class="library__modal-thumb-placeholder" />
+            <span class="md3-body-large">{{ t.name.main }}</span>
+          </div>
+        </div>
+        <p
+          v-else
+          class="md3-body-large"
+          style="color: var(--md-sys-color-on-surface-variant); text-align: center"
+        >
+          Ничего не найдено
+        </p>
       </div>
-      <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant); text-align: center;">
-        Ничего не найдено
-      </p>
     </div>
   </div>
-</div>
 </template>
 
 <script setup lang="ts">
@@ -247,13 +309,13 @@ function continuePlay(entry: HistoryEntry) {
 }
 
 function getPoster(titleId: number) {
-  const t = titleStore.titles.find(tt => tt.id === titleId)
+  const t = titleStore.titles.find((tt) => tt.id === titleId)
   if (!t?.poster) return ''
   return t.poster.preview || t.poster.src || t.poster.thumbnail || ''
 }
 
 function getTitleName(titleId: number) {
-  const t = titleStore.titles.find(tt => tt.id === titleId)
+  const t = titleStore.titles.find((tt) => tt.id === titleId)
   return t?.name.main || `Тайтл #${titleId}`
 }
 
@@ -283,21 +345,31 @@ async function scanLocalFiles() {
       size: f.size,
       modifiedAt: f.modifiedAt,
       releaseId: f.releaseId,
-      titleName: f.releaseId ? getTitleName(f.releaseId) : undefined
+      titleName: f.releaseId ? getTitleName(f.releaseId) : undefined,
     }))
     localFiles.value = mapped
 
     // Fetch missing titles in background
-    const missingIds = [...new Set(mapped.filter((f: LocalFile) => f.releaseId && !titleStore.titles.find(t => t.id === f.releaseId)).map((f: LocalFile) => f.releaseId!))]
+    const missingIds = [
+      ...new Set(
+        mapped
+          .filter(
+            (f: LocalFile) => f.releaseId && !titleStore.titles.find((t) => t.id === f.releaseId)
+          )
+          .map((f: LocalFile) => f.releaseId!)
+      ),
+    ]
     for (const id of missingIds) {
       try {
         await titleStore.fetchTitle(String(id))
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     // Recompute names after fetching
     localFiles.value = mapped.map((f: LocalFile) => ({
       ...f,
-      titleName: f.releaseId ? getTitleName(f.releaseId) : undefined
+      titleName: f.releaseId ? getTitleName(f.releaseId) : undefined,
     }))
   } finally {
     localFilesLoading.value = false
@@ -423,9 +495,10 @@ onMounted(() => {
     background: var(--md-sys-color-surface-container);
     color: var(--md-sys-color-primary);
     cursor: pointer;
-    transition: background-color 150ms var(--md-sys-motion-easing-standard),
-                border-color 150ms var(--md-sys-motion-easing-standard),
-                box-shadow 150ms var(--md-sys-motion-easing-standard);
+    transition:
+      background-color 150ms var(--md-sys-motion-easing-standard),
+      border-color 150ms var(--md-sys-motion-easing-standard),
+      box-shadow 150ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       background: var(--md-sys-color-primary-container);
@@ -511,8 +584,9 @@ onMounted(() => {
     border-radius: var(--md-sys-shape-corner-medium);
     background: var(--md-sys-color-surface-container);
     cursor: pointer;
-    transition: background-color 200ms var(--md-sys-motion-easing-standard),
-                transform 200ms var(--md-sys-motion-easing-standard);
+    transition:
+      background-color 200ms var(--md-sys-motion-easing-standard),
+      transform 200ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       background: var(--md-sys-color-surface-container-high);
@@ -551,7 +625,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     height: 4px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
   }
 
   &__history-progress-bar {
@@ -578,9 +652,10 @@ onMounted(() => {
     background: var(--md-sys-color-surface-container);
     color: var(--md-sys-color-primary);
     cursor: pointer;
-    transition: background-color 150ms var(--md-sys-motion-easing-standard),
-                border-color 150ms var(--md-sys-motion-easing-standard),
-                box-shadow 150ms var(--md-sys-motion-easing-standard);
+    transition:
+      background-color 150ms var(--md-sys-motion-easing-standard),
+      border-color 150ms var(--md-sys-motion-easing-standard),
+      box-shadow 150ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       background: var(--md-sys-color-primary-container);
@@ -608,8 +683,9 @@ onMounted(() => {
     border-radius: var(--md-sys-shape-corner-medium);
     background: var(--md-sys-color-surface-container);
     cursor: pointer;
-    transition: transform 200ms var(--md-sys-motion-easing-standard),
-                box-shadow 200ms var(--md-sys-motion-easing-standard);
+    transition:
+      transform 200ms var(--md-sys-motion-easing-standard),
+      box-shadow 200ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       transform: translateY(-2px);
@@ -637,7 +713,9 @@ onMounted(() => {
     border-radius: var(--md-sys-shape-corner-medium);
     background: var(--md-sys-color-surface-container);
     cursor: pointer;
-    transition: background-color 200ms, transform 200ms;
+    transition:
+      background-color 200ms,
+      transform 200ms;
 
     &:hover {
       background: var(--md-sys-color-surface-container-high);
@@ -684,7 +762,9 @@ onMounted(() => {
     color: var(--md-sys-color-primary);
     cursor: pointer;
     font-size: 12px;
-    transition: background-color 150ms, border-color 150ms;
+    transition:
+      background-color 150ms,
+      border-color 150ms;
     flex-shrink: 0;
 
     &:hover {

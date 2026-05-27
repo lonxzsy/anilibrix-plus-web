@@ -7,14 +7,14 @@ export function useIntersectionObserver(
   const observer = new IntersectionObserver(callback, {
     threshold: 0.1,
     rootMargin: '0px',
-    ...options
+    ...options,
   })
 
-  elements.forEach(el => observer.observe(el))
+  elements.forEach((el) => observer.observe(el))
 
   return {
     disconnect: () => observer.disconnect(),
-    unobserve: (el: Element) => observer.unobserve(el)
+    unobserve: (el: Element) => observer.unobserve(el),
   }
 }
 
@@ -68,7 +68,10 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 // Deep merge
-export function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+export function deepMerge(
+  target: Record<string, any>,
+  source: Record<string, any>
+): Record<string, any> {
   const result = { ...target }
   for (const key in source) {
     if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {

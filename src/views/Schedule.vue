@@ -12,7 +12,9 @@
         @click="activeDay = day.value"
       >
         <span class="schedule__tab-label md3-label-large">{{ day.label }}</span>
-        <span v-if="dayCounts[day.value]" class="schedule__tab-count md3-label-small">{{ dayCounts[day.value] }}</span>
+        <span v-if="dayCounts[day.value]" class="schedule__tab-count md3-label-small">{{
+          dayCounts[day.value]
+        }}</span>
       </button>
     </div>
 
@@ -26,7 +28,12 @@
         />
       </div>
       <div v-else-if="loading" class="schedule__skeletons">
-        <div v-for="n in 6" :key="n" class="md3-skeleton" style="height: 280px; border-radius: 4px;" />
+        <div
+          v-for="n in 6"
+          :key="n"
+          class="md3-skeleton"
+          style="height: 280px; border-radius: 4px"
+        />
       </div>
       <div v-else class="schedule__empty">
         <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
@@ -54,11 +61,17 @@ const days = [
   { value: 'thursday', label: 'Чт' },
   { value: 'friday', label: 'Пт' },
   { value: 'saturday', label: 'Сб' },
-  { value: 'sunday', label: 'Вс' }
+  { value: 'sunday', label: 'Вс' },
 ]
 
 const dayMap: Record<string, number> = {
-  monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5, saturday: 6, sunday: 0
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+  sunday: 0,
 }
 
 const todayDayValue = () => {
@@ -70,14 +83,14 @@ const activeDay = ref(todayDayValue())
 
 const loading = computed(() => titleStore.loading)
 const currentDayItems = computed(() => {
-  return titleStore.schedule.filter(item => item.release.publishDay?.value === activeDay.value)
+  return titleStore.schedule.filter((item) => item.release.publishDay?.value === activeDay.value)
 })
 
 const dayCounts = computed(() => {
   const counts: Record<string, number> = {}
-  days.forEach(d => {
+  days.forEach((d) => {
     counts[d.value] = titleStore.schedule.filter(
-      item => item.release.publishDay?.value === d.value
+      (item) => item.release.publishDay?.value === d.value
     ).length
   })
   return counts
@@ -97,7 +110,7 @@ function updateIndicator() {
   if (!activeEl) return
   indicatorStyle.value = {
     transform: `translateX(${activeEl.offsetLeft}px)`,
-    width: `${activeEl.offsetWidth}px`
+    width: `${activeEl.offsetWidth}px`,
   }
 }
 
@@ -136,8 +149,9 @@ onMounted(() => {
     background: var(--md-sys-color-primary);
     border-radius: 2px 2px 0 0;
     box-shadow: 0 0 8px rgba(184, 165, 232, 0.4);
-    transition: transform 300ms var(--md-sys-motion-easing-spring),
-                width 300ms var(--md-sys-motion-easing-spring);
+    transition:
+      transform 300ms var(--md-sys-motion-easing-spring),
+      width 300ms var(--md-sys-motion-easing-spring);
     pointer-events: none;
   }
 
@@ -172,7 +186,9 @@ onMounted(() => {
     border-radius: var(--md-sys-shape-corner-small);
     color: var(--md-sys-color-on-surface-variant);
     font-size: 11px;
-    transition: background-color 200ms, color 200ms;
+    transition:
+      background-color 200ms,
+      color 200ms;
 
     .schedule__tab--active & {
       background: var(--md-sys-color-primary-container);

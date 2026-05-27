@@ -15,20 +15,19 @@ export const useTitleStore = defineStore('titles', () => {
     let result = titles.value
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase()
-      result = result.filter(t =>
-        t.name.main.toLowerCase().includes(q) ||
-        t.name.english?.toLowerCase().includes(q) ||
-        t.name.alternative?.toLowerCase().includes(q) ||
-        t.description?.toLowerCase().includes(q)
+      result = result.filter(
+        (t) =>
+          t.name.main.toLowerCase().includes(q) ||
+          t.name.english?.toLowerCase().includes(q) ||
+          t.name.alternative?.toLowerCase().includes(q) ||
+          t.description?.toLowerCase().includes(q)
       )
     }
     return result
   })
 
   const recentUpdates = computed(() => {
-    return [...titles.value]
-      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
-      .slice(0, 12)
+    return [...titles.value].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0)).slice(0, 12)
   })
 
   async function fetchTitles(page = 1, limit = 20, search?: string) {
@@ -85,6 +84,6 @@ export const useTitleStore = defineStore('titles', () => {
     fetchTitle,
     searchTitles,
     fetchSchedule,
-    setSearchQuery
+    setSearchQuery,
   }
 })

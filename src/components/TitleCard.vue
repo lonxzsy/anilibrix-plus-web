@@ -1,17 +1,17 @@
 <template>
-  <div
-    class="title-card"
-    :class="{ 'title-card--hoverable': !loading }"
-    @click="handleClick"
-  >
+  <div class="title-card" :class="{ 'title-card--hoverable': !loading }" @click="handleClick">
     <div class="title-card__poster">
-      <div v-if="loading || !posterLoaded" class="title-card__skeleton md3-skeleton" :style="skeletonStyle" />
+      <div
+        v-if="loading || !posterLoaded"
+        class="title-card__skeleton md3-skeleton"
+        :style="skeletonStyle"
+      />
       <img
         v-if="title && !loading"
         :src="posterUrl"
         :alt="title.name.main"
         class="title-card__image"
-        :class="{ 'loaded': posterLoaded }"
+        :class="{ loaded: posterLoaded }"
         loading="lazy"
         @load="posterLoaded = true"
       />
@@ -20,7 +20,7 @@
       </div>
       <div v-if="!loading" class="title-card__overlay">
         <svg class="title-card__play" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8 5v14l11-7z"/>
+          <path d="M8 5v14l11-7z" />
         </svg>
       </div>
     </div>
@@ -33,7 +33,10 @@
       <p v-else-if="!loading && title?.year" class="title-card__meta md3-body-small">
         {{ title.year }}<span v-if="title.type?.description"> · {{ title.type.description }}</span>
       </p>
-      <div v-else-if="loading" class="title-card__skeleton title-card__skeleton--meta md3-skeleton" />
+      <div
+        v-else-if="loading"
+        class="title-card__skeleton title-card__skeleton--meta md3-skeleton"
+      />
     </div>
   </div>
 </template>
@@ -67,7 +70,7 @@ const posterUrl = computed(() => {
 })
 
 const skeletonStyle = computed(() => ({
-  aspectRatio: props.aspectRatio || '2/3'
+  aspectRatio: props.aspectRatio || '2/3',
 }))
 </script>
 
@@ -88,13 +91,16 @@ const skeletonStyle = computed(() => ({
 
   &--hoverable {
     .title-card__poster {
-      transition: transform 350ms var(--md-sys-motion-easing-spring),
-                  box-shadow 350ms var(--md-sys-motion-easing-standard);
+      transition:
+        transform 350ms var(--md-sys-motion-easing-spring),
+        box-shadow 350ms var(--md-sys-motion-easing-standard);
     }
 
     &:hover .title-card__poster {
       transform: translateY(-4px) scale(1.01);
-      box-shadow: var(--glow-primary), 0 12px 40px rgba(0,0,0,0.5);
+      box-shadow:
+        var(--glow-primary),
+        0 12px 40px rgba(0, 0, 0, 0.5);
     }
 
     &:hover .title-card__overlay {
@@ -123,8 +129,9 @@ const skeletonStyle = computed(() => ({
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    transition: opacity 400ms var(--md-sys-motion-easing-standard),
-                transform 500ms var(--md-sys-motion-easing-standard);
+    transition:
+      opacity 400ms var(--md-sys-motion-easing-standard),
+      transform 500ms var(--md-sys-motion-easing-standard);
 
     &.loaded {
       opacity: 1;
@@ -159,7 +166,7 @@ const skeletonStyle = computed(() => ({
     padding: 3px 10px;
     border-radius: var(--md-sys-shape-corner-extra-small);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     letter-spacing: 0.03em;
   }
 
@@ -169,7 +176,7 @@ const skeletonStyle = computed(() => ({
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
     opacity: 0;
     transition: opacity 300ms var(--md-sys-motion-easing-standard);
   }
@@ -178,7 +185,7 @@ const skeletonStyle = computed(() => ({
     width: 44px;
     height: 44px;
     color: #fff;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
     transition: transform 300ms var(--md-sys-motion-easing-spring);
   }
 

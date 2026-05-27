@@ -1,4 +1,14 @@
-import { app, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, nativeImage, shell, protocol } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Tray,
+  Menu,
+  globalShortcut,
+  nativeImage,
+  shell,
+  protocol,
+} from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { DatabaseManager } from './database'
@@ -46,7 +56,7 @@ function createWindow() {
     titleBarOverlay: {
       color: '#1c1b1f',
       symbolColor: '#e6e1e5',
-      height: 40
+      height: 40,
     },
     show: false,
     backgroundColor: '#1c1b1f',
@@ -56,8 +66,8 @@ function createWindow() {
       nodeIntegration: false,
       sandbox: true,
       webSecurity: true,
-      allowRunningInsecureContent: false
-    }
+      allowRunningInsecureContent: false,
+    },
   })
 
   if (isDev) {
@@ -71,7 +81,7 @@ function createWindow() {
     mainWindow?.show()
     if (process.platform === 'win32') {
       mainWindow?.setAppDetails({
-        appId: 'tv.anilibrixplus.desktop'
+        appId: 'tv.anilibrixplus.desktop',
       })
     }
   })
@@ -130,10 +140,12 @@ function setupPlayerShortcuts() {
 
 function createTray() {
   // Create a simple 16x16 transparent PNG from a Buffer if asset is missing
-  const emptyIcon = nativeImage.createFromBuffer(Buffer.from(
-    'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAABxpRE9UAAAAAgAAAAAAAAAIAAAAKAAAAAgAAAAIAAAABuX8AeYAAAApSURBVDhPY2AYBaNgFIyCUTAKRsEoGAWjYBSMglEwCkYGAgAABgABJAX4VQAAAABJRU5ErkJggg==',
-    'base64'
-  ))
+  const emptyIcon = nativeImage.createFromBuffer(
+    Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAABxpRE9UAAAAAgAAAAAAAAAIAAAAKAAAAAgAAAAIAAAABuX8AeYAAAApSURBVDhPY2AYBaNgFIyCUTAKRsEoGAWjYBSMglEwCkYGAgAABgABJAX4VQAAAABJRU5ErkJggg==',
+      'base64'
+    )
+  )
   tray = new Tray(emptyIcon)
 
   const contextMenu = Menu.buildFromTemplate([
@@ -147,15 +159,15 @@ function createTray() {
         } else {
           createWindow()
         }
-      }
+      },
     },
     { type: 'separator' },
     {
       label: 'Выйти',
       click: () => {
         app.quit()
-      }
-    }
+      },
+    },
   ])
 
   tray.setToolTip('Anilibrix Plus')
@@ -287,7 +299,7 @@ ipcMain.handle('notification:show', (_event, options: { title: string; body: str
     tray?.displayBalloon({
       iconType: 'info',
       title: options.title,
-      content: options.body
+      content: options.body,
     })
   }
 })
@@ -315,41 +327,51 @@ function loadMappings(): Record<string, number> {
     if (fs.existsSync(MAPPINGS_FILE)) {
       return JSON.parse(fs.readFileSync(MAPPINGS_FILE, 'utf-8'))
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return {}
 }
 
 function saveMappings(mappings: Record<string, number>) {
   try {
     fs.writeFileSync(MAPPINGS_FILE, JSON.stringify(mappings, null, 2))
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
-ipcMain.handle('torrent:download', async (_event, { url, filename, releaseId }: { url: string; filename: string; releaseId: number }) => {
-  try {
-    const downloadsPath = await ensureDownloadsDir()
-    const safeName = filename.replace(/[<>:"/\\|?*]/g, '_')
-    const filePath = path.join(downloadsPath, safeName)
+ipcMain.handle(
+  'torrent:download',
+  async (
+    _event,
+    { url, filename, releaseId }: { url: string; filename: string; releaseId: number }
+  ) => {
+    try {
+      const downloadsPath = await ensureDownloadsDir()
+      const safeName = filename.replace(/[<>:"/\\|?*]/g, '_')
+      const filePath = path.join(downloadsPath, safeName)
 
-    const response = await axios({
-      method: 'GET',
-      url,
-      responseType: 'stream',
-      timeout: 60000
-    })
+      const response = await axios({
+        method: 'GET',
+        url,
+        responseType: 'stream',
+        timeout: 60000,
+      })
 
-    const writer = fs.createWriteStream(filePath)
-    await streamPipeline(response.data, writer)
+      const writer = fs.createWriteStream(filePath)
+      await streamPipeline(response.data, writer)
 
-    const mappings = loadMappings()
-    mappings[safeName] = releaseId
-    saveMappings(mappings)
+      const mappings = loadMappings()
+      mappings[safeName] = releaseId
+      saveMappings(mappings)
 
-    return { success: true, filePath }
-  } catch (e: any) {
-    return { success: false, error: e.message }
+      return { success: true, filePath }
+    } catch (e: any) {
+      return { success: false, error: e.message }
+    }
   }
-})
+)
 
 ipcMain.handle('torrent:get-downloads-dir', async () => {
   return await ensureDownloadsDir()
@@ -359,18 +381,29 @@ ipcMain.handle('local-files:get-mappings', () => {
   return loadMappings()
 })
 
-ipcMain.handle('local-files:set-mapping', (_event, { filename, releaseId }: { filename: string; releaseId: number }) => {
-  const mappings = loadMappings()
-  mappings[filename] = releaseId
-  saveMappings(mappings)
-})
+ipcMain.handle(
+  'local-files:set-mapping',
+  (_event, { filename, releaseId }: { filename: string; releaseId: number }) => {
+    const mappings = loadMappings()
+    mappings[filename] = releaseId
+    saveMappings(mappings)
+  }
+)
 
 // Local video files scanner
 const VIDEO_EXTS = new Set(['.mp4', '.mkv', '.avi', '.mov', '.webm', '.wmv', '.flv', '.m4v'])
 
-function scanVideoFiles(dir: string): Array<{ name: string; path: string; size: number; modifiedAt: number; releaseId?: number }> {
+function scanVideoFiles(
+  dir: string
+): Array<{ name: string; path: string; size: number; modifiedAt: number; releaseId?: number }> {
   const mappings = loadMappings()
-  const results: Array<{ name: string; path: string; size: number; modifiedAt: number; releaseId?: number }> = []
+  const results: Array<{
+    name: string
+    path: string
+    size: number
+    modifiedAt: number
+    releaseId?: number
+  }> = []
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true })
     for (const entry of entries) {
@@ -386,7 +419,7 @@ function scanVideoFiles(dir: string): Array<{ name: string; path: string; size: 
             path: fullPath,
             size: stat.size,
             modifiedAt: stat.mtime.getTime(),
-            releaseId: mappings[entry.name]
+            releaseId: mappings[entry.name],
           })
         }
       }

@@ -6,9 +6,17 @@
         <img class="title-detail__poster" :src="posterUrl" :alt="title.name.main" />
         <div class="title-detail__info">
           <div class="title-detail__metadata">
-            <span v-if="title.year" class="title-detail__meta-tag md3-label-large">{{ title.year }}</span>
-            <span v-if="title.type?.description" class="title-detail__meta-tag md3-label-large">{{ title.type.description }}</span>
-            <span v-if="title.isOngoing" class="title-detail__meta-tag title-detail__meta-tag--ongoing md3-label-large">Онгоинг</span>
+            <span v-if="title.year" class="title-detail__meta-tag md3-label-large">{{
+              title.year
+            }}</span>
+            <span v-if="title.type?.description" class="title-detail__meta-tag md3-label-large">{{
+              title.type.description
+            }}</span>
+            <span
+              v-if="title.isOngoing"
+              class="title-detail__meta-tag title-detail__meta-tag--ongoing md3-label-large"
+              >Онгоинг</span
+            >
           </div>
           <h1 class="title-detail__name md3-display-small">{{ title.name.main }}</h1>
           <p v-if="title.name.english" class="title-detail__english md3-title-medium">
@@ -25,15 +33,32 @@
           </div>
           <div class="title-detail__actions">
             <button class="title-detail__fab glow-hover" @click="handlePlayClick">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-              <span class="md3-label-large">{{ hasLocalFiles ? 'Смотреть онлайн' : 'Смотреть' }}</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span class="md3-label-large">{{
+                hasLocalFiles ? 'Смотреть онлайн' : 'Смотреть'
+              }}</span>
             </button>
             <button
               v-if="hasLocalFiles"
               class="title-detail__fab title-detail__fab--offline"
               @click="playOffline"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
               <span class="md3-label-large">Смотреть офлайн</span>
             </button>
             <button
@@ -42,7 +67,9 @@
               @click="toggleFavorite"
             >
               <svg class="title-detail__star" width="18" height="18" viewBox="0 0 24 24">
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                <path
+                  d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                />
               </svg>
               <span class="title-detail__label-wrap">
                 <span class="title-detail__label title-detail__label--off">В избранное</span>
@@ -68,7 +95,10 @@
 
     <div class="title-detail__content">
       <div v-if="activeTab === 'description'" class="title-detail__description">
-        <p class="md3-body-large" style="line-height: 1.7; color: var(--md-sys-color-on-surface-variant)">
+        <p
+          class="md3-body-large"
+          style="line-height: 1.7; color: var(--md-sys-color-on-surface-variant)"
+        >
           {{ title.description || 'Описание отсутствует.' }}
         </p>
       </div>
@@ -86,10 +116,15 @@
               <span class="md3-headline-small">{{ ep.ordinal }}</span>
             </div>
             <div class="title-detail__episode-progress">
-              <div class="title-detail__episode-progress-bar" :style="{ width: `${getProgress(ep)}%` }" />
+              <div
+                class="title-detail__episode-progress-bar"
+                :style="{ width: `${getProgress(ep)}%` }"
+              />
             </div>
             <div class="title-detail__episode-overlay">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
             </div>
           </div>
           <div class="title-detail__episode-info">
@@ -103,15 +138,15 @@
 
       <div v-else-if="activeTab === 'related'" class="title-detail__related">
         <div v-if="relatedTitles.length > 0" class="title-detail__grid">
-          <TitleCard
-            v-for="t in relatedTitles"
-            :key="t.id"
-            :title="t"
-            @click="goToDetails(t)"
-          />
+          <TitleCard v-for="t in relatedTitles" :key="t.id" :title="t" @click="goToDetails(t)" />
         </div>
         <div v-else-if="relatedLoading" class="title-detail__grid">
-          <div v-for="n in 6" :key="n" class="md3-skeleton" style="height: 260px; border-radius: 4px;" />
+          <div
+            v-for="n in 6"
+            :key="n"
+            class="md3-skeleton"
+            style="height: 260px; border-radius: 4px"
+          />
         </div>
         <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
           Похожие тайтлы не найдены.
@@ -120,18 +155,21 @@
 
       <div v-else-if="activeTab === 'torrents'" class="title-detail__torrents">
         <div v-if="torrents.length > 0" class="title-detail__torrent-list">
-          <div
-            v-for="t in torrents"
-            :key="t.id"
-            class="title-detail__torrent-item"
-          >
+          <div v-for="t in torrents" :key="t.id" class="title-detail__torrent-item">
             <div class="title-detail__torrent-info">
               <div class="title-detail__torrent-header">
-                <span class="title-detail__torrent-quality md3-label-large">{{ t.quality.value }}</span>
-                <span v-if="bestTorrent?.id === t.id" class="title-detail__torrent-best md3-label-small">Лучшее</span>
+                <span class="title-detail__torrent-quality md3-label-large">{{
+                  t.quality.value
+                }}</span>
+                <span
+                  v-if="bestTorrent?.id === t.id"
+                  class="title-detail__torrent-best md3-label-small"
+                  >Лучшее</span
+                >
               </div>
               <span class="title-detail__torrent-meta md3-body-small">
-                {{ t.type.value }} · {{ t.codec.value }} · {{ t.color.value }} · {{ formatBytes(t.size) }}
+                {{ t.type.value }} · {{ t.codec.value }} · {{ t.color.value }} ·
+                {{ formatBytes(t.size) }}
               </span>
               <span class="title-detail__torrent-seeders md3-body-small">
                 {{ t.seeders }} сидов · {{ t.leechers }} личей
@@ -142,18 +180,52 @@
             </div>
             <div class="title-detail__torrent-actions">
               <button class="title-detail__torrent-btn md3-label-large" @click="downloadTorrent(t)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 .torrent
               </button>
-              <button class="title-detail__torrent-btn title-detail__torrent-btn--magnet md3-label-large" @click="openMagnet(t)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              <button
+                class="title-detail__torrent-btn title-detail__torrent-btn--magnet md3-label-large"
+                @click="openMagnet(t)"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="16" />
+                  <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
                 Magnet
               </button>
             </div>
           </div>
         </div>
         <div v-else-if="torrentsLoading" class="title-detail__torrent-skeletons">
-          <div v-for="n in 4" :key="n" class="md3-skeleton" style="height: 80px; border-radius: 8px;" />
+          <div
+            v-for="n in 4"
+            :key="n"
+            class="md3-skeleton"
+            style="height: 80px; border-radius: 8px"
+          />
         </div>
         <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
           Торренты для этого релиза не найдены.
@@ -162,7 +234,7 @@
     </div>
   </div>
   <div v-else-if="loading" class="title-detail__skeleton">
-    <div class="md3-skeleton" style="height: 420px; border-radius: 0;" />
+    <div class="md3-skeleton" style="height: 420px; border-radius: 0" />
   </div>
 </template>
 
@@ -194,7 +266,7 @@ const torrentsLoading = ref(false)
 const localMappings = ref<Record<string, number>>({})
 const localFilesForTitle = ref<Array<{ name: string; path: string }>>([])
 
-const isFav = computed(() => title.value ? libraryStore.isFavorite(title.value.id) : false)
+const isFav = computed(() => (title.value ? libraryStore.isFavorite(title.value.id) : false))
 
 const hasLocalFiles = computed(() => localFilesForTitle.value.length > 0)
 
@@ -213,14 +285,14 @@ const posterUrl = computed(() => {
 })
 
 const headerBgStyle = computed(() => ({
-  backgroundImage: `url(${posterUrl.value})`
+  backgroundImage: `url(${posterUrl.value})`,
 }))
 
 async function checkLocalFiles() {
   try {
     const [mappings, scanned] = await Promise.all([
       localFilesBridge.getMappings(),
-      localFilesBridge.scan()
+      localFilesBridge.scan(),
     ])
     localMappings.value = mappings
     const files: Array<{ name: string; path: string }> = []
@@ -273,7 +345,7 @@ function toggleFavorite() {
 
 function getProgress(ep: Episode) {
   const entry = libraryStore.history.find(
-    h => h.titleId === Number(props.id) && h.episodeId === ep.id
+    (h) => h.titleId === Number(props.id) && h.episodeId === ep.id
   )
   if (!entry || !entry.duration) return 0
   return Math.round((entry.timestamp / entry.duration) * 100)
@@ -286,24 +358,30 @@ async function loadRelated() {
     const id = Number(props.id)
     const [franchise, recommended] = await Promise.allSettled([
       api.getFranchiseByRelease(id),
-      api.getRecommendedReleases(id, 12)
+      api.getRecommendedReleases(id, 12),
     ])
     const results = new Map<number, Title>()
     if (franchise.status === 'fulfilled') {
-      franchise.value.forEach(t => results.set(t.id, t))
+      franchise.value.forEach((t) => results.set(t.id, t))
     }
     if (recommended.status === 'fulfilled') {
-      (recommended.value as Title[]).forEach((t: Title) => results.set(t.id, t))
+      ;(recommended.value as Title[]).forEach((t: Title) => results.set(t.id, t))
     }
-    relatedTitles.value = Array.from(results.values()).filter(t => t.id !== id)
+    relatedTitles.value = Array.from(results.values()).filter((t) => t.id !== id)
   } finally {
     relatedLoading.value = false
   }
 }
 
 const QUALITY_RANK: Record<string, number> = {
-  '360p': 1, '480p': 2, '576p': 3, '720p': 4,
-  '1080p': 5, '2k': 6, '4k': 7, '8k': 8
+  '360p': 1,
+  '480p': 2,
+  '576p': 3,
+  '720p': 4,
+  '1080p': 5,
+  '2k': 6,
+  '4k': 7,
+  '8k': 8,
 }
 
 const bestTorrent = computed(() => {
@@ -367,12 +445,15 @@ async function loadData() {
   loadRelated()
 }
 
-watch(() => props.id, () => {
-  activeTab.value = 'description'
-  torrents.value = []
-  localFilesForTitle.value = []
-  loadData()
-})
+watch(
+  () => props.id,
+  () => {
+    activeTab.value = 'description'
+    torrents.value = []
+    localFilesForTitle.value = []
+    loadData()
+  }
+)
 
 watch(activeTab, (tab) => {
   if (tab === 'torrents') {
@@ -419,7 +500,7 @@ onMounted(() => {
     inset: 0;
     background:
       linear-gradient(to top, var(--md-sys-color-background) 0%, transparent 50%),
-      linear-gradient(to right, rgba(0,0,0,0.75) 0%, transparent 50%);
+      linear-gradient(to right, rgba(0, 0, 0, 0.75) 0%, transparent 50%);
     backdrop-filter: blur(1px);
     z-index: 1;
   }
@@ -464,13 +545,13 @@ onMounted(() => {
 
   &__meta-tag {
     padding: 4px 12px;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--md-sys-shape-corner-extra-small);
-    color: rgba(255,255,255,0.85);
+    color: rgba(255, 255, 255, 0.85);
     font-size: 12px;
     letter-spacing: 0.02em;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 
     &--ongoing {
       color: #e8a5b8;
@@ -481,7 +562,7 @@ onMounted(() => {
 
   &__name {
     color: var(--md-sys-color-on-background);
-    text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
   }
 
   &__english {
@@ -502,7 +583,9 @@ onMounted(() => {
     color: var(--md-sys-color-on-surface-variant);
     border: 1px solid var(--md-sys-color-outline-variant);
     font-size: 12px;
-    transition: background 150ms, color 150ms;
+    transition:
+      background 150ms,
+      color 150ms;
 
     &:hover {
       background: var(--md-sys-color-surface-container-high);
@@ -527,9 +610,10 @@ onMounted(() => {
     color: var(--md-sys-color-on-primary);
     cursor: pointer;
     font: var(--md-sys-typescale-label-large);
-    transition: transform 200ms var(--md-sys-motion-easing-spring),
-                box-shadow 200ms var(--md-sys-motion-easing-standard),
-                color 300ms var(--md-sys-motion-easing-standard);
+    transition:
+      transform 200ms var(--md-sys-motion-easing-spring),
+      box-shadow 200ms var(--md-sys-motion-easing-standard),
+      color 300ms var(--md-sys-motion-easing-standard);
     position: relative;
     overflow: hidden;
 
@@ -541,11 +625,12 @@ onMounted(() => {
       width: 0;
       height: 0;
       border-radius: 50%;
-      background: rgba(255,255,255,0.18);
+      background: rgba(255, 255, 255, 0.18);
       transform: translate(-50%, -50%);
-      transition: width 350ms var(--md-sys-motion-easing-standard),
-                  height 350ms var(--md-sys-motion-easing-standard),
-                  border-radius 350ms var(--md-sys-motion-easing-standard);
+      transition:
+        width 350ms var(--md-sys-motion-easing-standard),
+        height 350ms var(--md-sys-motion-easing-standard),
+        border-radius 350ms var(--md-sys-motion-easing-standard);
       pointer-events: none;
       z-index: 0;
     }
@@ -611,9 +696,10 @@ onMounted(() => {
     stroke: currentColor;
     stroke-width: 1.5;
     stroke-linejoin: round;
-    transition: fill 300ms var(--md-sys-motion-easing-standard),
-                stroke 300ms var(--md-sys-motion-easing-standard),
-                transform 300ms var(--md-sys-motion-easing-spring);
+    transition:
+      fill 300ms var(--md-sys-motion-easing-standard),
+      stroke 300ms var(--md-sys-motion-easing-standard),
+      transform 300ms var(--md-sys-motion-easing-spring);
     transform-origin: center;
   }
 
@@ -635,8 +721,9 @@ onMounted(() => {
     position: absolute;
     left: 0;
     white-space: nowrap;
-    transition: opacity 200ms var(--md-sys-motion-easing-standard),
-                transform 200ms var(--md-sys-motion-easing-standard);
+    transition:
+      opacity 200ms var(--md-sys-motion-easing-standard),
+      transform 200ms var(--md-sys-motion-easing-standard);
 
     &--off {
       opacity: 1;
@@ -721,12 +808,15 @@ onMounted(() => {
     border-radius: var(--md-sys-shape-corner-small);
     overflow: hidden;
     background: var(--md-sys-color-surface-container);
-    transition: transform 250ms var(--md-sys-motion-easing-spring),
-                box-shadow 250ms var(--md-sys-motion-easing-standard);
+    transition:
+      transform 250ms var(--md-sys-motion-easing-spring),
+      box-shadow 250ms var(--md-sys-motion-easing-standard);
 
     &:hover {
       transform: translateY(-4px);
-      box-shadow: var(--glow-primary), 0 8px 24px rgba(0,0,0,0.4);
+      box-shadow:
+        var(--glow-primary),
+        0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     &:hover .title-detail__episode-overlay {
@@ -767,7 +857,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     height: 3px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
   }
 
   &__episode-progress-bar {
@@ -783,13 +873,13 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0,0,0,0.4);
+    background: rgba(0, 0, 0, 0.4);
     opacity: 0;
     transition: opacity 250ms var(--md-sys-motion-easing-standard);
 
     svg {
       color: #fff;
-      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4));
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
     }
   }
 
@@ -830,7 +920,9 @@ onMounted(() => {
     padding: 16px 20px;
     border-radius: var(--md-sys-shape-corner-medium);
     background: var(--md-sys-color-surface-container);
-    transition: background-color 200ms, transform 200ms;
+    transition:
+      background-color 200ms,
+      transform 200ms;
 
     &:hover {
       background: var(--md-sys-color-surface-container-high);
@@ -878,7 +970,10 @@ onMounted(() => {
     color: var(--md-sys-color-primary);
     cursor: pointer;
     font: var(--md-sys-typescale-label-large);
-    transition: background-color 150ms, border-color 150ms, box-shadow 150ms;
+    transition:
+      background-color 150ms,
+      border-color 150ms,
+      box-shadow 150ms;
 
     &:hover {
       background: var(--md-sys-color-primary-container);

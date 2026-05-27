@@ -21,10 +21,10 @@ export default defineConfig({
             minify: false,
             outDir: 'dist-electron',
             rollupOptions: {
-              external: ['electron-store', 'discord-rpc']
-            }
-          }
-        }
+              external: ['electron-store', 'discord-rpc'],
+            },
+          },
+        },
       },
       {
         entry: 'electron/preload.ts',
@@ -35,18 +35,18 @@ export default defineConfig({
           build: {
             sourcemap: true,
             minify: false,
-            outDir: 'dist-electron'
-          }
-        }
-      }
+            outDir: 'dist-electron',
+          },
+        },
+      },
     ]),
-    renderer()
+    renderer(),
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
-      '@electron': path.resolve(__dirname, 'electron')
-    }
+      '@electron': path.resolve(__dirname, 'electron'),
+    },
   },
   build: {
     outDir: 'dist',
@@ -56,17 +56,17 @@ export default defineConfig({
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia'],
           api: ['axios'],
-          player: ['hls.js']
-        }
-      }
-    }
+          player: ['hls.js'],
+        },
+      },
+    },
   },
   css: {
     preprocessorOptions: {
       scss: {
         api: 'modern',
-        additionalData: `@use "@/styles/m3-tokens.scss" as *;`
-      }
-    }
-  }
+        additionalData: `@use "@/styles/m3-tokens.scss" as *;`,
+      },
+    },
+  },
 })
