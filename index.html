@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; media-src 'self' https: blob: file: local: https://*.libria.fun; connect-src https://aniliberty.top https://*.libria.fun ws: wss:;"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <title>Anilibrix Plus</title>
+    <style>
+      html, body, #app {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        background: #0f0e12;
+        overflow: hidden;
+      }
+      #splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: #0f0e12;
+        z-index: 9999;
+        transition: opacity 800ms ease, visibility 800ms ease;
+      }
+      #splash.splash--done {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      .splash__logo {
+        width: 64px;
+        height: 64px;
+        color: #b8a5e8;
+        animation: splashPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+      .splash__track {
+        width: 120px;
+        height: 2px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .splash__bar {
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, #b8a5e8, transparent);
+        border-radius: 2px;
+        animation: splashSlide 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+      .splash__text {
+        color: #a8a3ad;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 13px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        animation: splashText 5s ease forwards;
+      }
+      @keyframes splashPulse {
+        0%, 100% { transform: scale(1); opacity: 0.85; }
+        50% { transform: scale(1.12); opacity: 1; }
+      }
+      @keyframes splashSlide {
+        0% { transform: translateX(-160%); }
+        100% { transform: translateX(260%); }
+      }
+      @keyframes splashText {
+        0% { opacity: 0; transform: translateY(6px); }
+        10% { opacity: 0; transform: translateY(6px); }
+        20% { opacity: 1; transform: translateY(0); }
+        85% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-4px); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash">
+      <svg class="splash__logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.6"/>
+        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="splash__track">
+        <div class="splash__bar"></div>
+      </div>
+      <span class="splash__text">Anilibrix Plus</span>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

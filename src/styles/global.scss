@@ -1,0 +1,147 @@
+@use "m3-tokens" as *;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-surface-container-highest);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--md-sys-color-primary);
+}
+
+::selection {
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+:focus-visible {
+  outline: 1px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.md3-display-large { font: var(--md-sys-typescale-display-large); letter-spacing: -0.03em; }
+.md3-display-medium { font: var(--md-sys-typescale-display-medium); letter-spacing: -0.02em; }
+.md3-display-small { font: var(--md-sys-typescale-display-small); letter-spacing: -0.02em; }
+.md3-headline-large { font: var(--md-sys-typescale-headline-large); }
+.md3-headline-medium { font: var(--md-sys-typescale-headline-medium); }
+.md3-headline-small { font: var(--md-sys-typescale-headline-small); }
+.md3-title-large { font: var(--md-sys-typescale-title-large); }
+.md3-title-medium { font: var(--md-sys-typescale-title-medium); }
+.md3-title-small { font: var(--md-sys-typescale-title-small); }
+.md3-body-large { font: var(--md-sys-typescale-body-large); }
+.md3-body-medium { font: var(--md-sys-typescale-body-medium); }
+.md3-body-small { font: var(--md-sys-typescale-body-small); }
+.md3-label-large { font: var(--md-sys-typescale-label-large); }
+.md3-label-medium { font: var(--md-sys-typescale-label-medium); }
+.md3-label-small { font: var(--md-sys-typescale-label-small); }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(184, 165, 232, 0.08); }
+  50% { box-shadow: 0 0 32px rgba(184, 165, 232, 0.16); }
+}
+
+.md3-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--md-sys-color-surface-container) 25%,
+    var(--md-sys-color-surface-container-high) 50%,
+    var(--md-sys-color-surface-container) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-strong {
+  background: rgba(15, 14, 18, 0.75);
+  backdrop-filter: blur(32px) saturate(1.3);
+  -webkit-backdrop-filter: blur(32px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glow-hover {
+  transition: box-shadow 300ms var(--md-sys-motion-easing-standard);
+  &:hover {
+    box-shadow: var(--glow-primary);
+  }
+}
+
+.md3-ripple {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s var(--md-sys-motion-easing-standard),
+                height 0.6s var(--md-sys-motion-easing-standard),
+                opacity 0.6s var(--md-sys-motion-easing-standard);
+    pointer-events: none;
+    opacity: 0;
+  }
+  &:active::after {
+    width: 200%; height: 200%;
+    opacity: 1;
+    transition-duration: 0.3s;
+  }
+}
