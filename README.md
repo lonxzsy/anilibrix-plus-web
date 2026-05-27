@@ -48,7 +48,7 @@
 
 ```bash
 # 1. Клонировать репозиторий
-git clone https://github.com/YOUR_USERNAME/anilibrix-plus.git
+git clone https://github.com/lonxzsy/anilibrix-plus.git
 cd anilibrix-plus
 
 # 2. Установить зависимости
