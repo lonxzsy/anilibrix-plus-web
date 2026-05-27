@@ -109,8 +109,7 @@
           class="subtitle-settings__chip"
           :class="{ active: style.position === p }"
           @click="
-            style.position = p as any
-            emitStyle()
+            style.position = p as any; emitStyle()
           "
         >
           {{ p === 'top' ? 'Вверху' : p === 'center' ? 'Центр' : 'Внизу' }}
@@ -127,8 +126,7 @@
           class="subtitle-settings__chip"
           :class="{ active: style.align === a }"
           @click="
-            style.align = a as any
-            emitStyle()
+            style.align = a as any; emitStyle()
           "
         >
           {{ a === 'left' ? 'Лево' : a === 'center' ? 'Центр' : 'Право' }}
