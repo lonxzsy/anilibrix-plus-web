@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div v-if="showSettings" class="subtitle-settings glass" @click.stop>
+  <div v-if="showSettings" class="subtitle-settings" @click.stop>
     <div class="subtitle-settings__header">
       <h4 class="md3-title-small">Субтитры</h4>
       <button class="subtitle-settings__close" @click="emit('closeSettings')">
@@ -290,7 +290,11 @@ watch(() => props.showSettings, (show) => {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  border: 1px solid var(--glass-border);
+  background: rgba(15, 14, 18, 0.92);
+  backdrop-filter: blur(24px) saturate(1.3);
+  -webkit-backdrop-filter: blur(24px) saturate(1.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 
   &__header {
     display: flex;
