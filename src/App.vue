@@ -62,16 +62,14 @@ onUnmounted(() => {
   color: var(--md-sys-color-on-background);
   overflow: hidden;
 
-  &-content {
+    &-content {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 28px 36px;
-    margin-top: 40px;
 
     &--mobile {
       padding: 16px;
-      margin-top: 0;
       margin-bottom: 64px;
     }
   }

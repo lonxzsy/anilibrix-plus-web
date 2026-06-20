@@ -789,7 +789,7 @@ onUnmounted(() => {
 }
 
 .player-top-actions {
-  position: absolute; top: 16px; right: 16px; z-index: 4;
+  position: absolute; top: 16px; right: 16px; z-index: 100;
   display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
 }
 
