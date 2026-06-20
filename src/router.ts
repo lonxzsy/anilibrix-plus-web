@@ -1,30 +1,20 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import Home from '@/views/Home.vue'
-import Catalog from '@/views/Catalog.vue'
-import TitleDetail from '@/views/TitleDetail.vue'
-import Player from '@/views/Player.vue'
-import Schedule from '@/views/Schedule.vue'
-import Library from '@/views/Library.vue'
-import Profile from '@/views/Profile.vue'
 
 const routes = [
-  { path: '/', name: 'Home', component: Home },
-  { path: '/catalog', name: 'Catalog', component: Catalog },
-  { path: '/title/:id', name: 'TitleDetail', component: TitleDetail, props: true },
-  { path: '/player/:titleId/:episodeId?', name: 'Player', component: Player, props: true },
-  { path: '/player/local/:filePath', name: 'LocalPlayer', component: Player, props: true },
-  { path: '/schedule', name: 'Schedule', component: Schedule },
-  { path: '/library', name: 'Library', component: Library },
-  { path: '/profile', name: 'Profile', component: Profile },
+  { path: '/', name: 'Home', component: () => import('@/views/Home.vue') },
+  { path: '/catalog', name: 'Catalog', component: () => import('@/views/Catalog.vue') },
+  { path: '/title/:id', name: 'TitleDetail', component: () => import('@/views/TitleDetail.vue'), props: true },
+  { path: '/player/:titleId/:episodeId?', name: 'Player', component: () => import('@/views/Player.vue'), props: true },
+  { path: '/schedule', name: 'Schedule', component: () => import('@/views/Schedule.vue') },
+  { path: '/library', name: 'Library', component: () => import('@/views/Library.vue') },
+  { path: '/profile', name: 'Profile', component: () => import('@/views/Profile.vue') },
 ]
 
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
   scrollBehavior(_to, _from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition
-    }
+    if (savedPosition) return savedPosition
     return { top: 0, behavior: 'smooth' }
   },
 })

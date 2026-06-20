@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { db } from '@/utils/db-bridge'
+import { favoritesRepo, historyRepo, playlistsRepo } from '@/db/database'
 import { api } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 import type { Title, HistoryEntry, Playlist } from '@/types'
@@ -21,10 +21,9 @@ export const useLibraryStore = defineStore('library', () => {
   })
 
   async function loadFavorites() {
-    // Always load local favorites first
-    const rows = await db.getFavorites()
+    const rows = await favoritesRepo.getAll()
     favorites.value = rows.map(
-      (r: any) =>
+      (r) =>
         ({
           id: r.titleId,
           alias: '',
@@ -42,7 +41,6 @@ export const useLibraryStore = defineStore('library', () => {
     )
     favoritesIds.value = new Set(favorites.value.map((t) => t.id))
 
-    // If logged in, sync with API favorites
     const authStore = useAuthStore()
     if (authStore.token) {
       try {
@@ -62,7 +60,7 @@ export const useLibraryStore = defineStore('library', () => {
 
   async function addToFavorites(title: Title) {
     const posterUrl = title.poster?.preview || title.poster?.src || ''
-    await db.addFavorite({
+    await favoritesRepo.add({
       titleId: title.id,
       titleName: title.name.main,
       posterUrl,
@@ -84,7 +82,7 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
   async function removeFromFavorites(titleId: number) {
-    await db.removeFavorite(titleId)
+    await favoritesRepo.remove(titleId)
     favorites.value = favorites.value.filter((t) => t.id !== titleId)
     favoritesIds.value.delete(titleId)
 
@@ -103,9 +101,9 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
   async function loadHistory() {
-    const rows = await db.getHistory()
+    const rows = await historyRepo.getAll()
     history.value = rows.map(
-      (r: any) =>
+      (r) =>
         ({
           titleId: r.titleId,
           episodeId: r.episodeId,
@@ -116,14 +114,12 @@ export const useLibraryStore = defineStore('library', () => {
         }) as HistoryEntry
     )
 
-    // If logged in, try to sync API history (timecodes)
     const authStore = useAuthStore()
     if (authStore.token) {
       try {
         apiLoading.value = true
         const timecodes = await api.getTimecodes()
         if (timecodes?.data?.length) {
-          // Merge API timecodes with local history
           const apiHistory = timecodes.data.map(
             (tc: any) =>
               ({
@@ -138,7 +134,6 @@ export const useLibraryStore = defineStore('library', () => {
               }) as HistoryEntry
           )
 
-          // Merge: API entries override local for same episode
           const merged = new Map<string, HistoryEntry>()
           for (const h of history.value) {
             merged.set(`${h.titleId}-${h.episodeId}`, h)
@@ -167,7 +162,7 @@ export const useLibraryStore = defineStore('library', () => {
     timestamp: number,
     duration: number
   ) {
-    await db.addHistory({
+    await historyRepo.add({
       titleId,
       episodeId,
       episodeNumber,
@@ -177,7 +172,6 @@ export const useLibraryStore = defineStore('library', () => {
     })
     await loadHistory()
 
-    // Sync to API if logged in
     const authStore = useAuthStore()
     if (authStore.token && episodeId) {
       try {
@@ -195,9 +189,9 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
   async function loadPlaylists() {
-    const rows = await db.getPlaylists()
+    const rows = await playlistsRepo.getAll()
     playlists.value = rows.map(
-      (r: any) =>
+      (r) =>
         ({
           id: r.id,
           name: r.name,
@@ -208,13 +202,13 @@ export const useLibraryStore = defineStore('library', () => {
   }
 
   async function createPlaylist(name: string) {
-    const id = await db.createPlaylist(name)
+    const id = await playlistsRepo.create(name)
     playlists.value.unshift({ id, name, createdAt: Math.floor(Date.now() / 1000), items: [] })
     return id
   }
 
   async function addToPlaylist(playlistId: number, title: Title) {
-    await db.addToPlaylist(playlistId, {
+    await playlistsRepo.addItem(playlistId, {
       titleId: title.id,
       titleName: title.name.main,
     })

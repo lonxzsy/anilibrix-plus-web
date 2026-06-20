@@ -1,88 +1,54 @@
 <template>
   <div class="profile">
-    <div class="profile__card glass">
-      <div class="profile__header">
-        <div class="profile__avatar-wrap">
-          <img
-            v-if="authStore.user?.avatar"
-            :src="authStore.user.avatar"
-            class="profile__avatar"
-            alt=""
-          />
-          <div v-else class="profile__avatar-fallback">
-            {{ authStore.user?.name?.charAt(0)?.toUpperCase() || '?' }}
-          </div>
-        </div>
-        <div class="profile__info">
-          <h2 class="profile__name md3-headline-medium">{{ authStore.user?.name }}</h2>
-          <span
-            class="profile__login md3-body-large"
-            style="color: var(--md-sys-color-on-surface-variant)"
-          >
-            @{{ authStore.user?.login }}
-          </span>
-          <span
-            v-if="authStore.user?.email"
-            class="profile__email md3-body-medium"
-            style="color: var(--md-sys-color-on-surface-variant)"
-          >
-            {{ authStore.user.email }}
-          </span>
-        </div>
+    <div v-if="authStore.user" class="profile__card glass">
+      <div class="profile__avatar-wrap">
+        <img v-if="authStore.user.avatar" :src="authStore.user.avatar" class="profile__avatar" alt="" />
+        <div v-else class="profile__avatar-fallback">{{ authStore.user.name.charAt(0).toUpperCase() }}</div>
       </div>
+      <h2 class="md3-headline-small">{{ authStore.user.name }}</h2>
+      <p class="md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
+        @{{ authStore.user.login }}
+      </p>
 
       <div class="profile__stats">
         <div class="profile__stat">
-          <span class="profile__stat-value md3-headline-small">{{
-            libraryStore.favorites.length
-          }}</span>
-          <span class="profile__stat-label md3-label-medium">Избранное</span>
+          <span class="md3-title-medium">{{ libraryStore.favorites.length }}</span>
+          <span class="md3-body-small">В избранном</span>
         </div>
         <div class="profile__stat">
-          <span class="profile__stat-value md3-headline-small">{{
-            libraryStore.history.length
-          }}</span>
-          <span class="profile__stat-label md3-label-medium">История</span>
-        </div>
-        <div class="profile__stat">
-          <span class="profile__stat-value md3-headline-small">{{
-            libraryStore.playlists.length
-          }}</span>
-          <span class="profile__stat-label md3-label-medium">Плейлисты</span>
+          <span class="md3-title-medium">{{ libraryStore.history.length }}</span>
+          <span class="md3-body-small">В истории</span>
         </div>
       </div>
 
-      <div v-if="authStore.user?.createdAt" class="profile__meta">
-        <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
-          Аккаунт создан: {{ formatDate(authStore.user.createdAt) }}
-        </span>
-      </div>
-
-      <div class="profile__actions">
-        <button class="profile__logout-btn md3-label-large" @click="logout">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-          </svg>
-          Выйти из аккаунта
+      <div class="profile__theme-toggle">
+        <span class="md3-body-medium">Тема оформления</span>
+        <button class="profile__theme-btn" @click="toggleTheme">
+          <svg v-if="isDark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
+          <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
+          <span class="md3-label-large">{{ isDark ? 'Тёмная' : 'Светлая' }}</span>
         </button>
       </div>
+
+      <button class="profile__logout" @click="handleLogout">
+        <span class="md3-label-large">Выйти</span>
+      </button>
+    </div>
+
+    <div v-else class="profile__empty glass">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--md-sys-color-on-surface-variant)">
+        <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" /><path d="M10 17l5-5-5-5" /><path d="M15 12H3" />
+      </svg>
+      <h3 class="md3-title-medium">Войдите в аккаунт</h3>
+      <p class="md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
+        Чтобы синхронизировать избранное и историю между устройствами
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
@@ -91,163 +57,50 @@ const router = useRouter()
 const authStore = useAuthStore()
 const libraryStore = useLibraryStore()
 
-function formatDate(iso: string) {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
-  } catch {
-    return iso
-  }
+const isDark = ref(localStorage.getItem('anilibrixplus-theme') !== 'light')
+
+function toggleTheme() {
+  isDark.value = !isDark.value
+  localStorage.setItem('anilibrixplus-theme', isDark.value ? 'dark' : 'light')
+  window.location.reload()
 }
 
-function logout() {
+function handleLogout() {
   authStore.logout()
   router.push('/')
 }
-
-onMounted(() => {
-  libraryStore.loadFavorites()
-  libraryStore.loadHistory()
-  libraryStore.loadPlaylists()
-})
 </script>
 
 <style scoped lang="scss">
 .profile {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  min-height: 100%;
-  gap: 24px;
+  padding-top: 32px;
 
   &__card {
+    width: 380px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 28px;
-    padding: 32px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    max-width: 640px;
-    width: 100%;
-  }
-
-  &__header {
-    display: flex;
     align-items: center;
-    gap: 24px;
-  }
-
-  &__avatar-wrap {
-    width: 96px;
-    height: 96px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 2px solid var(--md-sys-color-primary);
-    box-shadow: 0 0 20px rgba(184, 165, 232, 0.25);
-    flex-shrink: 0;
-  }
-
-  &__avatar {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &__avatar-fallback {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    font: var(--md-sys-typescale-headline-small);
-  }
-
-  &__info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  &__name {
-    color: var(--md-sys-color-on-surface);
-  }
-
-  &__login {
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  &__email {
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  &__stats {
-    display: flex;
     gap: 16px;
-  }
-
-  &__stat {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    padding: 16px 24px;
+    padding: 40px 32px;
     border-radius: var(--md-sys-shape-corner-medium);
-    background: var(--md-sys-color-surface-container);
-    flex: 1;
-    transition:
-      background-color 150ms,
-      transform 150ms;
-
-    &:hover {
-      background: var(--md-sys-color-surface-container-high);
-      transform: translateY(-2px);
-    }
   }
 
-  &__stat-value {
-    color: var(--md-sys-color-primary);
-  }
+  &__avatar-wrap { width: 72px; height: 72px; border-radius: 50%; overflow: hidden; border: 2px solid var(--md-sys-color-primary); box-shadow: 0 0 16px rgba(184,165,232,0.25); }
+  &__avatar { width: 100%; height: 100%; object-fit: cover; }
+  &__avatar-fallback { width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 28px; border: 2px solid var(--md-sys-color-primary); }
 
-  &__stat-label {
-    color: var(--md-sys-color-on-surface-variant);
-  }
+  &__stats { display: flex; gap: 32px; margin: 8px 0; }
+  &__stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 
-  &__meta {
-    padding-top: 4px;
-  }
+  &__theme-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 0; }
 
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-  }
+  &__theme-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--glass-border); background: transparent; color: var(--md-sys-color-on-surface); cursor: pointer; transition: background 150ms; &:hover { background: rgba(255,255,255,0.04); } }
 
-  &__logout-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    border: 1px solid var(--md-sys-color-outline);
-    background: var(--md-sys-color-surface-container);
-    color: var(--md-sys-color-error);
-    cursor: pointer;
-    transition:
-      background-color 150ms var(--md-sys-motion-easing-standard),
-      border-color 150ms var(--md-sys-motion-easing-standard),
-      box-shadow 150ms var(--md-sys-motion-easing-standard);
+  &__logout { width: 100%; padding: 12px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-error); background: transparent; color: var(--md-sys-color-error); cursor: pointer; transition: background 150ms; &:hover { background: rgba(224,138,133,0.08); } }
 
-    &:hover {
-      background: var(--md-sys-color-error-container);
-      border-color: var(--md-sys-color-error);
-      box-shadow: 0 0 16px rgba(224, 138, 133, 0.15);
-    }
-
-    &:active {
-      background: var(--md-sys-color-error);
-      color: var(--md-sys-color-on-error);
-    }
-  }
+  &__empty { width: 380px; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px 32px; border-radius: var(--md-sys-shape-corner-medium); text-align: center; }
 }
 </style>

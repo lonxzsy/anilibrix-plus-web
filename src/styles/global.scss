@@ -1,4 +1,5 @@
 @use "m3-tokens" as *;
+@use "light-theme" as *;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -25,9 +26,7 @@ html, body, #app {
   height: 5px;
 }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+::-webkit-scrollbar-track { background: transparent; }
 
 ::-webkit-scrollbar-thumb {
   background: var(--md-sys-color-surface-container-highest);
@@ -90,12 +89,7 @@ html, body, #app {
 }
 
 .md3-skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--md-sys-color-surface-container) 25%,
-    var(--md-sys-color-surface-container-high) 50%,
-    var(--md-sys-color-surface-container) 75%
-  );
+  background: linear-gradient(90deg, var(--md-sys-color-surface-container) 25%, var(--md-sys-color-surface-container-high) 50%, var(--md-sys-color-surface-container) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: var(--md-sys-shape-corner-small);
@@ -115,11 +109,14 @@ html, body, #app {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.md3-light .glass-strong {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 .glow-hover {
   transition: box-shadow 300ms var(--md-sys-motion-easing-standard);
-  &:hover {
-    box-shadow: var(--glow-primary);
-  }
+  &:hover { box-shadow: var(--glow-primary); }
 }
 
 .md3-ripple {
@@ -133,9 +130,7 @@ html, body, #app {
     background: rgba(255,255,255,0.06);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    transition: width 0.6s var(--md-sys-motion-easing-standard),
-                height 0.6s var(--md-sys-motion-easing-standard),
-                opacity 0.6s var(--md-sys-motion-easing-standard);
+    transition: width 0.6s var(--md-sys-motion-easing-standard), height 0.6s var(--md-sys-motion-easing-standard), opacity 0.6s var(--md-sys-motion-easing-standard);
     pointer-events: none;
     opacity: 0;
   }
@@ -143,5 +138,13 @@ html, body, #app {
     width: 200%; height: 200%;
     opacity: 1;
     transition-duration: 0.3s;
+  }
+}
+
+// Mobile-safe tap targets
+@supports (-webkit-touch-callout: none) {
+  button, a, .clickable {
+    min-height: 44px;
+    min-width: 44px;
   }
 }

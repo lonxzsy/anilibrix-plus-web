@@ -260,7 +260,7 @@ import { useRouter } from 'vue-router'
 import { useLibraryStore } from '@/stores/library'
 import { useTitleStore } from '@/stores/titles'
 import { useAuthStore } from '@/stores/auth'
-import { localFilesBridge } from '@/utils/db-bridge'
+import { localFiles as localFilesApi, type LocalVideoFile } from '@/utils/file-system'
 import { api } from '@/api/client'
 import TitleCard from '@/components/TitleCard.vue'
 import { formatTime } from '@/utils/helpers'
@@ -338,36 +338,38 @@ async function createPlaylist() {
 async function scanLocalFiles() {
   localFilesLoading.value = true
   try {
-    const files = await localFilesBridge.scan()
-    const mapped = files.map((f: any) => ({
-      name: f.name,
-      path: f.path,
-      size: f.size,
-      modifiedAt: f.modifiedAt,
-      releaseId: f.releaseId,
-      titleName: f.releaseId ? getTitleName(f.releaseId) : undefined,
-    }))
+    const handle = await localFilesApi.requestAccess()
+    if (!handle) {
+      localFilesLoading.value = false
+      return
+    }
+    const scanned = await localFilesApi.scan(handle)
+    const mapped = scanned.map((f: LocalVideoFile) => {
+      const rid = localFilesApi.getMapping(f.name) || undefined
+      return {
+        name: f.name,
+        path: f.path,
+        size: f.size,
+        modifiedAt: f.modifiedAt,
+        releaseId: rid,
+        titleName: rid ? getTitleName(rid) : undefined,
+      }
+    })
     localFiles.value = mapped
 
-    // Fetch missing titles in background
     const missingIds = [
       ...new Set(
         mapped
-          .filter(
-            (f: LocalFile) => f.releaseId && !titleStore.titles.find((t) => t.id === f.releaseId)
-          )
-          .map((f: LocalFile) => f.releaseId!)
+          .filter((f) => f.releaseId && !titleStore.titles.find((t) => t.id === f.releaseId))
+          .map((f) => f.releaseId!)
       ),
     ]
     for (const id of missingIds) {
       try {
         await titleStore.fetchTitle(String(id))
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     }
-    // Recompute names after fetching
-    localFiles.value = mapped.map((f: LocalFile) => ({
+    localFiles.value = mapped.map((f) => ({
       ...f,
       titleName: f.releaseId ? getTitleName(f.releaseId) : undefined,
     }))
@@ -410,7 +412,7 @@ async function searchLocalTitle() {
 
 async function assignLocalFile(title: Title) {
   if (!currentLocalFile.value) return
-  await localFilesBridge.setMapping(currentLocalFile.value.name, title.id)
+  localFilesApi.setMapping(currentLocalFile.value.name, title.id)
   await scanLocalFiles()
   showLocalSearchModal.value = false
   currentLocalFile.value = null
