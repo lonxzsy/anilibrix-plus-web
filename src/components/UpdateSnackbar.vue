@@ -65,8 +65,10 @@ function close() {
   }
 
   &__icon {
-    font-size: 20px;
-    line-height: 1;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--md-sys-color-primary);
   }
 
   &__text {
