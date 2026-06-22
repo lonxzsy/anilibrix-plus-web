@@ -135,3 +135,47 @@ export interface PaginationMeta {
     }
   }
 }
+
+export interface JikanAnime {
+  malId: number
+  title: string
+  titleEnglish: string
+  score: number
+  scoredBy: number
+  rank: number | null
+  popularity: number
+  synopsis: string
+  trailer: { youtubeId: string | null; url: string | null; embedUrl: string | null }
+  episodes: number | null
+  status: string
+  rating: string
+  url: string
+}
+
+export interface JikanCharacterEntry {
+  character: { malId: number; name: string; image: string }
+  role: string
+  voiceActors: { name: string; image: string; language: string }[]
+}
+
+export interface JikanScore {
+  score: number
+  votes: number
+  percentage: number
+}
+
+export interface JikanStats {
+  watching: number
+  completed: number
+  onHold: number
+  dropped: number
+  planToWatch: number
+  total: number
+  scores: JikanScore[]
+}
+
+export interface JikanFullData {
+  anime: JikanAnime
+  characters: JikanCharacterEntry[]
+  stats: JikanStats | null
+}

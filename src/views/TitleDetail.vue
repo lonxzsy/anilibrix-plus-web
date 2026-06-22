@@ -9,6 +9,17 @@
             <span v-if="title.year" class="title-detail__meta-tag md3-label-large">{{ title.year }}</span>
             <span v-if="title.type?.description" class="title-detail__meta-tag md3-label-large">{{ title.type.description }}</span>
             <span v-if="title.isOngoing" class="title-detail__meta-tag title-detail__meta-tag--ongoing md3-label-large">Онгоинг</span>
+            <a
+              v-if="jikanData?.anime.score"
+              :href="jikanData.anime.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="title-detail__meta-tag title-detail__mal-score md3-label-large"
+              :title="`MAL рейтинг на основе ${jikanData.anime.scoredBy.toLocaleString('ru')} голосов`"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+              {{ jikanData.anime.score.toFixed(2) }}
+            </a>
           </div>
           <h1 class="title-detail__name md3-display-small">{{ title.name.main }}</h1>
           <p v-if="title.name.english" class="title-detail__english md3-title-medium">{{ title.name.english }}</p>
@@ -45,6 +56,48 @@
         <p class="md3-body-large" style="line-height: 1.7; color: var(--md-sys-color-on-surface-variant)">
           {{ title.description || 'Описание отсутствует.' }}
         </p>
+
+        <div v-if="jikanData" class="title-detail__mal-section">
+          <div v-if="jikanData.anime.trailer.embedUrl" class="title-detail__trailer">
+            <h3 class="md3-title-medium" style="margin-bottom: 12px; color: var(--md-sys-color-on-surface)">Трейлер</h3>
+            <div class="title-detail__trailer-embed">
+              <iframe
+                :src="jikanData.anime.trailer.embedUrl"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+                title="Трейлер"
+              />
+            </div>
+          </div>
+
+          <div v-if="jikanData.stats" class="title-detail__stats">
+            <h3 class="md3-title-medium" style="margin-bottom: 12px; color: var(--md-sys-color-on-surface)">Распределение оценок MAL</h3>
+            <div class="title-detail__stats-bar">
+              <div
+                v-for="s in jikanData.stats.scores"
+                :key="s.score"
+                class="title-detail__stats-item"
+                :title="`${s.score} — ${s.votes.toLocaleString('ru')} голосов (${s.percentage}%)`"
+              >
+                <span class="title-detail__stats-label md3-label-small">{{ s.score }}</span>
+                <div class="title-detail__stats-track">
+                  <div
+                    class="title-detail__stats-fill"
+                    :style="{ height: `${s.percentage * 1.8}%` }"
+                    :class="{ 'title-detail__stats-fill--high': s.score >= 8, 'title-detail__stats-fill--mid': s.score >= 5 && s.score < 8 }"
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="title-detail__stats-total md3-body-small">
+              На основе {{ jikanData.stats.total.toLocaleString('ru') }} оценок
+            </div>
+          </div>
+        </div>
+        <div v-if="jikanLoading" class="title-detail__mal-loading">
+          <div class="md3-skeleton" style="height: 60px; border-radius: 8px; max-width: 400px" />
+        </div>
       </div>
 
       <div v-else-if="activeTab === 'episodes'" class="title-detail__episodes">
@@ -60,6 +113,23 @@
             <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">Серия {{ ep.ordinal }}</span>
           </div>
         </div>
+      </div>
+
+      <div v-else-if="activeTab === 'characters'" class="title-detail__characters">
+        <div v-if="jikanData?.characters.length" class="title-detail__character-grid">
+          <CharacterCard
+            v-for="(entry, i) in jikanData.characters"
+            :key="entry.character.malId"
+            :entry="entry"
+            :style="{ animationDelay: `${i * 40}ms` }"
+          />
+        </div>
+        <div v-else-if="jikanLoading" class="title-detail__character-skeletons">
+          <div v-for="n in 8" :key="n" class="md3-skeleton" style="height: 280px; border-radius: 6px" />
+        </div>
+        <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
+          {{ jikanStore.error || 'Информация о персонажах не найдена.' }}
+        </p>
       </div>
 
       <div v-else-if="activeTab === 'related'" class="title-detail__related">
@@ -113,9 +183,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitleStore } from '@/stores/titles'
 import { useLibraryStore } from '@/stores/library'
+import { useJikanStore } from '@/stores/jikan'
 import { api } from '@/api/client'
 import TitleCard from '@/components/TitleCard.vue'
-import type { Title, Episode, Torrent } from '@/types'
+import CharacterCard from '@/components/CharacterCard.vue'
+import type { Title, Episode, Torrent, JikanFullData } from '@/types'
 
 const props = defineProps<{ id: string }>()
 
@@ -125,7 +197,10 @@ const libraryStore = useLibraryStore()
 
 const title = ref<Title | null>(null)
 const loading = ref(true)
-const activeTab = ref<'description' | 'episodes' | 'related' | 'torrents'>('description')
+const activeTab = ref<'description' | 'episodes' | 'characters' | 'related' | 'torrents'>('description')
+const jikanStore = useJikanStore()
+const jikanData = ref<JikanFullData | null>(null)
+const jikanLoading = ref(false)
 const relatedTitles = ref<Title[]>([])
 const relatedLoading = ref(false)
 const torrents = ref<Torrent[]>([])
@@ -136,6 +211,7 @@ const isFav = computed(() => (title.value ? libraryStore.isFavorite(title.value.
 const tabs = [
   { id: 'description' as const, label: 'Описание' },
   { id: 'episodes' as const, label: 'Эпизоды' },
+  { id: 'characters' as const, label: 'Персонажи' },
   { id: 'related' as const, label: 'Похожие' },
   { id: 'torrents' as const, label: 'Торренты' },
 ]
@@ -314,6 +390,17 @@ async function loadData() {
   await libraryStore.loadFavorites()
   relatedTitles.value = []
   loadRelated()
+  loadJikanData()
+}
+
+async function loadJikanData() {
+  if (!title.value) return
+  jikanLoading.value = true
+  try {
+    jikanData.value = await jikanStore.fetchForTitle(title.value)
+  } finally {
+    jikanLoading.value = false
+  }
 }
 
 watch(() => props.id, () => {
@@ -324,6 +411,9 @@ watch(() => props.id, () => {
 
 watch(activeTab, (tab) => {
   if (tab === 'torrents') loadTorrents()
+  if (tab === 'characters' && !jikanData.value && !jikanLoading.value && title.value) {
+    loadJikanData()
+  }
 })
 
 onMounted(() => { loadData() })
@@ -382,5 +472,141 @@ onMounted(() => { loadData() })
   &__torrent-header { display: flex; align-items: center; gap: 10px; }
   &__torrent-best { padding: 2px 8px; border-radius: var(--md-sys-shape-corner-extra-small); background: rgba(139,195,74,0.15); color: #8bc34a; border: 1px solid rgba(139,195,74,0.25); font-size: 11px; letter-spacing: 0.02em; }
   &__torrent-skeletons { display: flex; flex-direction: column; gap: 12px; }
+
+  // MAL
+  &__mal-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffb300 !important;
+    border-color: rgba(255, 179, 0, 0.3) !important;
+    background: rgba(255, 179, 0, 0.12) !important;
+    text-decoration: none;
+    cursor: pointer;
+    transition: box-shadow 200ms;
+
+    &:hover {
+      box-shadow: 0 0 12px rgba(255, 179, 0, 0.2);
+    }
+  }
+
+  &__mal-section {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  &__mal-loading {
+    margin-top: 24px;
+  }
+
+  // Trailer
+  &__trailer {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__trailer-embed {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--md-sys-shape-corner-medium);
+    overflow: hidden;
+    box-shadow: var(--md-sys-elevation-2);
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  }
+
+  // Stats
+  &__stats {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__stats-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 140px;
+    padding-bottom: 4px;
+  }
+
+  &__stats-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__stats-label {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 10px;
+    line-height: 1;
+    order: 2;
+  }
+
+  &__stats-track {
+    flex: 1;
+    width: 100%;
+    max-width: 24px;
+    background: var(--md-sys-color-surface-container-high);
+    border-radius: 2px 2px 0 0;
+    position: relative;
+    order: 1;
+  }
+
+  &__stats-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 2px 2px 0 0;
+    background: var(--md-sys-color-on-surface-variant);
+    transition: height 600ms var(--md-sys-motion-easing-spring);
+
+    &--high {
+      background: var(--md-sys-color-primary);
+    }
+
+    &--mid {
+      background: var(--md-sys-color-tertiary);
+    }
+  }
+
+  &__stats-total {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  // Characters
+  &__characters {
+    min-height: 200px;
+  }
+
+  &__character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    animation: fadeUp 400ms var(--md-sys-motion-easing-decelerate) backwards;
+
+    > * {
+      animation: fadeUp 400ms var(--md-sys-motion-easing-decelerate) backwards;
+    }
+  }
+
+  &__character-skeletons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
 }
 </style>
