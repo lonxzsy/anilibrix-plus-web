@@ -9,6 +9,9 @@ const routes = [
   { path: '/library', name: 'Library', component: () => import('@/views/Library.vue') },
   { path: '/profile', name: 'Profile', component: () => import('@/views/Profile.vue') },
   { path: '/changelog', name: 'Changelog', component: () => import('@/views/Changelog.vue') },
+  { path: '/studios', name: 'StudioSearch', component: () => import('@/views/StudioSearch.vue') },
+  { path: '/studios/:source/:id', name: 'StudioEpisodes', component: () => import('@/views/StudioEpisodes.vue') },
+  { path: '/studios/player/:source/:episodeId', name: 'StudioPlayer', component: () => import('@/views/StudioPlayer.vue') },
 ]
 
 const router = createRouter({
