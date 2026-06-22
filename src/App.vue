@@ -74,15 +74,8 @@ onUnmounted(() => {
     padding: 28px 36px;
 
     &--mobile {
-      padding: 16px;
-      margin-bottom: 64px;
+      padding: 12px 12px 80px;
     }
-  }
-}
-
-@include mobile {
-  .app-content {
-    padding: 12px;
   }
 }
 

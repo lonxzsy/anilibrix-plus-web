@@ -12,7 +12,7 @@
     </div>
 
     <div ref="containerRef" class="player-container" @mousemove="showControls" @mouseleave="hideControlsDelayed" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd">
-      <video ref="videoRef" class="player-container__video" playsinline webkit-playsinline @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" @ended="onEnded" @waiting="isBuffering = true" @playing="onVideoPlay" @pause="onVideoPause" @click="togglePlay" />
+      <video ref="videoRef" class="player-container__video" playsinline webkit-playsinline @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" @ended="onEnded" @waiting="isBuffering = true" @playing="onVideoPlay" @pause="onVideoPause" />
 
       <div v-if="isBuffering" class="player-container__buffering">
         <div class="spinner" />
@@ -182,7 +182,7 @@ let saveInterval: ReturnType<typeof setInterval>
 const touchStartX = ref(0)
 const touchStartY = ref(0)
 const touchStartTime = ref(0)
-const touchMoved = ref(false)
+const touchMaxDelta = ref(0)
 
 const currentEpisodeId = computed(() => currentEpisode.value?.id || props.episodeId)
 const titleName = computed(() => title.value?.name.main || '')
@@ -577,26 +577,34 @@ function onTouchStart(e: TouchEvent) {
   touchStartX.value = e.touches[0].clientX
   touchStartY.value = e.touches[0].clientY
   touchStartTime.value = Date.now()
-  touchMoved.value = false
+  touchMaxDelta.value = 0
 }
 
 function onTouchMove(e: TouchEvent) {
-  const dx = e.touches[0].clientX - touchStartX.value
-  const dy = e.touches[0].clientY - touchStartY.value
-  if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
-    touchMoved.value = true
-  }
-
-  // Horizontal swipe on left/right edge for seek
-  if (Math.abs(dx) > 50 && Math.abs(dy) < 30) {
-    const seekAmount = Math.sign(dx) * 10
-    skip(seekAmount)
-    touchStartX.value = e.touches[0].clientX
-  }
+  const dx = Math.abs(e.touches[0].clientX - touchStartX.value)
+  const dy = Math.abs(e.touches[0].clientY - touchStartY.value)
+  touchMaxDelta.value = Math.max(touchMaxDelta.value, dx, dy)
 }
 
-function onTouchEnd() {
-  if (!touchMoved.value && Date.now() - touchStartTime.value < 300) {
+function onTouchEnd(e: TouchEvent) {
+  const elapsed = Date.now() - touchStartTime.value
+  const dx = e.changedTouches[0].clientX - touchStartX.value
+
+  if (touchMaxDelta.value > 30) {
+    if (Math.abs(dx) > 50 && Math.abs(e.changedTouches[0].clientY - touchStartY.value) < 60) {
+      const seekAmount = Math.round(dx / 12)
+      skip(Math.max(-60, Math.min(60, seekAmount)))
+    }
+    return
+  }
+
+  if (elapsed < 300) {
+    showControls()
+    if (isPlaying.value) {
+      controlsTimer = setTimeout(() => {
+        controlsHidden.value = true
+      }, 4000)
+    }
     togglePlay()
   }
 }
