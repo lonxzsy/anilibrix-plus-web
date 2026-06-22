@@ -10,6 +10,7 @@
     </main>
     <BottomNav v-if="isMobile" @open-auth="showAuth = true" />
     <AuthModal :visible="showAuth" @close="showAuth = false" />
+    <UpdateSnackbar />
   </div>
 </template>
 
@@ -19,6 +20,8 @@ import NavigationRail from '@/components/NavigationRail.vue'
 import BottomNav from '@/components/BottomNav.vue'
 import AuthModal from '@/components/AuthModal.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useChangelogStore } from '@/stores/changelog'
+import UpdateSnackbar from '@/components/UpdateSnackbar.vue'
 
 const showAuth = ref(false)
 const authStore = useAuthStore()
@@ -43,6 +46,8 @@ defineExpose({ toggleTheme, isDark })
 
 onMounted(() => {
   authStore.init()
+  const changelogStore = useChangelogStore()
+  changelogStore.fetchChangelog()
   window.addEventListener('resize', checkMobile)
 })
 
