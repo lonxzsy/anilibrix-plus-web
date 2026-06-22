@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/api/client'
+import { createSearchEngine } from '@/utils/search'
+import { searchJikan } from '@/utils/external-search'
 import type { Title, ScheduleItem } from '@/types'
 
 export const useTitleStore = defineStore('titles', () => {
@@ -8,22 +10,20 @@ export const useTitleStore = defineStore('titles', () => {
   const titleDetails = ref<Map<number, Title>>(new Map())
   const schedule = ref<ScheduleItem[]>([])
   const loading = ref(false)
+  const externalLoading = ref(false)
   const searchQuery = ref('')
+  const externalTitles = ref<Title[]>([])
   const paginationMeta = ref<any>(null)
 
+  const searchEngine = createSearchEngine(() => [
+    ...titles.value,
+    ...externalTitles.value,
+  ])
+
   const filteredTitles = computed(() => {
-    let result = titles.value
-    if (searchQuery.value) {
-      const q = searchQuery.value.toLowerCase()
-      result = result.filter(
-        (t) =>
-          t.name.main.toLowerCase().includes(q) ||
-          t.name.english?.toLowerCase().includes(q) ||
-          t.name.alternative?.toLowerCase().includes(q) ||
-          t.description?.toLowerCase().includes(q)
-      )
-    }
-    return result
+    if (!searchQuery.value) return titles.value
+    const results = searchEngine.search(searchQuery.value)
+    return results.map((r) => r.title)
   })
 
   const recentUpdates = computed(() => {
@@ -56,6 +56,26 @@ export const useTitleStore = defineStore('titles', () => {
   async function searchTitles(query: string) {
     searchQuery.value = query
     await fetchTitles(1, 20, query)
+    searchJikanExternal(query)
+  }
+
+  async function searchJikanExternal(query: string) {
+    if (!query || query.length < 2) {
+      externalTitles.value = []
+      return
+    }
+    externalLoading.value = true
+    try {
+      const jikanResults = await searchJikan(query, 10)
+      const existingIds = new Set(titles.value.map((t) => t.id))
+      externalTitles.value = jikanResults
+        .filter((ext) => !existingIds.has(ext.id))
+        .filter((ext) => !isDuplicateInTitles(ext, titles.value))
+    } catch {
+      externalTitles.value = []
+    } finally {
+      externalLoading.value = false
+    }
   }
 
   async function fetchSchedule() {
@@ -76,14 +96,40 @@ export const useTitleStore = defineStore('titles', () => {
     titleDetails,
     schedule,
     loading,
+    externalLoading,
     searchQuery,
+    externalTitles,
     paginationMeta,
     filteredTitles,
     recentUpdates,
+    searchEngine,
     fetchTitles,
     fetchTitle,
     searchTitles,
+    searchJikanExternal,
     fetchSchedule,
     setSearchQuery,
   }
 })
+
+function normalizeForDedup(name: string): string {
+  return name.toLowerCase().replace(/[^a-zа-яё0-9]/g, '').trim()
+}
+
+function isDuplicateInTitles(ext: Title, existing: Title[]): boolean {
+  const extNames = [
+    normalizeForDedup(ext.name.main),
+    normalizeForDedup(ext.name.english || ''),
+    normalizeForDedup(ext.name.alternative || ''),
+  ].filter(Boolean)
+
+  return existing.some((t) => {
+    const tNames = [
+      normalizeForDedup(t.name.main),
+      normalizeForDedup(t.name.english || ''),
+      normalizeForDedup(t.name.alternative || ''),
+    ].filter(Boolean)
+
+    return tNames.some((tn) => extNames.some((en) => en === tn || en.includes(tn) || tn.includes(en)))
+  })
+}

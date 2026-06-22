@@ -93,6 +93,10 @@ export interface Title {
   freshAt: number
   episodes?: Episode[]
   torrents?: Torrent[]
+  isExternal?: boolean
+  externalSource?: 'jikan'
+  malId?: number
+  score?: number
 }
 
 export interface ScheduleItem {

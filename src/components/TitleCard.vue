@@ -1,6 +1,6 @@
 <template>
-  <div class="title-card" :class="{ 'title-card--hoverable': !loading }" @click="handleClick">
-    <div class="title-card__poster">
+  <div class="title-card" :class="{ 'title-card--hoverable': !loading && !external, 'title-card--external': external }" @click="handleClick">
+    <div class="title-card__poster" :class="{ 'title-card__poster--external': external }">
       <div
         v-if="loading || !posterLoaded"
         class="title-card__skeleton md3-skeleton"
@@ -15,14 +15,27 @@
         loading="lazy"
         @load="posterLoaded = true"
       />
-      <div v-if="!loading && title?.isOngoing" class="title-card__badge">
+      <div v-if="!loading && title?.isOngoing && !external" class="title-card__badge">
         <span class="md3-label-small">Онгоинг</span>
       </div>
-      <div v-if="!loading" class="title-card__overlay">
+      <div v-if="external && !loading" class="title-card__badge title-card__badge--external">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        <span class="md3-label-small">Нет в Anilibria</span>
+      </div>
+      <div v-if="!loading && !external" class="title-card__overlay">
         <svg class="title-card__play" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7z" />
         </svg>
       </div>
+    </div>
+    <div v-if="external && title?.score" class="title-card__score">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+      <span>{{ title.score.toFixed(1) }}</span>
     </div>
     <div class="title-card__info">
       <h3 v-if="!loading" class="title-card__name md3-body-medium">{{ title?.name.main }}</h3>
@@ -50,6 +63,7 @@ const props = defineProps<{
   loading?: boolean
   aspectRatio?: string
   subtitle?: string
+  external?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -57,7 +71,7 @@ const emit = defineEmits<{
 }>()
 
 function handleClick() {
-  if (!props.loading && props.title) {
+  if (!props.loading && props.title && !props.external) {
     emit('click', props.title)
   }
 }
@@ -122,6 +136,11 @@ const skeletonStyle = computed(() => ({
     overflow: hidden;
     background-color: var(--md-sys-color-surface-container);
     aspect-ratio: 2/3;
+
+    &--external {
+      opacity: 0.6;
+      filter: grayscale(0.65);
+    }
   }
 
   &__image {
@@ -168,6 +187,38 @@ const skeletonStyle = computed(() => ({
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     letter-spacing: 0.03em;
+
+    &--external {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      left: 10px;
+      right: 10px;
+      width: auto;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: var(--md-sys-color-on-surface-variant);
+      border-color: rgba(255, 255, 255, 0.08);
+      justify-content: center;
+      backdrop-filter: blur(12px);
+    }
+  }
+
+  &__score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffc107;
+    padding: 2px 7px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    backdrop-filter: blur(8px);
   }
 
   &__overlay {
@@ -204,6 +255,15 @@ const skeletonStyle = computed(() => ({
     -webkit-box-orient: vertical;
     overflow: hidden;
     letter-spacing: -0.01em;
+  }
+
+  &--external &__name {
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  &--external &__meta {
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.6;
   }
 
   &__meta {

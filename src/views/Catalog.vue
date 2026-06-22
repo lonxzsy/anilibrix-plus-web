@@ -1,7 +1,7 @@
 <template>
   <div class="catalog">
     <div class="catalog__header glass-strong">
-      <SearchBar v-model="searchQuery" placeholder="Поиск аниме..." @search="onSearch" />
+      <SearchBar v-model="searchQuery" placeholder="Поиск аниме... (Ctrl+K)" @search="onSearch" @select="onSelectSuggestion" />
       <div class="catalog__filters">
         <select
           v-model="filters.genre"
@@ -106,6 +106,61 @@
       </div>
     </div>
 
+    <div v-if="searchQuery && filteredTitles.length === 0 && externalResults.length === 0 && !loading" class="catalog__no-results">
+      <p class="md3-title-medium">Ничего не найдено</p>
+      <p class="md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
+        Попробуйте изменить запрос, проверить опечатки или использовать ключевые слова
+      </p>
+      <div class="catalog__tips">
+        <span class="md3-label-small">Примеры: </span>
+        <span class="catalog__tip md3-body-small" @click="trySearch('жанр:комедия')">жанр:комедия</span>
+        <span class="catalog__tip md3-body-small" @click="trySearch('год:2024')">год:2024</span>
+        <span class="catalog__tip md3-body-small" @click="trySearch('статус:онгоинг')">статус:онгоинг</span>
+        <span class="catalog__tip md3-body-small" @click="trySearch('тип:тв')">тип:тв</span>
+      </div>
+    </div>
+
+    <div v-if="externalResults.length > 0 && searchQuery" class="catalog__external">
+      <div class="catalog__external-header">
+        <h3 class="md3-title-small">Другие результаты с MyAnimeList</h3>
+        <span v-if="externalLoading" class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">загрузка...</span>
+      </div>
+      <div v-if="viewMode === 'grid'" class="catalog__grid">
+        <TitleCard
+          v-for="title in externalResults"
+          :key="title.id"
+          :title="title"
+          :external="true"
+          @click="onExternalTitleClick(title)"
+        />
+      </div>
+      <div v-else class="catalog__list">
+        <div
+          v-for="title in externalResults"
+          :key="title.id"
+          class="catalog__list-item glass catalog__list-item--external"
+          @click="onExternalTitleClick(title)"
+        >
+          <img class="catalog__list-poster catalog__list-poster--external" :src="posterUrl(title)" loading="lazy" alt="" />
+          <div class="catalog__list-info">
+            <h3 class="md3-title-medium" style="color: var(--md-sys-color-on-surface-variant)">{{ title.name.main }}</h3>
+            <p class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant); opacity: 0.6">
+              {{ title.year }} · {{ title.type?.description }} ·
+              <span v-if="title.score">⭐ {{ title.score.toFixed(1) }}</span>
+            </p>
+            <p
+              v-if="title.description"
+              class="md3-body-small"
+              style="color: var(--md-sys-color-on-surface-variant); opacity: 0.5; margin-top: 4px"
+            >
+              {{ truncate(title.description, 180) }}
+            </p>
+            <span class="catalog__external-label">Нет в Anilibria</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div ref="loadMoreTrigger" class="catalog__loader" />
   </div>
 </template>
@@ -117,6 +172,7 @@ import { useTitleStore } from '@/stores/titles'
 import SearchBar from '@/components/SearchBar.vue'
 import TitleCard from '@/components/TitleCard.vue'
 import { debounce } from '@/utils/helpers'
+import { addSearchHistory } from '@/utils/search'
 import type { Title } from '@/types'
 
 const router = useRouter()
@@ -129,6 +185,7 @@ const currentPage = ref(1)
 const loadMoreTrigger = ref<HTMLElement>()
 
 const loading = computed(() => titleStore.loading)
+const externalLoading = computed(() => titleStore.externalLoading)
 const filteredTitles = computed(() => {
   let result = titleStore.filteredTitles
   if (filters.value.genre) {
@@ -142,6 +199,8 @@ const filteredTitles = computed(() => {
   }
   return result
 })
+
+const externalResults = computed(() => titleStore.externalTitles)
 
 const availableGenres = computed(() => {
   const map = new Map<number, { id: number; name: string }>()
@@ -177,11 +236,25 @@ function goToDetails(title: Title) {
   router.push(`/title/${title.id}`)
 }
 
+function onSelectSuggestion(title: Title) {
+  goToDetails(title)
+}
+
+function trySearch(q: string) {
+  searchQuery.value = q
+  onSearch(q)
+}
+
+function onExternalTitleClick(title: Title) {
+  window.open(`https://myanimelist.net/anime/${title.malId}`, '_blank')
+}
+
 const applyFilters = debounce(() => {}, 100)
 
 function onSearch(q: string) {
   currentPage.value = 1
   if (q.length >= 2) {
+    addSearchHistory(q)
     titleStore.searchTitles(q)
   } else if (q.length === 0) {
     titleStore.fetchTitles(1, 20)
@@ -395,6 +468,80 @@ onMounted(() => {
 
   &__loader {
     height: 40px;
+  }
+
+  &__no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 48px 16px;
+    text-align: center;
+  }
+
+  &__tips {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  &__tip {
+    background: var(--md-sys-color-surface-container);
+    padding: 4px 10px;
+    border-radius: var(--md-sys-shape-corner-small);
+    color: var(--md-sys-color-primary);
+    cursor: pointer;
+    transition: background 150ms;
+
+    &:hover {
+      background: var(--md-sys-color-primary-container);
+    }
+  }
+
+  &__external {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 8px;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  &__external-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  &__external-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--md-sys-color-on-surface-variant);
+    background: var(--md-sys-color-surface-container);
+    padding: 2px 8px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    margin-top: 6px;
+    align-self: flex-start;
+  }
+
+  &__list-item--external {
+    opacity: 0.7;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateX(4px);
+      box-shadow: var(--glow-primary);
+    }
+  }
+
+  &__list-poster--external {
+    filter: grayscale(0.6);
+    opacity: 0.6;
   }
 }
 </style>
