@@ -2,7 +2,10 @@
   <Transition name="snackbar">
     <div v-if="store.showUpdate" class="snackbar glass-strong">
       <div class="snackbar__body">
-        <span class="snackbar__icon">🎉</span>
+        <svg class="snackbar__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10" />
+          <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+        </svg>
         <div class="snackbar__text">
           <span class="snackbar__title md3-label-large">
             Обновление до {{ store.currentVersion }}
