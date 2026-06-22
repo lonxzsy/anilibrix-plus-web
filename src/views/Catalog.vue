@@ -106,7 +106,7 @@
       </div>
     </div>
 
-    <div v-if="searchQuery && filteredTitles.length === 0 && externalResults.length === 0 && !loading" class="catalog__no-results">
+    <div v-if="searchQuery && filteredTitles.length === 0 && decoderGroups.length === 0 && externalResults.length === 0 && !loading" class="catalog__no-results">
       <p class="md3-title-medium">Ничего не найдено</p>
       <p class="md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
         Попробуйте изменить запрос, проверить опечатки или использовать ключевые слова
@@ -117,6 +117,48 @@
         <span class="catalog__tip md3-body-small" @click="trySearch('год:2024')">год:2024</span>
         <span class="catalog__tip md3-body-small" @click="trySearch('статус:онгоинг')">статус:онгоинг</span>
         <span class="catalog__tip md3-body-small" @click="trySearch('тип:тв')">тип:тв</span>
+      </div>
+    </div>
+
+    <div v-if="searchQuery && decoderGroups.length > 0" class="catalog__decoder">
+      <div class="catalog__decoder-header">
+        <h3 class="md3-title-small">Другие студии</h3>
+        <span v-if="decoderLoading" class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">загрузка...</span>
+      </div>
+      <div v-for="group in decoderGroups" :key="group.source" class="catalog__decoder-group">
+        <div class="catalog__decoder-subheader">
+          <span class="md3-label-large">{{ sourceLabel(group.source) }}</span>
+          <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{ group.results.length }}</span>
+        </div>
+        <div v-if="viewMode === 'grid'" class="catalog__grid">
+          <div
+            v-for="item in group.results"
+            :key="item.id"
+            class="catalog__decoder-card"
+            @click="goToDecoderItem(group.source, item)"
+          >
+            <img class="catalog__decoder-card-img" :src="item.thumbnail" loading="lazy" alt="" />
+            <div class="catalog__decoder-card-info">
+              <span class="md3-label-small">{{ item.title }}</span>
+            </div>
+          </div>
+        </div>
+        <div v-else class="catalog__list">
+          <div
+            v-for="item in group.results"
+            :key="item.id"
+            class="catalog__list-item glass"
+            @click="goToDecoderItem(group.source, item)"
+          >
+            <img class="catalog__list-poster" :src="item.thumbnail" loading="lazy" alt="" />
+            <div class="catalog__list-info">
+              <h3 class="md3-title-medium">{{ item.title }}</h3>
+              <p class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
+                {{ sourceLabel(group.source) }}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -169,14 +211,32 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitleStore } from '@/stores/titles'
+import { useDecoderStore } from '@/stores/decoder'
 import SearchBar from '@/components/SearchBar.vue'
 import TitleCard from '@/components/TitleCard.vue'
 import { debounce } from '@/utils/helpers'
 import { addSearchHistory } from '@/utils/search'
+import { SOURCES } from '@/api/decoder'
 import type { Title } from '@/types'
+import type { DecoderSearchItem } from '@/api/decoder'
 
 const router = useRouter()
 const titleStore = useTitleStore()
+const decoderStore = useDecoderStore()
+
+const decoderLoading = computed(() => decoderStore.loading)
+
+const decoderGroups = computed(() =>
+  decoderStore.searchResults.filter((g) => g.results.length > 0)
+)
+
+function sourceLabel(name: string) {
+  return SOURCES.find((s) => s.name === name)?.label || name
+}
+
+function goToDecoderItem(source: string, item: DecoderSearchItem) {
+  router.push(`/studios/${source}/${encodeURIComponent(item.id)}?title=${encodeURIComponent(item.title)}`)
+}
 
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
@@ -256,6 +316,7 @@ function onSearch(q: string) {
   if (q.length >= 2) {
     addSearchHistory(q)
     titleStore.searchTitles(q)
+    decoderStore.searchAll(q)
   } else if (q.length === 0) {
     titleStore.fetchTitles(1, 20)
   }
@@ -499,6 +560,42 @@ onMounted(() => {
     &:hover {
       background: var(--md-sys-color-primary-container);
     }
+  }
+
+  &__decoder {
+    display: flex; flex-direction: column; gap: 20px;
+    padding-top: 8px; border-top: 1px solid var(--glass-border);
+  }
+
+  &__decoder-header {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  &__decoder-group { display: flex; flex-direction: column; gap: 10px; }
+
+  &__decoder-subheader {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--md-sys-color-on-surface-variant);
+    padding-left: 4px;
+  }
+
+  &__decoder-card {
+    display: flex; flex-direction: column; gap: 6px;
+    cursor: pointer; border-radius: var(--md-sys-shape-corner-small);
+    overflow: hidden; background: var(--md-sys-color-surface-container);
+    transition: transform 250ms var(--md-sys-motion-easing-spring), box-shadow 250ms;
+    &:hover { transform: translateY(-4px); box-shadow: var(--glow-primary), 0 8px 24px rgba(0,0,0,0.4); }
+  }
+
+  &__decoder-card-img {
+    width: 100%; aspect-ratio: 3/4; object-fit: cover;
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  &__decoder-card-info {
+    padding: 4px 10px 10px;
+    span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   }
 
   &__external {
