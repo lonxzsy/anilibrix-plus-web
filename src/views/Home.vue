@@ -123,11 +123,18 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .home {
   display: flex;
   flex-direction: column;
   gap: 40px;
   padding-bottom: 48px;
+
+  @include mobile {
+    gap: 24px;
+    padding-bottom: 24px;
+  }
 
   &__section {
     display: flex;
@@ -139,6 +146,10 @@ onMounted(() => {
       &:nth-child(#{$i}) {
         animation-delay: $i * 80ms;
       }
+    }
+
+    @include mobile {
+      gap: 12px;
     }
   }
 
@@ -170,6 +181,15 @@ onMounted(() => {
     &--compact {
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
+
+    @include mobile {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+
+      &--compact {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
   }
 
   &__scroll {
@@ -181,6 +201,13 @@ onMounted(() => {
     > * {
       flex-shrink: 0;
       width: 160px;
+    }
+
+    @include mobile {
+      gap: 10px;
+      > * {
+        width: 140px;
+      }
     }
   }
 }

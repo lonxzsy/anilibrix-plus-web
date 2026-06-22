@@ -80,6 +80,12 @@ onUnmounted(() => {
   }
 }
 
+@include mobile {
+  .app-content {
+    padding: 12px;
+  }
+}
+
 .page-enter-active {
   animation: pageEnter 400ms var(--md-sys-motion-easing-decelerate);
 }

@@ -634,6 +634,8 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .player-page {
   display: flex;
   flex-direction: column;
@@ -642,10 +644,20 @@ onUnmounted(() => {
   padding: 24px 32px;
   background: var(--md-sys-color-background);
 
+  @include mobile {
+    margin: -12px -16px;
+    padding: 12px 16px;
+    gap: 16px;
+  }
+
   &__header {
     display: flex;
     align-items: center;
     gap: 16px;
+
+    @include mobile {
+      gap: 10px;
+    }
   }
 
   &__back {
@@ -659,10 +671,22 @@ onUnmounted(() => {
     padding: 6px 0;
     transition: color 150ms var(--md-sys-motion-easing-standard);
     &:hover { color: var(--md-sys-color-on-surface); }
+
+    @include mobile {
+      span { display: none; }
+    }
   }
 
-  &__title { color: var(--md-sys-color-on-surface); flex: 1; }
-  &__episode-info { color: var(--md-sys-color-on-surface-variant); }
+  &__title {
+    color: var(--md-sys-color-on-surface); flex: 1;
+    @include mobile {
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  &__episode-info { color: var(--md-sys-color-on-surface-variant); @include mobile { font-size: 13px; } }
 }
 
 .player-container {

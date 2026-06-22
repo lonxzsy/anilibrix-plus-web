@@ -217,10 +217,16 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .catalog {
   display: flex;
   flex-direction: column;
   gap: 24px;
+
+  @include mobile {
+    gap: 16px;
+  }
 
   &__header {
     display: flex;
@@ -232,12 +238,25 @@ onMounted(() => {
     padding: 16px 20px;
     margin: -16px -20px;
     border-radius: var(--md-sys-shape-corner-small);
+
+    @include mobile {
+      top: -12px;
+      padding: 12px 16px;
+      margin: -12px -16px;
+      gap: 10px;
+    }
   }
 
   &__filters {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+
+    @include mobile {
+      gap: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
   &__filter {
@@ -269,12 +288,23 @@ onMounted(() => {
       color: var(--md-sys-color-on-surface);
       padding: 8px 12px;
     }
+
+    @include mobile {
+      min-width: 0;
+      width: 100%;
+      font-size: 12px;
+      padding: 8px 28px 8px 10px;
+    }
   }
 
   &__toggle {
     display: flex;
     gap: 6px;
     align-self: flex-end;
+
+    @include mobile {
+      align-self: flex-start;
+    }
   }
 
   &__toggle-btn {
@@ -305,12 +335,21 @@ onMounted(() => {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
+
+    @include mobile {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
   }
 
   &__list {
     display: flex;
     flex-direction: column;
     gap: 10px;
+
+    @include mobile {
+      gap: 8px;
+    }
   }
 
   &__list-item {
@@ -327,6 +366,11 @@ onMounted(() => {
       transform: translateX(4px);
       box-shadow: var(--glow-primary);
     }
+
+    @include mobile {
+      gap: 10px;
+      padding: 10px;
+    }
   }
 
   &__list-poster {
@@ -335,6 +379,11 @@ onMounted(() => {
     object-fit: cover;
     border-radius: var(--md-sys-shape-corner-extra-small);
     flex-shrink: 0;
+
+    @include mobile {
+      width: 60px;
+      height: 90px;
+    }
   }
 
   &__list-info {

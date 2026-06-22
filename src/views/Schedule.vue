@@ -125,6 +125,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .schedule {
   display: flex;
   flex-direction: column;
@@ -139,6 +141,13 @@ onMounted(() => {
     gap: 0;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
     position: relative;
+    overflow-x: auto;
+
+    @include mobile {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      &::-webkit-scrollbar { display: none; }
+    }
   }
 
   &__indicator {
@@ -166,6 +175,7 @@ onMounted(() => {
     cursor: pointer;
     position: relative;
     transition: color 200ms var(--md-sys-motion-easing-standard);
+    white-space: nowrap;
 
     &:hover {
       color: var(--md-sys-color-on-surface);
@@ -174,10 +184,19 @@ onMounted(() => {
     &--active {
       color: var(--md-sys-color-primary);
     }
+
+    @include mobile {
+      padding: 10px 14px;
+      gap: 6px;
+    }
   }
 
   &__tab-label {
     letter-spacing: 0.02em;
+
+    @include mobile {
+      font-size: 12px;
+    }
   }
 
   &__tab-count {
@@ -194,6 +213,11 @@ onMounted(() => {
       background: var(--md-sys-color-primary-container);
       color: var(--md-sys-color-on-primary-container);
     }
+
+    @include mobile {
+      padding: 1px 6px;
+      font-size: 10px;
+    }
   }
 
   &__content {
@@ -204,12 +228,22 @@ onMounted(() => {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
+
+    @include mobile {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
   }
 
   &__skeletons {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
+
+    @include mobile {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
   }
 
   &__empty {

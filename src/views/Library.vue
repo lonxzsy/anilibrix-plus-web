@@ -427,6 +427,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .library {
   display: flex;
   flex-direction: column;
@@ -437,6 +439,12 @@ onMounted(() => {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
   }
 
   &__title {
@@ -447,6 +455,10 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 12px;
+
+    @include mobile {
+      align-self: flex-end;
+    }
   }
 
   &__profile-info {
@@ -512,12 +524,22 @@ onMounted(() => {
       background: var(--md-sys-color-primary);
       color: var(--md-sys-color-on-primary);
     }
+
+    @include mobile {
+      width: 100%;
+      text-align: center;
+    }
   }
 
   &__tabs {
     display: flex;
     gap: 4px;
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    overflow-x: auto;
+
+    @include mobile {
+      gap: 2px;
+    }
   }
 
   &__tab {
@@ -528,6 +550,7 @@ onMounted(() => {
     cursor: pointer;
     position: relative;
     transition: color 200ms var(--md-sys-motion-easing-standard);
+    white-space: nowrap;
 
     &::after {
       content: '';
@@ -553,6 +576,18 @@ onMounted(() => {
         transform: scaleX(1);
       }
     }
+
+    @include mobile {
+      padding: 10px 14px;
+      font-size: 13px;
+      flex: 1;
+      text-align: center;
+
+      &::after {
+        left: 14px;
+        right: 14px;
+      }
+    }
   }
 
   &__content {
@@ -563,6 +598,11 @@ onMounted(() => {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 16px;
+
+    @include mobile {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
   }
 
   &__empty {
@@ -594,6 +634,11 @@ onMounted(() => {
       background: var(--md-sys-color-surface-container-high);
       transform: translateX(4px);
     }
+
+    @include mobile {
+      gap: 10px;
+      padding: 10px;
+    }
   }
 
   &__history-thumb {
@@ -609,6 +654,11 @@ onMounted(() => {
       width: 100%;
       height: 100%;
       object-fit: cover;
+    }
+
+    @include mobile {
+      width: 120px;
+      height: 68px;
     }
   }
 
@@ -641,6 +691,12 @@ onMounted(() => {
     flex-direction: column;
     gap: 4px;
     justify-content: center;
+
+    @include mobile {
+      span:first-child {
+        font-size: 14px;
+      }
+    }
   }
 
   &__playlists-header {
@@ -669,12 +725,22 @@ onMounted(() => {
       background: var(--md-sys-color-primary);
       color: var(--md-sys-color-on-primary);
     }
+
+    @include mobile {
+      width: 100%;
+      text-align: center;
+    }
   }
 
   &__playlists-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
   }
 
   &__playlist-card {
@@ -723,6 +789,11 @@ onMounted(() => {
       background: var(--md-sys-color-surface-container-high);
       transform: translateX(4px);
     }
+
+    @include mobile {
+      gap: 10px;
+      padding: 10px 12px;
+    }
   }
 
   &__local-icon {
@@ -735,6 +806,12 @@ onMounted(() => {
     background: var(--md-sys-color-primary-container);
     color: var(--md-sys-color-on-primary-container);
     flex-shrink: 0;
+
+    @include mobile {
+      width: 32px;
+      height: 32px;
+      svg { width: 18px; height: 18px; }
+    }
   }
 
   &__local-info {
@@ -788,13 +865,18 @@ onMounted(() => {
 
   &__modal {
     width: 480px;
-    max-height: 70vh;
+    max-width: 90vw;
+    max-height: 80vh;
     overflow-y: auto;
     padding: 24px;
     border-radius: var(--md-sys-shape-corner-medium);
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    @include mobile {
+      padding: 16px;
+    }
   }
 
   &__modal-input {

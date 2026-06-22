@@ -126,6 +126,8 @@ onUnmounted(() => pauseAutoPlay())
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .hero-carousel {
   position: relative;
   width: 100%;
@@ -134,6 +136,11 @@ onUnmounted(() => pauseAutoPlay())
   overflow: hidden;
   background-color: var(--md-sys-color-surface-container);
   box-shadow: var(--md-sys-elevation-3);
+
+  @include mobile {
+    height: 240px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+  }
 
   &__slides {
     position: relative;
@@ -194,12 +201,22 @@ onUnmounted(() => pauseAutoPlay())
     .hero-carousel__slide--active & {
       animation: fadeUp 600ms var(--md-sys-motion-easing-decelerate) backwards;
     }
+
+    @include mobile {
+      padding: 16px;
+      gap: 6px;
+      max-width: 100%;
+    }
   }
 
   &__metadata {
     display: flex;
     gap: 12px;
     align-items: center;
+
+    @include mobile {
+      gap: 8px;
+    }
   }
 
   &__year,
@@ -210,6 +227,10 @@ onUnmounted(() => pauseAutoPlay())
     letter-spacing: 0.06em;
     font-size: 11px;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+
+    @include mobile {
+      font-size: 10px;
+    }
   }
 
   &__ongoing {
@@ -221,6 +242,11 @@ onUnmounted(() => pauseAutoPlay())
     letter-spacing: 0.03em;
     font-size: 11px;
     border: 1px solid rgba(232, 165, 184, 0.15);
+
+    @include mobile {
+      padding: 2px 8px;
+      font-size: 10px;
+    }
   }
 
   &__title {
@@ -228,6 +254,15 @@ onUnmounted(() => pauseAutoPlay())
     letter-spacing: -0.03em;
     line-height: 1.05;
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+
+    @include mobile {
+      font-size: 16px;
+      line-height: 1.2;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
   }
 
   &__desc {
@@ -238,12 +273,21 @@ onUnmounted(() => pauseAutoPlay())
     overflow: hidden;
     line-height: 1.5;
     max-width: 520px;
+
+    @include mobile {
+      display: none;
+    }
   }
 
   &__actions {
     display: flex;
     gap: 12px;
     margin-top: 8px;
+
+    @include mobile {
+      gap: 8px;
+      margin-top: 4px;
+    }
   }
 
   &__btn {
@@ -281,6 +325,12 @@ onUnmounted(() => pauseAutoPlay())
       border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(12px);
     }
+
+    @include mobile {
+      padding: 6px 14px;
+      font-size: 12px;
+      gap: 6px;
+    }
   }
 
   &__controls {
@@ -293,11 +343,20 @@ onUnmounted(() => pauseAutoPlay())
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    @include mobile {
+      padding: 0 16px 16px;
+      gap: 8px;
+    }
   }
 
   &__indicators {
     display: flex;
     gap: 10px;
+
+    @include mobile {
+      gap: 6px;
+    }
   }
 
   &__indicator {
@@ -316,6 +375,14 @@ onUnmounted(() => pauseAutoPlay())
       width: 48px;
       box-shadow: 0 0 8px rgba(184, 165, 232, 0.3);
     }
+
+    @include mobile {
+      width: 20px;
+      height: 2px;
+      &--active {
+        width: 32px;
+      }
+    }
   }
 
   &__progress {
@@ -323,6 +390,10 @@ onUnmounted(() => pauseAutoPlay())
     background: rgba(255, 255, 255, 0.06);
     border-radius: 1px;
     overflow: hidden;
+
+    @include mobile {
+      display: none;
+    }
   }
 
   &__progress-bar {
