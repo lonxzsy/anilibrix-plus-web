@@ -173,17 +173,72 @@ function toggleFavorite() {
 }
 
 async function shareTitle() {
-  if (navigator.share && title.value) {
-    try {
-      await navigator.share({
-        title: title.value.name.main,
-        text: `Смотри аниме "${title.value.name.main}" на Anilibrix Plus`,
-        url: window.location.href,
-      })
-    } catch {}
-  } else if (title.value) {
-    await navigator.clipboard.writeText(window.location.href)
+  if (!title.value) return
+  const url = window.location.href
+  const shareData = {
+    title: title.value.name.main,
+    text: `Смотри аниме "${title.value.name.main}" на Anilibrix Plus`,
+    url: url,
   }
+
+  // Web Share API (только HTTPS, мобильные устройства)
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData)
+      return
+    } catch (err) {
+      // Игнорируем отмену пользователем (AbortError)
+      if (err instanceof DOMException && err.name === 'AbortError') return
+      // При другой ошибке — падаем в копирование ссылки
+    }
+  }
+
+  // Fallback: копируем ссылку в буфер обмена
+  try {
+    await navigator.clipboard.writeText(url)
+    showShareToast('Ссылка скопирована в буфер обмена!')
+  } catch {
+    // Если clipboard API недоступен, показываем модальное окно с ссылкой
+    showShareToast('Скопируйте ссылку вручную: ' + url)
+  }
+}
+
+function showShareToast(message: string) {
+  // Создаём временный toast-элемент
+  const toast = document.createElement('div')
+  toast.textContent = message
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    padding: 12px 24px;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--glow-primary), var(--md-sys-elevation-3);
+    z-index: 9999;
+    font: var(--md-sys-typescale-body-medium);
+    opacity: 0;
+    transition: opacity 300ms var(--md-sys-motion-easing-standard), transform 300ms var(--md-sys-motion-easing-spring);
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `
+  document.body.appendChild(toast)
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1'
+    toast.style.transform = 'translateX(-50%) translateY(0)'
+  })
+  setTimeout(() => {
+    toast.style.opacity = '0'
+    toast.style.transform = 'translateX(-50%) translateY(80px)'
+    setTimeout(() => toast.remove(), 300)
+  }, 3000)
 }
 
 function getProgress(ep: Episode) {

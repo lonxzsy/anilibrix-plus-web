@@ -1,4 +1,3 @@
-@use "m3-tokens" as *;
 @use "light-theme" as *;
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -22,8 +21,8 @@ html, body, #app {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track { background: transparent; }
@@ -31,10 +30,27 @@ html, body, #app {
 ::-webkit-scrollbar-thumb {
   background: var(--md-sys-color-surface-container-highest);
   border-radius: 3px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+  transition: background 200ms var(--md-sys-motion-easing-standard);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--md-sys-color-primary);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--md-sys-color-primary-container);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--md-sys-color-surface-container-highest) transparent;
 }
 
 ::selection {

@@ -166,7 +166,7 @@ const availableTypes = computed(() => {
 })
 
 function posterUrl(title: Title) {
-  return title.poster?.thumbnail || title.poster?.preview || title.poster?.src || ''
+  return title.poster?.preview || title.poster?.src || title.poster?.thumbnail || ''
 }
 
 function truncate(str: string, len: number) {
