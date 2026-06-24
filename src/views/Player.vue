@@ -20,8 +20,8 @@
 
       <div class="player-top-actions">
         <transition name="skip">
-          <button v-if="skipTargetTime != null" class="player-skip-btn md3-label-large" @click="seekToTime(skipTargetTime!)">
-            Пропустить {{ canSkipOpening ? 'опенинг' : 'эндинг' }}
+          <button v-if="skipTargetTime != null" class="player-skip-btn md3-label-large" @click="manualSkip">
+            <span class="player-skip-btn__label" :style="{ opacity: skipOpacity }">Пропустить {{ canSkipOpening ? 'опенинг' : 'эндинг' }} {{ skipCountdown > 0 ? skipCountdown : '' }}</span>
           </button>
         </transition>
         <transition name="skip">
@@ -237,6 +237,15 @@ const skipTargetTime = computed(() => {
 const showNextEpisode = ref(false)
 const nextEpisodeProgress = ref(0)
 let nextEpisodeTimer: ReturnType<typeof setInterval> | null = null
+
+const skipCountdown = ref(0)
+const SKIP_COUNTDOWN_SECONDS = 3
+let skipTimer: ReturnType<typeof setInterval> | null = null
+const skipOpacity = computed(() => {
+  if (skipCountdown.value <= 0) return 1
+  const elapsed = SKIP_COUNTDOWN_SECONDS - skipCountdown.value
+  return 1 - (elapsed / SKIP_COUNTDOWN_SECONDS) * 0.85
+})
 
 const queue = ref<string[]>([])
 const showQueue = ref(false)
@@ -470,10 +479,47 @@ function seekTo(e: MouseEvent) {
 }
 
 function seekToTime(time: number) {
+  stopSkipTimer()
   if (videoRef.value) {
     videoRef.value.currentTime = time
   }
 }
+
+function startSkipTimer() {
+  stopSkipTimer()
+  skipCountdown.value = SKIP_COUNTDOWN_SECONDS
+  skipTimer = setInterval(() => {
+    skipCountdown.value--
+    if (skipCountdown.value <= 0) {
+      stopSkipTimer()
+      if (skipTargetTime.value != null) {
+        seekToTime(skipTargetTime.value)
+      }
+    }
+  }, 1000)
+}
+
+function stopSkipTimer() {
+  if (skipTimer) {
+    clearInterval(skipTimer)
+    skipTimer = null
+  }
+  skipCountdown.value = 0
+}
+
+function manualSkip() {
+  if (skipTargetTime.value != null) {
+    seekToTime(skipTargetTime.value)
+  }
+}
+
+watch(skipTargetTime, (val) => {
+  if (val != null) {
+    startSkipTimer()
+  } else {
+    stopSkipTimer()
+  }
+})
 
 function onProgressHover(e: MouseEvent) {
   if (!progressBarRef.value || !duration.value) return
@@ -965,6 +1011,7 @@ onUnmounted(() => {
   transition: background-color 150ms, color 150ms, transform 200ms var(--md-sys-motion-easing-spring);
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   &:hover { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); transform: translateY(-2px); }
+  &__label { white-space: nowrap; transition: opacity 1s linear; }
 }
 
 .player-next-btn {
