@@ -11,7 +11,7 @@
       <span class="player-page__episode-info md3-body-medium">Эпизод {{ currentOrdinal }}</span>
     </div>
 
-    <div ref="containerRef" class="player-container" @mousemove="showControls" @mouseleave="hideControlsDelayed" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd">
+    <div ref="containerRef" class="player-container" :class="{ 'player-container--hide-cursor': controlsHidden && isPlaying && isFullscreen }" @mousemove="showControls" @mouseleave="hideControlsDelayed" @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd">
       <video ref="videoRef" class="player-container__video" playsinline webkit-playsinline @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" @ended="onEnded" @waiting="isBuffering = true" @playing="onVideoPlay" @pause="onVideoPause" />
 
       <div v-if="isBuffering" class="player-container__buffering">
@@ -192,6 +192,7 @@ const isBuffering = ref(false)
 const volume = ref(1)
 const playbackRate = ref(1)
 const controlsHidden = ref(false)
+const isFullscreen = ref(false)
 const showQuality = ref(false)
 const showSpeed = ref(false)
 const showSubtitles = ref(false)
@@ -581,7 +582,8 @@ function toggleFullscreen() {
 }
 
 function onFullscreenChange() {
-  if (document.fullscreenElement) {
+  isFullscreen.value = !!document.fullscreenElement
+  if (isFullscreen.value) {
     showControls()
   }
 }
@@ -815,10 +817,11 @@ onUnmounted(() => {
   user-select: none;
 
   &:fullscreen {
-    max-height: 100vh;
+    background: #000;
     border-radius: 0;
     .player-container__video { border-radius: 0; }
   }
+  &--hide-cursor { cursor: none; }
 
   &__video {
     width: 100%;
