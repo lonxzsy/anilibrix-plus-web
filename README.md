@@ -1,55 +1,63 @@
 # Anilibrix Plus Web
 
-> PWA для просмотра аниме на базе [Anilibria](https://anilibria.tv). Material Design 3, мобильная поддержка, установка на экран дома.
+> PWA for watching anime powered by [Anilibria](https://anilibria.tv), [AnimeVost](https://animevost.org), and more. Material Design 3, mobile support, installable to home screen.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Vue-3.4-42b883?style=flat-square&logo=vue.js" alt="Vue">
   <img src="https://img.shields.io/badge/PWA-ready-5a0fc8?style=flat-square&logo=pwa" alt="PWA">
   <img src="https://img.shields.io/badge/TypeScript-5.4-3178c6?style=flat-square&logo=typescript" alt="TypeScript">
   <img src="https://img.shields.io/badge/Material%20Design-3-6750a4?style=flat-square&logo=material-design" alt="Material Design 3">
+  <img src="https://img.shields.io/badge/GSAP-3.15-88ce02?style=flat-square&logo=greensock" alt="GSAP">
   <img src="https://img.shields.io/badge/Deploy-Vercel-000000?style=flat-square&logo=vercel" alt="Vercel">
 </p>
 
 ---
 
-## Возможности
+## Features
 
-- **Каталог** — просмотр всех релизов Anilibria с поиском, фильтрами по жанру/году/типу, переключением сетка/список
-- **Расписание** — ежедневное расписание выхода новых серий с анимированными вкладками
-- **Плеер** — кастомный HTML5 плеер на HLS.js:
-  - Пропуск опенинга / эндинга
-  - Автопереключение на следующую серию
-  - Субтитры (SRT/VTT) с настройкой стиля
-  - Картинка-в-картинке (PiP)
-  - Выбор качества (480p / 720p / 1080p)
-  - Скорость воспроизведения (0.5x–2x)
-  - Горячие клавиши
-  - Touch-жесты на мобильных
-- **Библиотека** — избранное, история просмотров, плейлисты, синхронизация с аккаунтом Anilibria
-- **Две темы** — тёмная (кинематографичная) и светлая (Material You)
-- **PWA** — установка на экран дома, офлайн-доступ через Service Worker
-- **Локальные файлы** — выбор папки с сериалами через File System Access API (Chrome)
-- **Авторизация** — вход через аккаунт Anilibria, синхронизация избранного и истории
-- **Web Share API** — поделиться ссылкой на тайтл
+- **Catalog** — browse all Anilibria releases with search, genre/year/type filters, grid/list toggle
+- **Schedule** — daily release schedule with animated tab indicators
+- **Trending** — top anime by MyAnimeList rating, sortable by score/popularity/rank, grid/list view
+- **Multi-Studio Search** — search across AnimeVost, AniLib, YummyAnime, and Dream Cast with a dedicated player
+- **Player** — custom HTML5 player built on HLS.js:
+  - Opening/ending skip
+  - Auto-advance to next episode
+  - Subtitles (SRT/VTT) with style configuration
+  - Picture-in-Picture (PiP)
+  - Quality selection (480p / 720p / 1080p)
+  - Playback speed (0.5x–2x)
+  - Keyboard shortcuts
+  - Touch gestures on mobile
+- **Library** — favorites, watch later, viewing history, playlists, sync with Anilibria account
+- **User Ratings** — rate anime and persist ratings locally
+- **Animation System** — GSAP-powered page transitions, stagger card animations, parallax scrolling, scroll reveal, count-up animations, fly-to-detail transitions
+- **Toast Notifications** — non-intrusive success/error/info toasts
+- **Keyboard Shortcuts Modal** — view all global shortcuts from any page
+- **Two Themes** — dark (cinematic) and light (Material You)
+- **PWA** — installable to home screen, offline access via Service Worker
+- **Local Files** — select local series folder via File System Access API (Chrome)
+- **Authentication** — sign in with Anilibria account, sync favorites and history
+- **Changelog** — inline release history fetched from GitHub
+- **Web Share API** — share title links
 
 ---
 
-## Живой демо
+## Live Demo
 
 [![Deploy on Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Flonxzsy%2Fanilibrix-plus-web)
 
-Либо открой в браузере после деплоя — установи на телефон через "Добавить на экран дома".
+Or open in browser after deployment — install on your phone via "Add to Home Screen".
 
 ---
 
-## Установка и запуск
+## Installation & Setup
 
-### Требования
+### Requirements
 
 - Node.js **18+**
 - npm / yarn / pnpm
 
-### Разработка
+### Development
 
 ```bash
 git clone https://github.com/lonxzsy/anilibrix-plus-web.git
@@ -58,17 +66,17 @@ npm install
 npm run dev
 ```
 
-Dev-сервер запустится на `http://localhost:5173`.
+Dev server starts at `http://localhost:5173`.
 
-### Сборка
+### Build
 
 ```bash
 npm run build
 ```
 
-Готовая статика в папке `dist/`. Можно залить на любой хостинг.
+Static output in `dist/`. Deploy to any hosting provider.
 
-### Превью собранного
+### Preview Production Build
 
 ```bash
 npm run preview
@@ -76,17 +84,17 @@ npm run preview
 
 ---
 
-## Деплой на Vercel (рекомендуется)
+## Deploy to Vercel (Recommended)
 
-### Автоматически (через GitHub)
+### Automatic (via GitHub)
 
-1. Создай репозиторий и запушь код
-2. Зайди на [vercel.com](https://vercel.com) → `Add New Project`
-3. Импортируй репозиторий
-4. Vercel сам определит Vite — ничего менять не нужно
-5. Нажми `Deploy` — готово
+1. Create a repository and push the code
+2. Go to [vercel.com](https://vercel.com) → `Add New Project`
+3. Import the repository
+4. Vercel auto-detects Vite — no configuration needed
+5. Click `Deploy`
 
-### Через CLI
+### Via CLI
 
 ```bash
 npm i -g vercel
@@ -94,59 +102,76 @@ vercel login
 vercel --prod
 ```
 
-### CI/CD (уже настроен)
+### CI/CD (pre-configured)
 
-В `.github/workflows/deploy.yml` — автодеплой при пуше в `main`.  
-Добавь в GitHub Secrets:
+`.github/workflows/deploy.yml` — auto-deploys on push to `main`.  
+Add these GitHub Secrets:
 - `VERCEL_TOKEN` — [vercel.com/account/tokens](https://vercel.com/account/tokens)
-- `VERCEL_ORG_ID` — из `vercel link`
-- `VERCEL_PROJECT_ID` — из `vercel link`
+- `VERCEL_ORG_ID` — from `vercel link`
+- `VERCEL_PROJECT_ID` — from `vercel link`
 
 ---
 
-## Структура проекта
+## Project Structure
 
 ```
 anilibrix-plus-web/
 ├── public/
-│   └── icons/            # Иконки PWA
+│   └── icons/              # PWA icons
 ├── src/
-│   ├── api/              # API клиент Anilibria (Axios)
-│   ├── components/       # Vue-компоненты
+│   ├── api/                 # API client
+│   │   ├── client.ts        # Anilibria API (Axios)
+│   │   └── decoder.ts       # Multi-studio decoder API
+│   ├── components/
 │   │   ├── AuthModal.vue
-│   │   ├── BottomNav.vue       # Навигация для мобильных
+│   │   ├── BottomNav.vue         # Mobile bottom navigation
 │   │   ├── HeroCarousel.vue
-│   │   ├── NavigationRail.vue  # Боковая панель (десктоп)
+│   │   ├── NavigationRail.vue    # Desktop sidebar
 │   │   ├── SearchBar.vue
+│   │   ├── ShortcutsModal.vue    # Keyboard shortcuts overlay
 │   │   ├── SubtitleOverlay.vue
-│   │   └── TitleCard.vue
-│   ├── db/               # IndexedDB (Dexie.js)
+│   │   ├── TitleCard.vue
+│   │   ├── ToastContainer.vue    # Toast notifications
+│   │   └── UpdateSnackbar.vue
+│   ├── composables/         # Reusable composition functions
+│   │   ├── useGsap.ts            # GSAP animations (page transitions, stagger, parallax, etc.)
+│   │   ├── useScrollReveal.ts    # Scroll-triggered reveal animations
+│   │   └── useToast.ts           # Toast notification state
+│   ├── db/                  # IndexedDB via Dexie.js
 │   │   └── database.ts
-│   ├── stores/           # Pinia stores
+│   ├── stores/              # Pinia stores
 │   │   ├── auth.ts
-│   │   ├── library.ts
+│   │   ├── decoder.ts            # Multi-studio search state
+│   │   ├── library.ts            # Favorites, watch later, ratings
 │   │   └── titles.ts
 │   ├── styles/
-│   │   ├── m3-tokens.scss       # Material Design 3 токены
-│   │   ├── light-theme.scss     # Светлая тема
-│   │   ├── responsive.scss      # Брейкпоинты
+│   │   ├── m3-tokens.scss        # Material Design 3 tokens
+│   │   ├── light-theme.scss      # Light theme
+│   │   ├── responsive.scss       # Breakpoint mixins
 │   │   └── global.scss
 │   ├── utils/
-│   │   ├── file-system.ts       # File System Access API
+│   │   ├── external-search.ts    # Jikan (MyAnimeList) API search
+│   │   ├── file-system.ts        # File System Access API
 │   │   ├── helpers.ts
+│   │   ├── search.ts             # Fuse.js fuzzy search with transliteration
 │   │   └── subtitles.ts
 │   ├── views/
-│   │   ├── Home.vue
 │   │   ├── Catalog.vue
-│   │   ├── TitleDetail.vue
-│   │   ├── Player.vue
-│   │   ├── Schedule.vue
+│   │   ├── Changelog.vue         # Release history
+│   │   ├── Home.vue
 │   │   ├── Library.vue
-│   │   └── Profile.vue
+│   │   ├── Player.vue
+│   │   ├── Profile.vue
+│   │   ├── Schedule.vue
+│   │   ├── StudioEpisodes.vue    # Studio anime episodes
+│   │   ├── StudioPlayer.vue      # Custom video player for studio sources
+│   │   ├── StudioSearch.vue      # Multi-studio search page
+│   │   ├── TitleDetail.vue
+│   │   └── Trending.vue          # MyAnimeList top anime
 │   ├── types.ts
 │   ├── router.ts
 │   └── main.ts
-├── .github/workflows/    # CI/CD
+├── .github/workflows/       # CI/CD
 │   ├── ci.yml
 │   └── deploy.yml
 ├── vercel.json
@@ -157,62 +182,71 @@ anilibrix-plus-web/
 
 ---
 
-## Адаптация под мобильные
+## Responsive Breakpoints
 
-- **< 600px** — Bottom Navigation Bar, 2 колонки в каталоге, плеер на весь экран
-- **600–1024px** — Tablet layout, сворачиваемый сайдбар
-- **> 1024px** — Полноценный десктоп с NavigationRail
+- **< 600px** — Bottom Navigation Bar, 2-column catalog, full-screen player
+- **600–1024px** — Tablet layout, collapsible sidebar
+- **> 1024px** — Full desktop with NavigationRail
 
-PWA можно установить на телефон через "Add to Home Screen" — работает как нативное приложение.
-
----
-
-## Горячие клавиши (плеер)
-
-| Клавиша | Действие |
-|---|---|
-| `Пробел` / `K` | Плей / Пауза |
-| `←` / `→` | Назад / Вперёд на 10 сек |
-| `↑` / `↓` | Громкость |
-| `F` | Полноэкранный режим |
-| `M` | Звук вкл/выкл |
-| `N` | Следующая серия |
+PWA can be installed on your phone via "Add to Home Screen" — works like a native app.
 
 ---
 
-## Технологии
+## Keyboard Shortcuts
 
-| Технология | Назначение |
+| Key | Action |
 |---|---|
-| [Vue 3](https://vuejs.org/) + Composition API | UI фреймворк |
-| [Vite](https://vitejs.dev/) | Сборка |
-| [Pinia](https://pinia.vuejs.org/) | Управление состоянием |
-| [Vue Router](https://router.vuejs.org/) | Роутинг (hash-based) |
-| [Dexie.js](https://dexie.org/) | IndexedDB — локальное хранилище |
-| [HLS.js](https://github.com/video-dev/hls.js/) | HLS-стриминг |
-| [Axios](https://axios-http.com/) | HTTP-клиент |
+| `Space` / `K` | Play / Pause |
+| `←` / `→` | Rewind / Forward 10s |
+| `↑` / `↓` | Volume |
+| `F` | Fullscreen |
+| `M` | Mute |
+| `N` | Next episode |
+| `?` | Show shortcuts modal |
+| `Ctrl+K` | Focus search bar |
+
+---
+
+## Technologies
+
+| Technology | Purpose |
+|---|---|
+| [Vue 3](https://vuejs.org/) + Composition API | UI framework |
+| [Vite](https://vitejs.dev/) | Build tool |
+| [Pinia](https://pinia.vuejs.org/) | State management |
+| [Vue Router](https://router.vuejs.org/) | Routing (hash-based) |
+| [GSAP](https://gsap.com/) | Animations (page transitions, stagger, scroll, parallax) |
+| [Dexie.js](https://dexie.org/) | IndexedDB — local storage |
+| [HLS.js](https://github.com/video-dev/hls.js/) | HLS streaming |
+| [Fuse.js](https://fusejs.io/) | Fuzzy search with transliteration |
+| [Axios](https://axios-http.com/) | HTTP client |
 | [vite-plugin-pwa](https://vite-pwa-org.netlify.app/) | PWA + Service Worker |
-| [Sass/SCSS](https://sass-lang.com/) | Стилизация |
-| [Material Design 3](https://m3.material.io/) | Дизайн-система |
+| [Sass/SCSS](https://sass-lang.com/) | Styling |
+| [Material Design 3](https://m3.material.io/) | Design system |
 
 ---
 
-## Миграция с Electron
+## Migration from Electron
 
-Проект был портирован с [оригинальной Electron-версии](https://github.com/lonxzsy/anilibrix-plus):
+This project was ported from the [original Electron version](https://github.com/lonxzsy/anilibrix-plus):
 
 - `electron-store` → `Dexie.js` (IndexedDB)
-- `Discord RPC` — удалён (не нужен в браузере)
-- `local://` протокол → `File System Access API`
-- IPC bridges → прямые вызовы Pinia + Dexie
-- Добавлен PWA Service Worker
-- Добавлена адаптивная вёрстка
-- Добавлен Bottom Navigation Bar
+- `Discord RPC` — removed (not needed in browser)
+- `local://` protocol → `File System Access API`
+- IPC bridges → direct Pinia + Dexie calls
+- Added PWA Service Worker
+- Added responsive layout
+- Added Bottom Navigation Bar
+- Added GSAP animation system
+- Added multi-studio search (AnimeVost, AniLib, YummyAnime, Dream Cast)
+- Added Trending page with MyAnimeList integration
+- Added toast notifications
+- Added keyboard shortcuts modal
 
 ---
 
-## Лицензия
+## License
 
 MIT
 
-> **Disclaimer:** Anilibrix Plus — неофициальный клиент. Все права на контент принадлежат [Anilibria](https://anilibria.tv).
+> **Disclaimer:** Anilibrix Plus is an unofficial client. All content rights belong to [Anilibria](https://anilibria.tv) and respective publishers.
