@@ -24,13 +24,15 @@
       </div>
     </div>
 
-    <div class="navigation-rail__items">
+    <div class="navigation-rail__items" ref="itemsRef">
+      <div class="navigation-rail__active-indicator" :style="indicatorStyle" />
       <router-link
         v-for="item in items"
         :key="item.path"
         :to="item.path"
         class="navigation-rail__item"
         :class="{ 'navigation-rail__item--active': isActive(item.path) }"
+        :ref="(el: any) => itemRefs[item.path] = el as HTMLElement"
       >
         <svg
           class="navigation-rail__item-icon"
@@ -86,6 +88,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -95,6 +98,10 @@ const authStore = useAuthStore()
 defineEmits<{
   openAuth: []
 }>()
+
+const itemsRef = ref<HTMLElement | null>(null)
+const itemRefs = ref<Record<string, HTMLElement>>({})
+const indicatorStyle = ref<Record<string, string>>({})
 
 const items = [
   {
@@ -122,12 +129,30 @@ const items = [
     label: 'Библиотека',
     iconPath: 'M19 21l-7-5-7 5V5a2 2 0 012-2l5 0a2 2 0 012 2v16z M12 7v14',
   },
+  {
+    path: '/trending',
+    label: 'Популярное',
+    iconPath: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+  },
 ]
 
 function isActive(path: string) {
   if (path === '/') return route.path === '/'
   return route.path.startsWith(path)
 }
+
+function updateIndicator() {
+  const activePath = items.find((item) => isActive(item.path))
+  if (!activePath || !itemRefs.value[activePath.path] || !itemsRef.value) return
+  const el = itemRefs.value[activePath.path]
+  indicatorStyle.value = {
+    transform: `translateY(${el.offsetTop}px)`,
+    height: `${el.offsetHeight}px`,
+  }
+}
+
+watch(() => route.path, () => nextTick(updateIndicator), { flush: 'post' })
+onMounted(() => nextTick(updateIndicator))
 </script>
 
 <style scoped lang="scss">
@@ -173,6 +198,21 @@ function isActive(path: string) {
     width: 100%;
     padding: 0 10px;
     flex: 1;
+    position: relative;
+  }
+
+  &__active-indicator {
+    position: absolute;
+    left: 10px;
+    width: calc(100% - 20px);
+    background: rgba(184, 165, 232, 0.08);
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid rgba(184, 165, 232, 0.06);
+    transition:
+      transform 350ms var(--md-sys-motion-easing-spring),
+      height 350ms var(--md-sys-motion-easing-spring);
+    pointer-events: none;
+    z-index: 0;
   }
 
   &__item {
@@ -199,6 +239,8 @@ function isActive(path: string) {
       height: 20px;
       transition: color 200ms var(--md-sys-motion-easing-standard);
     }
+
+    z-index: 1;
 
     &-label {
       font-size: 10px;

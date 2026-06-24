@@ -1,6 +1,7 @@
 // Breakpoints
 $breakpoint-sm: 600px;
 $breakpoint-md: 1024px;
+$breakpoint-lg: 1440px;
 
 @mixin mobile {
   @media (max-width: #{$breakpoint-sm - 1px}) {
@@ -20,6 +21,12 @@ $breakpoint-md: 1024px;
   }
 }
 
+@mixin wide {
+  @media (min-width: $breakpoint-lg) {
+    @content;
+  }
+}
+
 @mixin mobile-tablet {
   @media (max-width: #{$breakpoint-md - 1px}) {
     @content;
@@ -28,6 +35,18 @@ $breakpoint-md: 1024px;
 
 @mixin tablet-desktop {
   @media (min-width: $breakpoint-sm) {
+    @content;
+  }
+}
+
+@mixin retina {
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    @content;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
     @content;
   }
 }

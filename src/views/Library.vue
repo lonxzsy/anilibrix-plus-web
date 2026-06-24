@@ -4,28 +4,22 @@
       <h1 class="library__title md3-headline-medium">Моя библиотека</h1>
       <div v-if="authStore.user" class="library__profile">
         <div class="library__profile-info">
-          <span class="md3-label-large" style="color: var(--md-sys-color-on-surface)">{{
-            authStore.user.name
-          }}</span>
-          <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{
-            authStore.user.login
-          }}</span>
+          <span class="md3-label-large" style="color: var(--md-sys-color-on-surface)">{{ authStore.user.name }}</span>
+          <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{ authStore.user.login }}</span>
         </div>
-        <div v-if="authStore.user.avatar" class="library__profile-avatar">
-          <img :src="authStore.user.avatar" alt="" />
-        </div>
-        <div v-else class="library__profile-avatar-fallback">
-          {{ authStore.user.name.charAt(0).toUpperCase() }}
-        </div>
+        <div v-if="authStore.user.avatar" class="library__profile-avatar"><img :src="authStore.user.avatar" alt="" /></div>
+        <div v-else class="library__profile-avatar-fallback">{{ authStore.user.name.charAt(0).toUpperCase() }}</div>
       </div>
     </div>
 
-    <div class="library__tabs">
+    <div class="library__tabs" ref="tabsRef">
+      <div class="library__indicator" :style="indicatorStyle" />
       <button
         v-for="tab in tabs"
         :key="tab.id"
         class="library__tab md3-label-large"
         :class="{ 'library__tab--active': activeTab === tab.id }"
+        :ref="(el: any) => tabRefs[tab.id] = el as HTMLElement"
         @click="activeTab = tab.id"
       >
         {{ tab.label }}
@@ -33,229 +27,158 @@
     </div>
 
     <div class="library__content">
-      <!-- Favorites -->
-      <div v-if="activeTab === 'favorites'" class="library__grid">
-        <TitleCard
-          v-for="title in libraryStore.favorites"
-          :key="title.id"
-          :title="title"
-          @click="goToDetails(title)"
-        />
-        <div v-if="libraryStore.favorites.length === 0" class="library__empty">
-          <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
-            Нет избранных тайтлов.
-          </span>
-        </div>
-      </div>
-
-      <!-- History -->
-      <div v-else-if="activeTab === 'history'" class="library__history">
-        <div class="library__sync-bar">
-          <button
-            v-if="authStore.token"
-            class="library__sync-btn md3-label-large"
-            @click="syncData"
-          >
-            {{ libraryStore.apiLoading ? 'Синхронизация...' : 'Синхронизировать с сервером' }}
-          </button>
-        </div>
-        <div
-          v-for="entry in libraryStore.history.slice(0, 50)"
-          :key="`${entry.titleId}-${entry.episodeId}`"
-          class="library__history-item"
-          @click="continuePlay(entry)"
-        >
-          <div class="library__history-thumb">
-            <img
-              v-if="getPoster(entry.titleId)"
-              :src="getPoster(entry.titleId)"
-              loading="lazy"
-              alt=""
+      <Transition name="tab-fade" mode="out-in">
+        <div :key="activeTab">
+          <!-- Favorites -->
+          <div v-if="activeTab === 'favorites'" class="library__grid">
+            <TitleCard
+              v-for="title in libraryStore.favorites"
+              :key="title.id"
+              :title="title"
+              :show-watch-later="true"
+              :is-watch-later="libraryStore.isInWatchLater(title.id)"
+              @watch-later="handleWatchLater"
+              @click="goToDetails(title)"
             />
-            <div v-else class="library__history-placeholder">
-              <span class="md3-title-large">{{ entry.episodeNumber }}</span>
-            </div>
-            <div class="library__history-progress">
-              <div
-                class="library__history-progress-bar"
-                :style="{ width: `${getProgressPercent(entry)}%` }"
-              />
-            </div>
-          </div>
-          <div class="library__history-info">
-            <span class="md3-title-medium">{{ getTitleName(entry.titleId) }}</span>
-            <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
-              Серия {{ entry.episodeNumber }}
-            </span>
-            <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
-              {{ formatDuration(entry.timestamp) }} / {{ formatDuration(entry.duration) }}
-            </span>
-          </div>
-        </div>
-        <div v-if="libraryStore.history.length === 0" class="library__empty">
-          <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
-            История просмотров пуста.
-          </span>
-        </div>
-      </div>
-
-      <!-- Playlists -->
-      <div v-else-if="activeTab === 'playlists'" class="library__playlists">
-        <div class="library__playlists-header">
-          <button class="library__create-btn md3-label-large md3-ripple" @click="createPlaylist">
-            + Новый плейлист
-          </button>
-        </div>
-        <div class="library__playlists-list">
-          <div
-            v-for="playlist in libraryStore.playlists"
-            :key="playlist.id"
-            class="library__playlist-card"
-          >
-            <span class="md3-title-medium">{{ playlist.name }}</span>
-            <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
-              {{ playlist.items.length }} тайтлов
-            </span>
-          </div>
-          <div v-if="libraryStore.playlists.length === 0" class="library__empty">
-            <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
-              Нет плейлистов.
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Local Files -->
-      <div v-else-if="activeTab === 'local'" class="library__local">
-        <div class="library__sync-bar">
-          <button class="library__sync-btn md3-label-large" @click="scanLocalFiles">
-            {{ localFilesLoading ? 'Сканирование...' : 'Обновить' }}
-          </button>
-        </div>
-        <div v-if="localFiles.length > 0" class="library__local-list">
-          <div
-            v-for="file in localFiles"
-            :key="file.path"
-            class="library__local-item"
-            @click="playLocalFile(file)"
-          >
-            <div class="library__local-icon">
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path
-                  d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
-                />
-                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div v-if="libraryStore.favorites.length === 0" class="library__empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--md-sys-color-on-surface-variant)">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" />
               </svg>
+              <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">Нет избранных тайтлов.</span>
             </div>
-            <div class="library__local-info">
-              <span
-                v-if="file.titleName"
-                class="md3-title-medium"
-                style="color: var(--md-sys-color-primary)"
-                >{{ file.titleName }}</span
-              >
-              <span v-else class="md3-title-medium">{{ file.name }}</span>
-              <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
-                {{ formatBytes(file.size) }}
-                <span
-                  v-if="file.releaseId"
-                  style="margin-left: 8px; color: var(--md-sys-color-primary)"
-                  >· Распознано</span
-                >
-              </span>
+          </div>
+
+          <!-- Watch Later -->
+          <div v-else-if="activeTab === 'watchlater'" class="library__grid">
+            <TitleCard
+              v-for="title in watchLaterList"
+              :key="title.id"
+              :title="title"
+              :show-watch-later="true"
+              :is-watch-later="true"
+              @watch-later="handleWatchLater"
+              @click="goToDetails(title)"
+            />
+            <div v-if="watchLaterList.length === 0" class="library__empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--md-sys-color-on-surface-variant)">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">Нет тайтлов в списке.</span>
             </div>
-            <button
-              v-if="!file.releaseId"
-              class="library__local-link md3-label-small"
-              @click.stop="openLocalSearch(file)"
-            >
-              Привязать
-            </button>
+          </div>
+
+          <!-- History -->
+          <div v-else-if="activeTab === 'history'" class="library__history">
+            <div class="library__sync-bar">
+              <button v-if="authStore.token" class="library__sync-btn md3-label-large" @click="syncData">
+                {{ libraryStore.apiLoading ? 'Синхронизация...' : 'Синхронизировать с сервером' }}
+              </button>
+            </div>
+            <div v-for="entry in libraryStore.history.slice(0, 50)" :key="`${entry.titleId}-${entry.episodeId}`" class="library__history-item" @click="continuePlay(entry)">
+              <div class="library__history-thumb">
+                <img v-if="getPoster(entry.titleId)" :src="getPoster(entry.titleId)" loading="lazy" alt="" />
+                <div v-else class="library__history-placeholder"><span class="md3-title-large">{{ entry.episodeNumber }}</span></div>
+                <div class="library__history-progress"><div class="library__history-progress-bar" :style="{ width: `${getProgressPercent(entry)}%` }" /></div>
+              </div>
+              <div class="library__history-info">
+                <span class="md3-title-medium">{{ getTitleName(entry.titleId) }}</span>
+                <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">Серия {{ entry.episodeNumber }}</span>
+                <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{ formatDuration(entry.timestamp) }} / {{ formatDuration(entry.duration) }}</span>
+              </div>
+            </div>
+            <div v-if="libraryStore.history.length === 0" class="library__empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--md-sys-color-on-surface-variant)">
+                <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">История просмотров пуста.</span>
+            </div>
+          </div>
+
+          <!-- Playlists -->
+          <div v-else-if="activeTab === 'playlists'" class="library__playlists">
+            <div class="library__playlists-header">
+              <button class="library__create-btn md3-label-large" @click="createPlaylist">+ Новый плейлист</button>
+            </div>
+            <div class="library__playlists-list">
+              <div v-for="playlist in libraryStore.playlists" :key="playlist.id" class="library__playlist-card">
+                <span class="md3-title-medium">{{ playlist.name }}</span>
+                <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">{{ playlist.items.length }} тайтлов</span>
+              </div>
+              <div v-if="libraryStore.playlists.length === 0" class="library__empty">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--md-sys-color-on-surface-variant)">
+                  <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />
+                </svg>
+                <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">Нет плейлистов.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Local Files -->
+          <div v-else-if="activeTab === 'local'" class="library__local">
+            <div class="library__sync-bar">
+              <button class="library__sync-btn md3-label-large" @click="scanLocalFiles">
+                {{ localFilesLoading ? 'Сканирование...' : 'Обновить' }}
+              </button>
+            </div>
+            <div v-if="localFiles.length > 0" class="library__local-list">
+              <div v-for="file in localFiles" :key="file.path" class="library__local-item" @click="playLocalFile(file)">
+                <div class="library__local-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </div>
+                <div class="library__local-info">
+                  <span v-if="file.titleName" class="md3-title-medium" style="color: var(--md-sys-color-primary)">{{ file.titleName }}</span>
+                  <span v-else class="md3-title-medium">{{ file.name }}</span>
+                  <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">
+                    {{ formatBytes(file.size) }}
+                    <span v-if="file.releaseId" style="margin-left: 8px; color: var(--md-sys-color-primary)">· Распознано</span>
+                  </span>
+                </div>
+                <button v-if="!file.releaseId" class="library__local-link md3-label-small" @click.stop="openLocalSearch(file)">Привязать</button>
+              </div>
+            </div>
+            <div v-else-if="localFilesLoading" class="library__local-skeletons">
+              <div v-for="n in 4" :key="n" class="md3-skeleton" style="height: 56px; border-radius: 8px" />
+            </div>
+            <div v-else class="library__empty">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--md-sys-color-on-surface-variant)">
+                <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">Видео-файлы не найдены.</span>
+            </div>
           </div>
         </div>
-        <div v-else-if="localFilesLoading" class="library__local-skeletons">
-          <div
-            v-for="n in 4"
-            :key="n"
-            class="md3-skeleton"
-            style="height: 56px; border-radius: 8px"
-          />
-        </div>
-        <div v-else class="library__empty">
-          <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
-            Видео-файлы в папке загрузок не найдены.
-          </span>
-        </div>
-      </div>
+      </Transition>
     </div>
 
     <!-- Local file search modal -->
-    <div
-      v-if="showLocalSearchModal"
-      class="library__modal-overlay"
-      @click.self="showLocalSearchModal = false"
-    >
-      <div class="library__modal glass">
-        <h3
-          class="md3-title-large"
-          style="color: var(--md-sys-color-on-surface); margin-bottom: 16px"
-        >
-          Привязать к аниме
-        </h3>
-        <input
-          v-model="localSearchQuery"
-          class="library__modal-input md3-body-medium"
-          placeholder="Название аниме..."
-          @keydown.enter="searchLocalTitle"
-        />
-        <div v-if="localSearchLoading" class="library__modal-loading">
-          <div
-            v-for="n in 3"
-            :key="n"
-            class="md3-skeleton"
-            style="height: 60px; border-radius: 8px"
-          />
+    <Teleport to="body">
+      <Transition name="modal-backdrop">
+        <div v-if="showLocalSearchModal" class="library__modal-overlay" @click.self="showLocalSearchModal = false">
+          <Transition name="modal-content" appear>
+            <div v-if="showLocalSearchModal" class="library__modal glass">
+              <h3 class="md3-title-large" style="color: var(--md-sys-color-on-surface); margin-bottom: 16px">Привязать к аниме</h3>
+              <input v-model="localSearchQuery" class="library__modal-input md3-body-medium" placeholder="Название аниме..." @keydown.enter="searchLocalTitle" />
+              <div v-if="localSearchLoading" class="library__modal-loading">
+                <div v-for="n in 3" :key="n" class="md3-skeleton" style="height: 60px; border-radius: 8px" />
+              </div>
+              <div v-else-if="localSearchResults.length > 0" class="library__modal-list">
+                <div v-for="t in localSearchResults" :key="t.id" class="library__modal-item" @click="assignLocalFile(t)">
+                  <img v-if="t.poster?.preview" :src="t.poster.preview" class="library__modal-thumb" alt="" />
+                  <div v-else class="library__modal-thumb-placeholder" />
+                  <span class="md3-body-large">{{ t.name.main }}</span>
+                </div>
+              </div>
+              <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant); text-align: center">Ничего не найдено</p>
+            </div>
+          </Transition>
         </div>
-        <div v-else-if="localSearchResults.length > 0" class="library__modal-list">
-          <div
-            v-for="t in localSearchResults"
-            :key="t.id"
-            class="library__modal-item"
-            @click="assignLocalFile(t)"
-          >
-            <img
-              v-if="t.poster?.preview"
-              :src="t.poster.preview"
-              class="library__modal-thumb"
-              alt=""
-            />
-            <div v-else class="library__modal-thumb-placeholder" />
-            <span class="md3-body-large">{{ t.name.main }}</span>
-          </div>
-        </div>
-        <p
-          v-else
-          class="md3-body-large"
-          style="color: var(--md-sys-color-on-surface-variant); text-align: center"
-        >
-          Ничего не найдено
-        </p>
-      </div>
-    </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLibraryStore } from '@/stores/library'
 import { useTitleStore } from '@/stores/titles'
@@ -264,27 +187,30 @@ import { localFiles as localFilesApi, type LocalVideoFile } from '@/utils/file-s
 import { api } from '@/api/client'
 import TitleCard from '@/components/TitleCard.vue'
 import { formatTime } from '@/utils/helpers'
+import { useToast } from '@/composables/useToast'
+import { useGsap } from '@/composables/useGsap'
 import type { Title, HistoryEntry } from '@/types'
 
 interface LocalFile {
-  name: string
-  path: string
-  size: number
-  modifiedAt: number
-  releaseId?: number
-  titleName?: string
+  name: string; path: string; size: number; modifiedAt: number
+  releaseId?: number; titleName?: string
 }
 
 const router = useRouter()
 const libraryStore = useLibraryStore()
 const titleStore = useTitleStore()
 const authStore = useAuthStore()
+const { info, success } = useToast()
+const { staggerCards } = useGsap()
 
-async function syncData() {
-  await libraryStore.syncWithApi()
+function triggerStagger() {
+  nextTick(() => {
+    const grid = document.querySelector('.library__grid')
+    if (grid) staggerCards(grid as HTMLElement, { stagger: 0.05 })
+  })
 }
 
-const activeTab = ref<'favorites' | 'history' | 'playlists' | 'local'>('favorites')
+const activeTab = ref<'favorites' | 'watchlater' | 'history' | 'playlists' | 'local'>('favorites')
 const localFiles = ref<LocalFile[]>([])
 const localFilesLoading = ref(false)
 const showLocalSearchModal = ref(false)
@@ -293,20 +219,46 @@ const localSearchResults = ref<Title[]>([])
 const localSearchQuery = ref('')
 const localSearchLoading = ref(false)
 
+const tabsRef = ref<HTMLElement | null>(null)
+const tabRefs = ref<Record<string, HTMLElement>>({})
+const indicatorStyle = ref<Record<string, string>>({})
+
 const tabs = [
   { id: 'favorites' as const, label: 'Избранное' },
+  { id: 'watchlater' as const, label: 'Список' },
   { id: 'history' as const, label: 'История' },
   { id: 'playlists' as const, label: 'Плейлисты' },
   { id: 'local' as const, label: 'Локальные файлы' },
 ]
 
-function goToDetails(title: Title) {
-  router.push(`/title/${title.id}`)
+const watchLaterList = computed(() => {
+  return titleStore.titles.filter((t) => libraryStore.isInWatchLater(t.id))
+})
+
+function handleWatchLater(title: Title) {
+  libraryStore.toggleWatchLater(title.id)
+  if (libraryStore.isInWatchLater(title.id)) {
+    success('Добавлено в список')
+  } else {
+    info('Удалено из списка')
+  }
 }
 
-function continuePlay(entry: HistoryEntry) {
-  router.push(`/player/${entry.titleId}/${entry.episodeId}`)
+function updateIndicator() {
+  const activeEl = tabRefs.value[activeTab.value]
+  if (!activeEl || !tabsRef.value) return
+  indicatorStyle.value = {
+    transform: `translateX(${activeEl.offsetLeft}px)`,
+    width: `${activeEl.offsetWidth}px`,
+  }
 }
+
+watch(activeTab, () => nextTick(updateIndicator), { flush: 'post' })
+
+async function syncData() { await libraryStore.syncWithApi() }
+
+function goToDetails(title: Title) { router.push(`/title/${title.id}`) }
+function continuePlay(entry: HistoryEntry) { router.push(`/player/${entry.titleId}/${entry.episodeId}`) }
 
 function getPoster(titleId: number) {
   const t = titleStore.titles.find((tt) => tt.id === titleId)
@@ -324,58 +276,28 @@ function getProgressPercent(entry: HistoryEntry) {
   return Math.round((entry.timestamp / entry.duration) * 100)
 }
 
-function formatDuration(seconds: number) {
-  return formatTime(seconds)
-}
+function formatDuration(seconds: number) { return formatTime(seconds) }
 
 async function createPlaylist() {
   const name = prompt('Название плейлиста:')
-  if (name?.trim()) {
-    await libraryStore.createPlaylist(name.trim())
-  }
+  if (name?.trim()) await libraryStore.createPlaylist(name.trim())
 }
 
 async function scanLocalFiles() {
   localFilesLoading.value = true
   try {
     const handle = await localFilesApi.requestAccess()
-    if (!handle) {
-      localFilesLoading.value = false
-      return
-    }
+    if (!handle) { localFilesLoading.value = false; return }
     const scanned = await localFilesApi.scan(handle)
     const mapped = scanned.map((f: LocalVideoFile) => {
       const rid = localFilesApi.getMapping(f.name) || undefined
-      return {
-        name: f.name,
-        path: f.path,
-        size: f.size,
-        modifiedAt: f.modifiedAt,
-        releaseId: rid,
-        titleName: rid ? getTitleName(rid) : undefined,
-      }
+      return { name: f.name, path: f.path, size: f.size, modifiedAt: f.modifiedAt, releaseId: rid, titleName: rid ? getTitleName(rid) : undefined }
     })
     localFiles.value = mapped
-
-    const missingIds = [
-      ...new Set(
-        mapped
-          .filter((f) => f.releaseId && !titleStore.titles.find((t) => t.id === f.releaseId))
-          .map((f) => f.releaseId!)
-      ),
-    ]
-    for (const id of missingIds) {
-      try {
-        await titleStore.fetchTitle(String(id))
-      } catch {}
-    }
-    localFiles.value = mapped.map((f) => ({
-      ...f,
-      titleName: f.releaseId ? getTitleName(f.releaseId) : undefined,
-    }))
-  } finally {
-    localFilesLoading.value = false
-  }
+    const missingIds = [...new Set(mapped.filter((f) => f.releaseId && !titleStore.titles.find((t) => t.id === f.releaseId)).map((f) => f.releaseId!))]
+    for (const id of missingIds) { try { await titleStore.fetchTitle(String(id)) } catch {} }
+    localFiles.value = mapped.map((f) => ({ ...f, titleName: f.releaseId ? getTitleName(f.releaseId) : undefined }))
+  } finally { localFilesLoading.value = false }
 }
 
 function formatBytes(bytes: number): string {
@@ -385,9 +307,7 @@ function formatBytes(bytes: number): string {
   return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-function playLocalFile(file: LocalFile) {
-  router.push(`/player/local/${encodeURIComponent(file.path)}`)
-}
+function playLocalFile(file: LocalFile) { router.push(`/player/local/${encodeURIComponent(file.path)}`) }
 
 function openLocalSearch(file: LocalFile) {
   currentLocalFile.value = file
@@ -402,537 +322,98 @@ async function searchLocalTitle() {
   try {
     const result = await api.getCatalogReleases(1, 20, localSearchQuery.value.trim())
     localSearchResults.value = result.data || []
-  } catch (e) {
-    console.warn('Local search failed:', e)
-    localSearchResults.value = []
-  } finally {
-    localSearchLoading.value = false
-  }
+  } catch (e) { console.warn('Local search failed:', e); localSearchResults.value = [] }
+  finally { localSearchLoading.value = false }
 }
 
 async function assignLocalFile(title: Title) {
   if (!currentLocalFile.value) return
   localFilesApi.setMapping(currentLocalFile.value.name, title.id)
-  await scanLocalFiles()
-  showLocalSearchModal.value = false
-  currentLocalFile.value = null
+  await scanLocalFiles(); showLocalSearchModal.value = false; currentLocalFile.value = null
 }
 
+let tabWatchSkipped = true
+watch(activeTab, () => {
+  if (tabWatchSkipped) { tabWatchSkipped = false; return }
+  triggerStagger()
+})
+
 onMounted(() => {
-  libraryStore.loadFavorites()
-  libraryStore.loadHistory()
-  libraryStore.loadPlaylists()
-  scanLocalFiles()
+  libraryStore.loadFavorites(); libraryStore.loadHistory(); libraryStore.loadPlaylists(); scanLocalFiles()
+  nextTick(() => { updateIndicator() })
 })
 </script>
 
 <style scoped lang="scss">
 @use "@/styles/responsive.scss" as *;
 
-.library {
+.library-wrapper {
   display: flex;
   flex-direction: column;
   gap: 24px;
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-
-    @include mobile {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
+  .library {
+    &__header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      @include mobile { flex-direction: column; align-items: flex-start; gap: 8px; }
     }
-  }
-
-  &__title {
-    color: var(--md-sys-color-on-surface);
-  }
-
-  &__profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    @include mobile {
-      align-self: flex-end;
-    }
-  }
-
-  &__profile-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 2px;
-  }
-
-  &__profile-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 1.5px solid var(--md-sys-color-primary);
-    box-shadow: 0 0 8px rgba(184, 165, 232, 0.25);
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-  }
-
-  &__profile-avatar-fallback {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    font: var(--md-sys-typescale-label-medium);
-    font-size: 14px;
-    border: 1.5px solid var(--md-sys-color-primary);
-    box-shadow: 0 0 8px rgba(184, 165, 232, 0.25);
-  }
-
-  &__sync-bar {
-    margin-bottom: 12px;
-  }
-
-  &__sync-btn {
-    padding: 8px 16px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    border: 1px solid var(--md-sys-color-outline);
-    background: var(--md-sys-color-surface-container);
-    color: var(--md-sys-color-primary);
-    cursor: pointer;
-    transition:
-      background-color 150ms var(--md-sys-motion-easing-standard),
-      border-color 150ms var(--md-sys-motion-easing-standard),
-      box-shadow 150ms var(--md-sys-motion-easing-standard);
-
-    &:hover {
-      background: var(--md-sys-color-primary-container);
-      border-color: var(--md-sys-color-primary);
-      box-shadow: var(--glow-primary);
-    }
-
-    &:active {
-      background: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
-    }
-
-    @include mobile {
-      width: 100%;
-      text-align: center;
-    }
-  }
-
-  &__tabs {
-    display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
-    overflow-x: auto;
-
-    @include mobile {
-      gap: 2px;
-    }
-  }
-
-  &__tab {
-    padding: 12px 20px;
-    background: transparent;
-    border: none;
-    color: var(--md-sys-color-on-surface-variant);
-    cursor: pointer;
-    position: relative;
-    transition: color 200ms var(--md-sys-motion-easing-standard);
-    white-space: nowrap;
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 20px;
-      right: 20px;
-      height: 3px;
-      background: var(--md-sys-color-primary);
-      border-radius: var(--md-sys-shape-corner-small) var(--md-sys-shape-corner-small) 0 0;
-      transform: scaleX(0);
-      transition: transform 200ms var(--md-sys-motion-easing-standard);
-    }
-
-    &:hover {
-      color: var(--md-sys-color-on-surface);
-    }
-
-    &--active {
-      color: var(--md-sys-color-primary);
-
-      &::after {
-        transform: scaleX(1);
-      }
-    }
-
-    @include mobile {
-      padding: 10px 14px;
-      font-size: 13px;
-      flex: 1;
-      text-align: center;
-
-      &::after {
-        left: 14px;
-        right: 14px;
-      }
-    }
-  }
-
-  &__content {
-    min-height: 200px;
-  }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
-
-    @include mobile {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-  }
-
-  &__empty {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-    grid-column: 1 / -1;
-  }
-
-  &__history {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  &__history-item {
-    display: flex;
-    gap: 16px;
-    padding: 12px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    background: var(--md-sys-color-surface-container);
-    cursor: pointer;
-    transition:
-      background-color 200ms var(--md-sys-motion-easing-standard),
-      transform 200ms var(--md-sys-motion-easing-standard);
-
-    &:hover {
-      background: var(--md-sys-color-surface-container-high);
-      transform: translateX(4px);
-    }
-
-    @include mobile {
-      gap: 10px;
-      padding: 10px;
-    }
-  }
-
-  &__history-thumb {
-    position: relative;
-    width: 160px;
-    height: 90px;
-    border-radius: var(--md-sys-shape-corner-small);
-    overflow: hidden;
-    background: var(--md-sys-color-surface-container-high);
-    flex-shrink: 0;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    @include mobile {
-      width: 120px;
-      height: 68px;
-    }
-  }
-
-  &__history-placeholder {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--md-sys-color-on-surface-variant);
-  }
-
-  &__history-progress {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: rgba(0, 0, 0, 0.3);
-  }
-
-  &__history-progress-bar {
-    height: 100%;
-    background: var(--md-sys-color-primary);
-    transition: width 300ms var(--md-sys-motion-easing-standard);
-  }
-
-  &__history-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    justify-content: center;
-
-    @include mobile {
-      span:first-child {
-        font-size: 14px;
-      }
-    }
-  }
-
-  &__playlists-header {
-    margin-bottom: 16px;
-  }
-
-  &__create-btn {
-    padding: 10px 20px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    border: 1px solid var(--md-sys-color-outline);
-    background: var(--md-sys-color-surface-container);
-    color: var(--md-sys-color-primary);
-    cursor: pointer;
-    transition:
-      background-color 150ms var(--md-sys-motion-easing-standard),
-      border-color 150ms var(--md-sys-motion-easing-standard),
-      box-shadow 150ms var(--md-sys-motion-easing-standard);
-
-    &:hover {
-      background: var(--md-sys-color-primary-container);
-      border-color: var(--md-sys-color-primary);
-      box-shadow: var(--glow-primary);
-    }
-
-    &:active {
-      background: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
-    }
-
-    @include mobile {
-      width: 100%;
-      text-align: center;
-    }
-  }
-
-  &__playlists-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
-
-    @include mobile {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-  }
-
-  &__playlist-card {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 20px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    background: var(--md-sys-color-surface-container);
-    cursor: pointer;
-    transition:
-      transform 200ms var(--md-sys-motion-easing-standard),
-      box-shadow 200ms var(--md-sys-motion-easing-standard);
-
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--md-sys-elevation-1);
-    }
-  }
-
-  &__local {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  &__local-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  &__local-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    background: var(--md-sys-color-surface-container);
-    cursor: pointer;
-    transition:
-      background-color 200ms,
-      transform 200ms;
-
-    &:hover {
-      background: var(--md-sys-color-surface-container-high);
-      transform: translateX(4px);
-    }
-
-    @include mobile {
-      gap: 10px;
-      padding: 10px 12px;
-    }
-  }
-
-  &__local-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    flex-shrink: 0;
-
-    @include mobile {
-      width: 32px;
-      height: 32px;
-      svg { width: 18px; height: 18px; }
-    }
-  }
-
-  &__local-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    overflow: hidden;
-
-    span:first-child {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-
-  &__local-skeletons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  &__local-link {
-    padding: 6px 12px;
-    border-radius: var(--md-sys-shape-corner-small);
-    border: 1px solid var(--md-sys-color-outline);
-    background: transparent;
-    color: var(--md-sys-color-primary);
-    cursor: pointer;
-    font-size: 12px;
-    transition:
-      background-color 150ms,
-      border-color 150ms;
-    flex-shrink: 0;
-
-    &:hover {
-      background: var(--md-sys-color-primary-container);
-      border-color: var(--md-sys-color-primary);
-    }
-  }
-
-  &__modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-
-  &__modal {
-    width: 480px;
-    max-width: 90vw;
-    max-height: 80vh;
-    overflow-y: auto;
-    padding: 24px;
-    border-radius: var(--md-sys-shape-corner-medium);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-
-    @include mobile {
-      padding: 16px;
-    }
-  }
-
-  &__modal-input {
-    padding: 10px 14px;
-    border-radius: var(--md-sys-shape-corner-small);
-    border: 1px solid var(--md-sys-color-outline);
-    background: var(--md-sys-color-surface-container);
-    color: var(--md-sys-color-on-surface);
-    outline: none;
-
-    &:focus {
-      border-color: var(--md-sys-color-primary);
-    }
-  }
-
-  &__modal-loading {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  &__modal-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  &__modal-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px;
-    border-radius: var(--md-sys-shape-corner-small);
-    background: var(--md-sys-color-surface-container);
-    cursor: pointer;
-    transition: background-color 150ms;
-
-    &:hover {
-      background: var(--md-sys-color-surface-container-high);
-    }
-  }
-
-  &__modal-thumb {
-    width: 40px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    flex-shrink: 0;
-  }
-
-  &__modal-thumb-placeholder {
-    width: 40px;
-    height: 60px;
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    background: var(--md-sys-color-surface-container-high);
-    flex-shrink: 0;
+    &__title { color: var(--md-sys-color-on-surface); }
+    &__profile { display: flex; align-items: center; gap: 12px; @include mobile { align-self: flex-end; } }
+    &__profile-info { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+    &__profile-avatar { width: 36px; height: 36px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--md-sys-color-primary); box-shadow: 0 0 8px rgba(184,165,232,0.25); img { width: 100%; height: 100%; object-fit: cover; } }
+    &__profile-avatar-fallback { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 14px; border: 1.5px solid var(--md-sys-color-primary); box-shadow: 0 0 8px rgba(184,165,232,0.25); }
+
+    &__tabs { display: flex; gap: 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); overflow-x: auto; position: relative; @include mobile { gap: 0; } }
+    &__indicator { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--md-sys-color-primary); border-radius: 2px 2px 0 0; box-shadow: 0 0 8px rgba(184,165,232,0.4); transition: transform 300ms var(--md-sys-motion-easing-spring), width 300ms var(--md-sys-motion-easing-spring); pointer-events: none; }
+    &__tab { padding: 12px 20px; background: transparent; border: none; color: var(--md-sys-color-on-surface-variant); cursor: pointer; position: relative; transition: color 200ms; white-space: nowrap; &:hover { color: var(--md-sys-color-on-surface); } &--active { color: var(--md-sys-color-primary); } @include mobile { padding: 10px 14px; font-size: 13px; flex: 1; text-align: center; } }
+
+    &__content { min-height: 200px; }
+    &__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; @include mobile { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+    &__empty { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 200px; justify-content: center; grid-column: 1 / -1; svg { opacity: 0.5; } }
+    &__sync-bar { margin-bottom: 12px; }
+    &__sync-btn { padding: 8px 16px; border-radius: var(--md-sys-shape-corner-medium); border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-primary); cursor: pointer; transition: background-color 150ms, border-color 150ms, box-shadow 150ms; &:hover { background: var(--md-sys-color-primary-container); border-color: var(--md-sys-color-primary); box-shadow: var(--glow-primary); } &:active { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); } @include mobile { width: 100%; text-align: center; } }
+
+    &__history { display: flex; flex-direction: column; gap: 12px; }
+    &__history-item { display: flex; gap: 16px; padding: 12px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container); cursor: pointer; transition: background-color 200ms, transform 200ms; &:hover { background: var(--md-sys-color-surface-container-high); transform: translateX(4px); } @include mobile { gap: 10px; padding: 10px; } }
+    &__history-thumb { position: relative; width: 160px; height: 90px; border-radius: var(--md-sys-shape-corner-small); overflow: hidden; background: var(--md-sys-color-surface-container-high); flex-shrink: 0; img { width: 100%; height: 100%; object-fit: cover; } @include mobile { width: 120px; height: 68px; } }
+    &__history-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--md-sys-color-on-surface-variant); }
+    &__history-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(0,0,0,0.3); }
+    &__history-progress-bar { height: 100%; background: var(--md-sys-color-primary); transition: width 300ms; }
+    &__history-info { display: flex; flex-direction: column; gap: 4px; justify-content: center; @include mobile { span:first-child { font-size: 14px; } } }
+
+    &__playlists-header { margin-bottom: 16px; }
+    &__create-btn { padding: 10px 20px; border-radius: var(--md-sys-shape-corner-medium); border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-primary); cursor: pointer; transition: background-color 150ms, border-color 150ms, box-shadow 150ms; &:hover { background: var(--md-sys-color-primary-container); border-color: var(--md-sys-color-primary); box-shadow: var(--glow-primary); } &:active { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); } @include mobile { width: 100%; text-align: center; } }
+    &__playlists-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; @include mobile { grid-template-columns: 1fr; gap: 10px; } }
+    &__playlist-card { display: flex; flex-direction: column; gap: 4px; padding: 20px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container); cursor: pointer; transition: transform 200ms, box-shadow 200ms; &:hover { transform: translateY(-2px); box-shadow: var(--md-sys-elevation-1); } }
+
+    &__local { display: flex; flex-direction: column; gap: 12px; }
+    &__local-list { display: flex; flex-direction: column; gap: 8px; }
+    &__local-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container); cursor: pointer; transition: background-color 200ms, transform 200ms; &:hover { background: var(--md-sys-color-surface-container-high); transform: translateX(4px); } @include mobile { gap: 10px; padding: 10px 12px; } }
+    &__local-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); flex-shrink: 0; @include mobile { width: 32px; height: 32px; svg { width: 18px; height: 18px; } } }
+    &__local-info { display: flex; flex-direction: column; gap: 2px; overflow: hidden; span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+    &__local-skeletons { display: flex; flex-direction: column; gap: 8px; }
+    &__local-link { padding: 6px 12px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-outline); background: transparent; color: var(--md-sys-color-primary); cursor: pointer; font-size: 12px; transition: background-color 150ms, border-color 150ms; flex-shrink: 0; &:hover { background: var(--md-sys-color-primary-container); border-color: var(--md-sys-color-primary); } }
+
+    &__modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    &__modal { width: 480px; max-width: 90vw; max-height: 80vh; overflow-y: auto; padding: 24px; border-radius: var(--md-sys-shape-corner-medium); display: flex; flex-direction: column; gap: 12px; @include mobile { padding: 16px; } }
+    &__modal-input { padding: 10px 14px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface); outline: none; &:focus { border-color: var(--md-sys-color-primary); } }
+    &__modal-loading { display: flex; flex-direction: column; gap: 8px; }
+    &__modal-list { display: flex; flex-direction: column; gap: 8px; }
+    &__modal-item { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--md-sys-shape-corner-small); background: var(--md-sys-color-surface-container); cursor: pointer; transition: background-color 150ms; &:hover { background: var(--md-sys-color-surface-container-high); } }
+    &__modal-thumb { width: 40px; height: 60px; object-fit: cover; border-radius: var(--md-sys-shape-corner-extra-small); flex-shrink: 0; }
+    &__modal-thumb-placeholder { width: 40px; height: 60px; border-radius: var(--md-sys-shape-corner-extra-small); background: var(--md-sys-color-surface-container-high); flex-shrink: 0; }
   }
 }
+
+.modal-backdrop-enter-active, .modal-backdrop-leave-active { transition: opacity 250ms var(--md-sys-motion-easing-standard); }
+.modal-backdrop-enter-from, .modal-backdrop-leave-to { opacity: 0; }
+.modal-content-enter-active { transition: all 300ms var(--md-sys-motion-easing-spring); }
+.modal-content-leave-active { transition: all 200ms var(--md-sys-motion-easing-accelerate); }
+.modal-content-enter-from { opacity: 0; transform: scale(0.92); }
+.modal-content-leave-to { opacity: 0; transform: scale(0.96); }
+
+.tab-fade-enter-active { transition: all 200ms var(--md-sys-motion-easing-decelerate); }
+.tab-fade-leave-active { transition: all 150ms var(--md-sys-motion-easing-accelerate); }
+.tab-fade-enter-from { opacity: 0; transform: translateY(8px); }
+.tab-fade-leave-to { opacity: 0; transform: translateY(-4px); }
 </style>

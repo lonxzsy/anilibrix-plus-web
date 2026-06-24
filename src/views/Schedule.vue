@@ -19,11 +19,12 @@
     </div>
 
     <div class="schedule__content">
-      <div v-if="currentDayItems.length > 0" class="schedule__grid">
+      <div v-if="currentDayItems.length > 0" class="schedule__grid" data-stagger-container>
         <TitleCard
           v-for="item in currentDayItems"
           :key="item.release.id"
           :title="item.release"
+          data-stagger
           @click="goToDetails(item.release)"
         />
       </div>
@@ -49,10 +50,12 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitleStore } from '@/stores/titles'
 import TitleCard from '@/components/TitleCard.vue'
+import { useGsap } from '@/composables/useGsap'
 import type { Title } from '@/types'
 
 const router = useRouter()
 const titleStore = useTitleStore()
+const { staggerCards } = useGsap()
 
 const days = [
   { value: 'monday', label: 'Пн' },
@@ -120,7 +123,18 @@ onMounted(() => {
   if (titleStore.schedule.length === 0) {
     titleStore.fetchSchedule()
   }
-  nextTick(updateIndicator)
+  nextTick(() => {
+    updateIndicator()
+    const grid = document.querySelector('.schedule__grid')
+    if (grid) staggerCards(grid as HTMLElement)
+  })
+})
+
+watch(currentDayItems, () => {
+  nextTick(() => {
+    const grid = document.querySelector('.schedule__grid')
+    if (grid) staggerCards(grid as HTMLElement)
+  })
 })
 </script>
 

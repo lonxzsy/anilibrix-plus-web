@@ -1,5 +1,13 @@
 <template>
-  <div class="title-card" :class="{ 'title-card--hoverable': !loading && !external, 'title-card--external': external }" @click="handleClick">
+  <div
+    class="title-card"
+    :class="[
+      { 'title-card--hoverable': !loading && !external, 'title-card--external': external },
+      `title-card--${variant}`,
+    ]"
+    data-stagger
+    @click="handleClick"
+  >
     <div class="title-card__poster" :class="{ 'title-card__poster--external': external }">
       <div
         v-if="loading || !posterLoaded"
@@ -25,6 +33,26 @@
         </svg>
         <span class="md3-label-small">Нет в Anilibria</span>
       </div>
+
+      <!-- Progress bar -->
+      <div v-if="progress != null && !loading" class="title-card__progress">
+        <div class="title-card__progress-bar" :style="{ width: `${Math.min(100, Math.max(0, progress))}%` }" />
+      </div>
+
+      <!-- Watch later button -->
+      <button
+        v-if="showWatchLater && !loading && !external"
+        class="title-card__watch-later"
+        :class="{ 'title-card__watch-later--active': isWatchLater }"
+        :title="isWatchLater ? 'Убрать из списка' : 'Добавить в список'"
+        @click.stop="toggleWatchLater"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+          <circle cx="12" cy="12" r="10" />
+        </svg>
+      </button>
+
       <div v-if="!loading && !external" class="title-card__overlay">
         <svg class="title-card__play" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7z" />
@@ -37,6 +65,13 @@
       </svg>
       <span>{{ title.score.toFixed(1) }}</span>
     </div>
+
+    <!-- User rating badge -->
+    <div v-if="userRating && !loading" class="title-card__user-rating">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+      <span>{{ userRating }}</span>
+    </div>
+
     <div class="title-card__info">
       <h3 v-if="!loading" class="title-card__name md3-body-medium">{{ title?.name.main }}</h3>
       <div v-else class="title-card__skeleton title-card__skeleton--text md3-skeleton" />
@@ -64,15 +99,27 @@ const props = defineProps<{
   aspectRatio?: string
   subtitle?: string
   external?: boolean
+  progress?: number
+  showWatchLater?: boolean
+  isWatchLater?: boolean
+  userRating?: number
+  variant?: 'default' | 'compact'
 }>()
 
 const emit = defineEmits<{
   click: [title: Title]
+  'watch-later': [title: Title]
 }>()
 
 function handleClick() {
   if (!props.loading && props.title && !props.external) {
     emit('click', props.title)
+  }
+}
+
+function toggleWatchLater() {
+  if (props.title) {
+    emit('watch-later', props.title)
   }
 }
 
@@ -95,12 +142,12 @@ const skeletonStyle = computed(() => ({
   gap: 10px;
   cursor: pointer;
   border-radius: var(--md-sys-shape-corner-small);
-  animation: scaleIn 400ms var(--md-sys-motion-easing-decelerate) backwards;
 
-  @for $i from 1 through 20 {
-    &:nth-child(#{$i}) {
-      animation-delay: $i * 40ms;
-    }
+  &--compact {
+    gap: 6px;
+    .title-card__info { padding: 0; }
+    .title-card__name { font-size: 12px; -webkit-line-clamp: 1; }
+    .title-card__meta { font-size: 11px; }
   }
 
   &--hoverable {
@@ -205,6 +252,60 @@ const skeletonStyle = computed(() => ({
     }
   }
 
+  &__progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 2;
+  }
+
+  &__progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
+    border-radius: 0 2px 0 0;
+    transition: width 400ms var(--md-sys-motion-easing-spring);
+    box-shadow: 0 0 6px rgba(184, 165, 232, 0.3);
+  }
+
+  &__watch-later {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 3;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: background 150ms, color 150ms, transform 200ms var(--md-sys-motion-easing-spring);
+    opacity: 0;
+
+    .title-card--hoverable:hover & {
+      opacity: 1;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      transform: scale(1.1);
+    }
+
+    &--active {
+      opacity: 1;
+      color: var(--md-sys-color-primary);
+      background: rgba(184, 165, 232, 0.2);
+    }
+  }
+
   &__score {
     position: absolute;
     top: 10px;
@@ -219,6 +320,24 @@ const skeletonStyle = computed(() => ({
     font-size: 11px;
     letter-spacing: 0.02em;
     backdrop-filter: blur(8px);
+  }
+
+  &__user-rating {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    color: var(--md-sys-color-primary);
+    padding: 2px 7px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
   }
 
   &__overlay {

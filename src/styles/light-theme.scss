@@ -42,6 +42,32 @@
   --md-sys-color-on-background: #1d1b20;
 
   // Glass for light theme
-  --glass-bg: rgba(255, 255, 255, 0.5);
-  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.08);
+
+  // Glow for light theme — darker, more visible
+  --glow-primary: 0 0 16px rgba(103, 80, 164, 0.15), 0 0 4px rgba(103, 80, 164, 0.08);
+  --glow-surface: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+  // Elevation adjusted for light
+  --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.08), 0 0 1px rgba(0,0,0,0.04);
+  --md-sys-elevation-2: 0 2px 6px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --md-sys-elevation-3: 0 4px 12px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+  --md-sys-elevation-4: 0 8px 20px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+  --md-sys-elevation-5: 0 12px 32px rgba(0,0,0,0.14), 0 8px 16px rgba(0,0,0,0.08);
+
+  // Skeleton in light theme
+  .md3-skeleton {
+    background: var(--md-sys-color-surface-container-high);
+    &::before {
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--md-sys-color-surface-container-highest) 40%,
+        rgba(0,0,0,0.04) 50%,
+        var(--md-sys-color-surface-container-highest) 60%,
+        transparent 100%
+      );
+    }
+  }
 }

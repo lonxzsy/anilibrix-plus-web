@@ -1,85 +1,59 @@
 <template>
-  <div v-if="visible" class="auth-modal" @click.self="close">
-    <div class="auth-modal__content glass">
-      <div class="auth-modal__header">
-        <h3 class="md3-headline-small">{{ isRegister ? 'Регистрация' : 'Вход' }}</h3>
-        <button class="auth-modal__close" @click="close">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
+  <Teleport to="body">
+    <Transition name="auth-backdrop">
+      <div v-if="visible" class="auth-modal" @click.self="close">
+        <Transition name="auth-content" appear>
+          <div v-if="visible" class="auth-modal__content glass">
+            <div class="auth-modal__header">
+              <h3 class="md3-headline-small">{{ isRegister ? 'Регистрация' : 'Вход' }}</h3>
+              <button class="auth-modal__close" @click="close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <form class="auth-modal__form" @submit.prevent="submit">
+              <div class="auth-modal__field">
+                <label class="md3-label-medium">Логин</label>
+                <input v-model="login" type="text" class="auth-modal__input md3-body-large" placeholder="your_login" required />
+              </div>
+
+              <div v-if="isRegister" class="auth-modal__field">
+                <label class="md3-label-medium">Email</label>
+                <input v-model="email" type="email" class="auth-modal__input md3-body-large" placeholder="email@example.com" required />
+              </div>
+
+              <div class="auth-modal__field">
+                <label class="md3-label-medium">Пароль</label>
+                <input v-model="password" type="password" class="auth-modal__input md3-body-large" placeholder="••••••••" required />
+              </div>
+
+              <div v-if="error" class="auth-modal__error md3-body-small">{{ error }}</div>
+
+              <button type="submit" class="auth-modal__submit" :disabled="loading">
+                <span class="md3-label-large">{{ loading ? 'Загрузка...' : isRegister ? 'Зарегистрироваться' : 'Войти' }}</span>
+              </button>
+            </form>
+
+            <div class="auth-modal__footer">
+              <button class="auth-modal__switch md3-body-medium" @click="isRegister = !isRegister">
+                {{ isRegister ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться' }}
+              </button>
+            </div>
+          </div>
+        </Transition>
       </div>
-
-      <form class="auth-modal__form" @submit.prevent="submit">
-        <div class="auth-modal__field">
-          <label class="md3-label-medium">Логин</label>
-          <input
-            v-model="login"
-            type="text"
-            class="auth-modal__input md3-body-large"
-            placeholder="your_login"
-            required
-          />
-        </div>
-
-        <div v-if="isRegister" class="auth-modal__field">
-          <label class="md3-label-medium">Email</label>
-          <input
-            v-model="email"
-            type="email"
-            class="auth-modal__input md3-body-large"
-            placeholder="email@example.com"
-            required
-          />
-        </div>
-
-        <div class="auth-modal__field">
-          <label class="md3-label-medium">Пароль</label>
-          <input
-            v-model="password"
-            type="password"
-            class="auth-modal__input md3-body-large"
-            placeholder="••••••••"
-            required
-          />
-        </div>
-
-        <div v-if="error" class="auth-modal__error md3-body-small">{{ error }}</div>
-
-        <button type="submit" class="auth-modal__submit glow-hover" :disabled="loading">
-          <span class="md3-label-large">{{
-            loading ? 'Загрузка...' : isRegister ? 'Зарегистрироваться' : 'Войти'
-          }}</span>
-        </button>
-      </form>
-
-      <div class="auth-modal__footer">
-        <button class="auth-modal__switch md3-body-medium" @click="isRegister = !isRegister">
-          {{ isRegister ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться' }}
-        </button>
-      </div>
-    </div>
-  </div>
+    </Transition>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
-const props = defineProps<{
-  visible: boolean
-}>()
-
-const emit = defineEmits<{
-  close: []
-}>()
+const props = defineProps<{ visible: boolean }>()
+const emit = defineEmits<{ close: [] }>()
 
 const authStore = useAuthStore()
 const login = ref('')
@@ -89,41 +63,20 @@ const isRegister = ref(false)
 const loading = ref(false)
 const error = ref('')
 
-watch(
-  () => props.visible,
-  (v) => {
-    if (v) {
-      error.value = ''
-      login.value = ''
-      email.value = ''
-      password.value = ''
-    }
-  }
-)
+watch(() => props.visible, (v) => {
+  if (v) { error.value = ''; login.value = ''; email.value = ''; password.value = '' }
+})
 
 async function submit() {
-  loading.value = true
-  error.value = ''
-
-  if (isRegister.value) {
-    // Registration not available via public API docs easily; fallback to login
-    error.value = 'Регистрация временно недоступна'
-    loading.value = false
-    return
-  }
-
+  loading.value = true; error.value = ''
+  if (isRegister.value) { error.value = 'Регистрация временно недоступна'; loading.value = false; return }
   const success = await authStore.login(login.value, password.value)
-  if (success) {
-    close()
-  } else {
-    error.value = authStore.error || 'Ошибка входа'
-  }
+  if (success) close()
+  else error.value = authStore.error || 'Ошибка входа'
   loading.value = false
 }
 
-function close() {
-  emit('close')
-}
+function close() { emit('close') }
 </script>
 
 <style scoped lang="scss">
@@ -136,7 +89,7 @@ function close() {
   justify-content: center;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
-  animation: fadeIn 200ms var(--md-sys-motion-easing-standard);
+  -webkit-backdrop-filter: blur(8px);
 
   &__content {
     width: 380px;
@@ -146,7 +99,6 @@ function close() {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    animation: scaleIn 300ms var(--md-sys-motion-easing-spring) backwards;
   }
 
   &__header {
@@ -162,26 +114,16 @@ function close() {
     cursor: pointer;
     padding: 4px;
     transition: color 150ms;
-
-    &:hover {
-      color: var(--md-sys-color-on-surface);
-    }
+    &:hover { color: var(--md-sys-color-on-surface); }
   }
 
-  &__form {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
+  &__form { display: flex; flex-direction: column; gap: 14px; }
 
   &__field {
     display: flex;
     flex-direction: column;
     gap: 6px;
-
-    label {
-      color: var(--md-sys-color-on-surface-variant);
-    }
+    label { color: var(--md-sys-color-on-surface-variant); }
   }
 
   &__input {
@@ -192,24 +134,12 @@ function close() {
     color: var(--md-sys-color-on-surface);
     font-size: 15px;
     outline: none;
-    transition:
-      border-color 200ms,
-      box-shadow 200ms;
-
-    &:focus {
-      border-color: rgba(184, 165, 232, 0.3);
-      box-shadow: 0 0 0 3px rgba(184, 165, 232, 0.08);
-    }
-
-    &::placeholder {
-      color: var(--md-sys-color-on-surface-variant);
-    }
+    transition: border-color 200ms, box-shadow 200ms;
+    &:focus { border-color: rgba(184, 165, 232, 0.3); box-shadow: 0 0 0 3px rgba(184, 165, 232, 0.08); }
+    &::placeholder { color: var(--md-sys-color-on-surface-variant); }
   }
 
-  &__error {
-    color: var(--md-sys-color-error);
-    padding: 4px 0;
-  }
+  &__error { color: var(--md-sys-color-error); padding: 4px 0; }
 
   &__submit {
     padding: 12px;
@@ -218,43 +148,26 @@ function close() {
     border: none;
     border-radius: var(--md-sys-shape-corner-small);
     cursor: pointer;
-    transition:
-      transform 200ms var(--md-sys-motion-easing-spring),
-      box-shadow 200ms var(--md-sys-motion-easing-standard);
-
-    &:hover {
-      transform: translateY(-1px);
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    transition: transform 200ms var(--md-sys-motion-easing-spring), box-shadow 200ms;
+    &:hover { transform: translateY(-1px); box-shadow: var(--glow-primary); }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 
-  &__footer {
-    text-align: center;
-  }
+  &__footer { text-align: center; }
 
   &__switch {
-    background: transparent;
-    border: none;
-    color: var(--md-sys-color-primary);
-    cursor: pointer;
-    transition: opacity 150ms;
-
-    &:hover {
-      opacity: 0.8;
-    }
+    background: transparent; border: none; color: var(--md-sys-color-primary);
+    cursor: pointer; transition: opacity 150ms;
+    &:hover { opacity: 0.8; }
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.auth-backdrop-enter-active, .auth-backdrop-leave-active {
+  transition: opacity 250ms var(--md-sys-motion-easing-standard);
 }
+.auth-backdrop-enter-from, .auth-backdrop-leave-to { opacity: 0; }
+.auth-content-enter-active { transition: all 300ms var(--md-sys-motion-easing-spring); }
+.auth-content-leave-active { transition: all 200ms var(--md-sys-motion-easing-accelerate); }
+.auth-content-enter-from { opacity: 0; transform: scale(0.92) translateY(12px); }
+.auth-content-leave-to { opacity: 0; transform: scale(0.96); }
 </style>

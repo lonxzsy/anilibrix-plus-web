@@ -3,32 +3,34 @@
     <div class="catalog__header glass-strong">
       <SearchBar v-model="searchQuery" placeholder="Поиск аниме... (Ctrl+K)" @search="onSearch" @select="onSelectSuggestion" />
       <div class="catalog__filters">
-        <select
-          v-model="filters.genre"
-          class="catalog__filter md3-body-medium"
-          @change="applyFilters"
-        >
-          <option value="">Все жанры</option>
-          <option v-for="genre in availableGenres" :key="genre.id" :value="genre.name">
+        <div class="catalog__filter-chips">
+          <button
+            v-for="genre in genreChips"
+            :key="genre.name"
+            class="catalog__chip md3-label-medium"
+            :class="{ 'catalog__chip--active': activeGenre === genre.name }"
+            @click="toggleGenre(genre.name)"
+          >
             {{ genre.name }}
-          </option>
-        </select>
-        <select
-          v-model="filters.year"
-          class="catalog__filter md3-body-medium"
-          @change="applyFilters"
-        >
-          <option value="">Все года</option>
-          <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
-        </select>
-        <select
-          v-model="filters.type"
-          class="catalog__filter md3-body-medium"
-          @change="applyFilters"
-        >
-          <option value="">Все типы</option>
-          <option v-for="t in availableTypes" :key="t" :value="t">{{ t }}</option>
-        </select>
+          </button>
+          <button
+            v-if="activeGenre"
+            class="catalog__chip catalog__chip--clear"
+            @click="activeGenre = ''"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="catalog__filter-selects">
+          <select v-model="filters.year" class="catalog__filter md3-body-medium" @change="applyFilters">
+            <option value="">Все года</option>
+            <option v-for="year in availableYears" :key="year" :value="year">{{ year }}</option>
+          </select>
+          <select v-model="filters.type" class="catalog__filter md3-body-medium" @change="applyFilters">
+            <option value="">Все типы</option>
+            <option v-for="t in availableTypes" :key="t" :value="t">{{ t }}</option>
+          </select>
+        </div>
       </div>
       <div class="catalog__toggle">
         <button
@@ -71,21 +73,26 @@
       </div>
     </div>
 
-    <div v-if="viewMode === 'grid'" class="catalog__grid">
+    <div v-if="viewMode === 'grid'" class="catalog__grid" data-stagger-container>
       <TitleCard
         v-for="title in filteredTitles"
         :key="title.id"
         :title="title"
+        data-stagger
+        :progress="getTitleProgress(title)"
         @click="goToDetails(title)"
       />
-      <TitleCard v-for="n in 12" v-if="loading" :key="`sk-${n}`" loading />
+      <template v-for="n in 12" :key="`sk-${n}`">
+        <TitleCard v-if="loading" loading />
+      </template>
     </div>
 
-    <div v-else class="catalog__list">
+    <div v-else class="catalog__list" data-stagger-container>
       <div
         v-for="title in filteredTitles"
         :key="title.id"
         class="catalog__list-item glass"
+        data-stagger
         @click="goToDetails(title)"
       >
         <img class="catalog__list-poster" :src="posterUrl(title)" loading="lazy" alt="" />
@@ -208,10 +215,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitleStore } from '@/stores/titles'
+import { useLibraryStore } from '@/stores/library'
 import { useDecoderStore } from '@/stores/decoder'
+import { useGsap } from '@/composables/useGsap'
 import SearchBar from '@/components/SearchBar.vue'
 import TitleCard from '@/components/TitleCard.vue'
 import { debounce } from '@/utils/helpers'
@@ -222,7 +231,9 @@ import type { DecoderSearchItem } from '@/api/decoder'
 
 const router = useRouter()
 const titleStore = useTitleStore()
+const libraryStore = useLibraryStore()
 const decoderStore = useDecoderStore()
+const { staggerCards } = useGsap()
 
 const decoderLoading = computed(() => decoderStore.loading)
 
@@ -240,7 +251,8 @@ function goToDecoderItem(source: string, item: DecoderSearchItem) {
 
 const searchQuery = ref('')
 const viewMode = ref<'grid' | 'list'>('grid')
-const filters = ref({ genre: '', year: '', type: '' })
+const filters = ref({ year: '', type: '' })
+const activeGenre = ref('')
 const currentPage = ref(1)
 const loadMoreTrigger = ref<HTMLElement>()
 
@@ -248,8 +260,8 @@ const loading = computed(() => titleStore.loading)
 const externalLoading = computed(() => titleStore.externalLoading)
 const filteredTitles = computed(() => {
   let result = titleStore.filteredTitles
-  if (filters.value.genre) {
-    result = result.filter((t) => t.genres?.some((g) => g.name === filters.value.genre))
+  if (activeGenre.value) {
+    result = result.filter((t) => t.genres?.some((g) => g.name === activeGenre.value))
   }
   if (filters.value.year) {
     result = result.filter((t) => String(t.year) === filters.value.year)
@@ -260,13 +272,17 @@ const filteredTitles = computed(() => {
   return result
 })
 
-const externalResults = computed(() => titleStore.externalTitles)
-
-const availableGenres = computed(() => {
+const genreChips = computed(() => {
   const map = new Map<number, { id: number; name: string }>()
   titleStore.titles.forEach((t) => t.genres?.forEach((g) => map.set(g.id, g)))
-  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name))
+  return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name)).slice(0, 12)
 })
+
+function toggleGenre(name: string) {
+  activeGenre.value = activeGenre.value === name ? '' : name
+}
+
+const externalResults = computed(() => titleStore.externalTitles)
 
 const availableYears = computed(() => {
   const set = new Set<string>()
@@ -296,6 +312,12 @@ function goToDetails(title: Title) {
   router.push(`/title/${title.id}`)
 }
 
+function getTitleProgress(title: Title) {
+  const hist = libraryStore.history.find((h) => h.titleId === title.id)
+  if (!hist?.duration) return undefined
+  return Math.round((hist.timestamp / hist.duration) * 100)
+}
+
 function onSelectSuggestion(title: Title) {
   goToDetails(title)
 }
@@ -309,7 +331,10 @@ function onExternalTitleClick(title: Title) {
   window.open(`https://myanimelist.net/anime/${title.malId}`, '_blank')
 }
 
-const applyFilters = debounce(() => {}, 100)
+function applyFilters() {
+  currentPage.value = 1
+  titleStore.fetchTitles(1, 20)
+}
 
 function onSearch(q: string) {
   currentPage.value = 1
@@ -336,8 +361,24 @@ watch(searchQuery, (val) => {
   titleStore.setSearchQuery(val)
 })
 
+let titleWatchSkipped = true
+
+function triggerStagger() {
+  nextTick(() => {
+    const grid = document.querySelector('.catalog__grid') || document.querySelector('.catalog__list')
+    if (grid) staggerCards(grid as HTMLElement)
+  })
+}
+
+watch(filteredTitles, () => {
+  if (titleWatchSkipped) { titleWatchSkipped = false; return }
+  triggerStagger()
+})
+watch(viewMode, triggerStagger)
+
 onMounted(() => {
   titleStore.fetchTitles(1, 20)
+  libraryStore.loadHistory()
   if (loadMoreTrigger.value) {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -383,8 +424,63 @@ onMounted(() => {
 
   &__filters {
     display: flex;
+    flex-direction: column;
     gap: 10px;
+
+    @include mobile {
+      gap: 8px;
+    }
+  }
+
+  &__filter-chips {
+    display: flex;
+    gap: 6px;
     flex-wrap: wrap;
+  }
+
+  &__chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface-variant);
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 150ms, color 150ms, border-color 150ms, box-shadow 150ms;
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--md-sys-color-surface-container-high);
+      color: var(--md-sys-color-on-surface);
+    }
+
+    &--active {
+      background: var(--md-sys-color-primary-container);
+      color: var(--md-sys-color-on-primary-container);
+      border-color: var(--md-sys-color-primary);
+      box-shadow: 0 0 8px rgba(184, 165, 232, 0.15);
+    }
+
+    &--clear {
+      color: var(--md-sys-color-on-surface-variant);
+      padding: 6px 10px;
+      font-size: 11px;
+      &:hover {
+        background: rgba(224, 138, 133, 0.1);
+        color: var(--md-sys-color-error);
+        border-color: rgba(224, 138, 133, 0.2);
+      }
+    }
+
+    @include mobile {
+      font-size: 11px;
+      padding: 4px 12px;
+    }
+  }
+
+  &__filter-selects {
+    display: flex;
+    gap: 10px;
 
     @include mobile {
       gap: 8px;

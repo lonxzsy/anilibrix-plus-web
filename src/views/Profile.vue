@@ -12,11 +12,11 @@
 
       <div class="profile__stats">
         <div class="profile__stat">
-          <span class="md3-title-medium">{{ libraryStore.favorites.length }}</span>
+          <span ref="favCountRef" class="md3-title-medium">0</span>
           <span class="md3-body-small">В избранном</span>
         </div>
         <div class="profile__stat">
-          <span class="md3-title-medium">{{ libraryStore.history.length }}</span>
+          <span ref="histCountRef" class="md3-title-medium">0</span>
           <span class="md3-body-small">В истории</span>
         </div>
       </div>
@@ -28,6 +28,17 @@
           <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" /></svg>
           <span class="md3-label-large">{{ isDark ? 'Тёмная' : 'Светлая' }}</span>
         </button>
+      </div>
+
+      <div class="profile__links">
+        <router-link to="/trending" class="profile__link md3-label-large">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+          Популярное
+        </router-link>
+        <router-link to="/changelog" class="profile__link md3-label-large">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+          Что нового
+        </router-link>
       </div>
 
       <button class="profile__logout" @click="handleLogout">
@@ -48,14 +59,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLibraryStore } from '@/stores/library'
+import { useGsap } from '@/composables/useGsap'
 
 const router = useRouter()
 const authStore = useAuthStore()
 const libraryStore = useLibraryStore()
+const { animateCount } = useGsap()
+
+const favCountRef = ref<HTMLElement | null>(null)
+const histCountRef = ref<HTMLElement | null>(null)
 
 const isDark = ref(localStorage.getItem('anilibrixplus-theme') !== 'light')
 
@@ -69,6 +85,19 @@ function handleLogout() {
   authStore.logout()
   router.push('/')
 }
+
+onMounted(async () => {
+  await libraryStore.loadFavorites()
+  await libraryStore.loadHistory()
+  nextTick(() => {
+    if (favCountRef.value) {
+      animateCount(favCountRef.value, 0, libraryStore.favorites.length, { duration: 1.5 })
+    }
+    if (histCountRef.value) {
+      animateCount(histCountRef.value, 0, libraryStore.history.length, { duration: 1.8 })
+    }
+  })
+})
 </script>
 
 <style scoped lang="scss">
@@ -96,8 +125,31 @@ function handleLogout() {
   &__stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 
   &__theme-toggle { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 8px 0; }
+  &__theme-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--glass-border); background: transparent; color: var(--md-sys-color-on-surface); cursor: pointer; transition: background 150ms, transform 200ms var(--md-sys-motion-easing-spring); &:hover { background: rgba(255,255,255,0.04); transform: scale(1.02); } }
 
-  &__theme-btn { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--glass-border); background: transparent; color: var(--md-sys-color-on-surface); cursor: pointer; transition: background 150ms; &:hover { background: rgba(255,255,255,0.04); } }
+  &__links {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+  }
+
+  &__link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--md-sys-color-on-surface-variant);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+    &:hover { background: rgba(255,255,255,0.04); color: var(--md-sys-color-on-surface); }
+    svg { color: var(--md-sys-color-primary); flex-shrink: 0; }
+  }
 
   &__logout { width: 100%; padding: 12px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-error); background: transparent; color: var(--md-sys-color-error); cursor: pointer; transition: background 150ms; &:hover { background: rgba(224,138,133,0.08); } }
 

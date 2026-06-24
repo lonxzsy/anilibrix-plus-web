@@ -122,7 +122,32 @@
     </div>
 
     <div v-if="episodes.length > 0" class="player-page__episodes">
-      <h3 class="md3-title-medium">Эпизоды</h3>
+      <div class="player-page__episodes-header">
+        <h3 class="md3-title-medium">Эпизоды</h3>
+        <div class="player-page__queue-section">
+          <button class="player-page__queue-btn md3-label-small" :class="{ 'player-page__queue-btn--active': queue.length > 0 }" @click="showQueue = !showQueue">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+            Очередь{{ queue.length > 0 ? ` (${queue.length})` : '' }}
+          </button>
+          <button v-if="currentEpisode" class="player-page__queue-add-btn md3-label-small" :class="{ 'player-page__queue-add-btn--added': isInQueue(currentEpisode.id) }" @click="toggleQueue(currentEpisode)">
+            {{ isInQueue(currentEpisode.id) ? 'В очереди' : 'В очередь' }}
+          </button>
+        </div>
+      </div>
+
+      <Transition name="queue-expand">
+        <div v-if="showQueue && queue.length > 0" class="player-page__queue-list">
+          <div v-for="(epId, i) in queue" :key="epId" class="player-page__queue-item" :class="{ 'player-page__queue-item--current': epId === currentEpisodeId }">
+            <span class="md3-body-medium">{{ getEpisodeOrdinal(epId) }}</span>
+            <div class="player-page__queue-item-actions">
+              <button class="player-page__queue-item-btn" @click="removeFromQueue(epId)" title="Убрать">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+
       <div class="player-page__episodes-list">
         <button v-for="ep in episodes" :key="ep.id" class="player-page__episode-btn md3-label-large" :class="{ 'player-page__episode-btn--active': ep.id === currentEpisodeId }" @click="selectEpisode(ep)">
           {{ ep.ordinal }}
@@ -212,6 +237,31 @@ const skipTargetTime = computed(() => {
 const showNextEpisode = ref(false)
 const nextEpisodeProgress = ref(0)
 let nextEpisodeTimer: ReturnType<typeof setInterval> | null = null
+
+const queue = ref<string[]>([])
+const showQueue = ref(false)
+
+function isInQueue(episodeId: string) {
+  return queue.value.includes(episodeId)
+}
+
+function toggleQueue(ep: Episode) {
+  const idx = queue.value.indexOf(ep.id)
+  if (idx > -1) {
+    queue.value.splice(idx, 1)
+  } else {
+    queue.value.push(ep.id)
+  }
+}
+
+function removeFromQueue(episodeId: string) {
+  queue.value = queue.value.filter((id) => id !== episodeId)
+}
+
+function getEpisodeOrdinal(episodeId: string) {
+  const ep = episodes.value.find((e) => e.id === episodeId)
+  return ep ? `Серия ${ep.ordinal}${ep.name ? ` — ${ep.name}` : ''}` : episodeId
+}
 
 const qualityOptions = [
   { value: 'hls1080', label: '1080p' },
@@ -343,6 +393,16 @@ function resetNextEpisodeTimer() {
 
 function autoNextEpisode() {
   resetNextEpisodeTimer()
+
+  if (queue.value.length > 0 && currentEpisode.value) {
+    const currentIdx = queue.value.indexOf(currentEpisode.value.id)
+    if (currentIdx >= 0 && currentIdx < queue.value.length - 1) {
+      const nextId = queue.value[currentIdx + 1]
+      const nextEp = episodes.value.find((e) => e.id === nextId)
+      if (nextEp) { selectEpisode(nextEp); return }
+    }
+  }
+
   const idx = episodes.value.findIndex((e) => e.id === currentEpisode.value?.id)
   if (idx < 0) return
   for (let i = idx + 1; i < episodes.value.length; i++) {
@@ -804,6 +864,78 @@ onUnmounted(() => {
 .player-page__episodes {
   display: flex; flex-direction: column; gap: 12px;
   h3 { color: var(--md-sys-color-on-surface); }
+}
+
+.player-page__episodes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.player-page__queue-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-page__queue-btn,
+.player-page__queue-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--md-sys-shape-corner-small);
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms;
+
+  &:hover { background: rgba(255,255,255,0.04); color: var(--md-sys-color-on-surface); }
+  &--active { color: var(--md-sys-color-primary); border-color: rgba(184,165,232,0.2); }
+  &--added { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); border-color: var(--md-sys-color-primary); }
+}
+
+.player-page__queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-surface-container);
+}
+
+.player-page__queue-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  transition: background 150ms;
+
+  &--current {
+    background: rgba(184,165,232,0.08);
+    color: var(--md-sys-color-primary);
+  }
+
+  &-actions { display: flex; gap: 4px; }
+  &-btn {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; border: none;
+    color: var(--md-sys-color-on-surface-variant); cursor: pointer;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    transition: background 150ms, color 150ms;
+    &:hover { background: rgba(224,138,133,0.1); color: var(--md-sys-color-error); }
+  }
+}
+
+.queue-expand-enter-active, .queue-expand-leave-active {
+  transition: all 200ms var(--md-sys-motion-easing-standard);
+}
+.queue-expand-enter-from, .queue-expand-leave-to {
+  opacity: 0; transform: translateY(-8px); max-height: 0;
 }
 
 .player-page__episodes-list {

@@ -1,11 +1,13 @@
 <template>
   <nav class="bottom-nav glass-strong">
+    <div class="bottom-nav__indicator" :style="indicatorStyle" />
     <router-link
       v-for="item in items"
       :key="item.path"
       :to="item.path"
       class="bottom-nav__item"
       :class="{ 'bottom-nav__item--active': isActive(item.path) }"
+      :ref="(el: any) => itemRefs[item.path] = el as HTMLElement"
     >
       <svg class="bottom-nav__item-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path :d="item.iconPath" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
@@ -34,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -41,6 +44,9 @@ const route = useRoute()
 const authStore = useAuthStore()
 
 defineEmits<{ openAuth: [] }>()
+
+const itemRefs = ref<Record<string, HTMLElement>>({})
+const indicatorStyle = ref<Record<string, string>>({})
 
 const items = [
   {
@@ -68,12 +74,30 @@ const items = [
     label: 'Библиотека',
     iconPath: 'M19 21l-7-5-7 5V5a2 2 0 012-2l5 0a2 2 0 012 2v16z M12 7v14',
   },
+  {
+    path: '/trending',
+    label: 'Популярное',
+    iconPath: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+  },
 ]
 
 function isActive(path: string) {
   if (path === '/') return route.path === '/'
   return route.path.startsWith(path)
 }
+
+function updateIndicator() {
+  const activeItem = items.find((item) => isActive(item.path))
+  if (!activeItem || !itemRefs.value[activeItem.path]) return
+  const el = itemRefs.value[activeItem.path]
+  indicatorStyle.value = {
+    transform: `translateX(${el.offsetLeft}px)`,
+    width: `${el.offsetWidth}px`,
+  }
+}
+
+watch(() => route.path, () => nextTick(updateIndicator), { flush: 'post' })
+onMounted(() => nextTick(updateIndicator))
 </script>
 
 <style scoped lang="scss">
@@ -90,6 +114,19 @@ function isActive(path: string) {
   z-index: 50;
   border-top: 1px solid var(--glass-border);
 
+  &__indicator {
+    position: absolute;
+    top: 0;
+    height: 2px;
+    background: var(--md-sys-color-primary);
+    border-radius: 0 0 2px 2px;
+    box-shadow: 0 0 8px rgba(184, 165, 232, 0.4);
+    transition:
+      transform 300ms var(--md-sys-motion-easing-spring),
+      width 300ms var(--md-sys-motion-easing-spring);
+    pointer-events: none;
+  }
+
   &__item {
     display: flex;
     flex-direction: column;
@@ -104,8 +141,10 @@ function isActive(path: string) {
     border-radius: var(--md-sys-shape-corner-small);
     transition: color 200ms, background 200ms;
     min-width: 56px;
+    position: relative;
+    z-index: 1;
 
-    &-icon { width: 22px; height: 22px; }
+    &-icon { width: 22px; height: 22px; transition: filter 300ms; }
     &-label { font-size: 10px; letter-spacing: 0.01em; }
 
     &:hover { color: var(--md-sys-color-on-surface); background: rgba(255,255,255,0.04); }

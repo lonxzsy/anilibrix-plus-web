@@ -5,6 +5,31 @@ import { api } from '@/api/client'
 import { useAuthStore } from '@/stores/auth'
 import type { Title, HistoryEntry, Playlist } from '@/types'
 
+const WATCH_LATER_KEY = 'anilibrixplus-watchlater'
+const USER_RATINGS_KEY = 'anilibrixplus-ratings'
+
+function loadWatchLaterIds(): Set<number> {
+  try {
+    const raw = localStorage.getItem(WATCH_LATER_KEY)
+    return new Set<number>(raw ? JSON.parse(raw) : [])
+  } catch { return new Set<number>() }
+}
+
+function saveWatchLaterIds(ids: Set<number>) {
+  localStorage.setItem(WATCH_LATER_KEY, JSON.stringify(Array.from(ids)))
+}
+
+function loadUserRatings(): Map<number, number> {
+  try {
+    const raw = localStorage.getItem(USER_RATINGS_KEY)
+    return new Map<number, number>(raw ? JSON.parse(raw) : [])
+  } catch { return new Map<number, number>() }
+}
+
+function saveUserRatings(ratings: Map<number, number>) {
+  localStorage.setItem(USER_RATINGS_KEY, JSON.stringify(Array.from(ratings.entries())))
+}
+
 export const useLibraryStore = defineStore('library', () => {
   const favorites = ref<Title[]>([])
   const history = ref<HistoryEntry[]>([])
@@ -12,13 +37,55 @@ export const useLibraryStore = defineStore('library', () => {
   const favoritesIds = ref<Set<number>>(new Set())
   const collections = ref<{ releaseId: number; type: string }[]>([])
   const apiLoading = ref(false)
+  const watchLaterIds = ref<Set<number>>(loadWatchLaterIds())
+  const userRatings = ref<Map<number, number>>(loadUserRatings())
 
   const continueWatching = computed(() => {
     return history.value
       .filter((h) => h.timestamp > 0 && h.timestamp < h.duration * 0.9)
       .sort((a, b) => b.watchedAt - a.watchedAt)
-      .slice(0, 3)
+      .slice(0, 6)
   })
+
+  const watchLaterTitles = computed(() => {
+    return favorites.value.filter((t) => watchLaterIds.value.has(t.id))
+  })
+
+  function isInWatchLater(titleId: number) {
+    return watchLaterIds.value.has(titleId)
+  }
+
+  function toggleWatchLater(titleId: number) {
+    if (watchLaterIds.value.has(titleId)) {
+      watchLaterIds.value.delete(titleId)
+    } else {
+      watchLaterIds.value.add(titleId)
+    }
+    saveWatchLaterIds(watchLaterIds.value)
+  }
+
+  function addToWatchLater(titleId: number) {
+    watchLaterIds.value.add(titleId)
+    saveWatchLaterIds(watchLaterIds.value)
+  }
+
+  function removeFromWatchLater(titleId: number) {
+    watchLaterIds.value.delete(titleId)
+    saveWatchLaterIds(watchLaterIds.value)
+  }
+
+  function getUserRating(titleId: number): number {
+    return userRatings.value.get(titleId) || 0
+  }
+
+  function setUserRating(titleId: number, rating: number) {
+    if (rating <= 0) {
+      userRatings.value.delete(titleId)
+    } else {
+      userRatings.value.set(titleId, Math.min(10, Math.max(1, rating)))
+    }
+    saveUserRatings(userRatings.value)
+  }
 
   async function loadFavorites() {
     const rows = await favoritesRepo.getAll()
@@ -73,11 +140,8 @@ export const useLibraryStore = defineStore('library', () => {
 
     const authStore = useAuthStore()
     if (authStore.token) {
-      try {
-        await api.addToFavorites([title.id])
-      } catch (e) {
-        console.warn('Failed to add favorite to API:', e)
-      }
+      try { await api.addToFavorites([title.id]) }
+      catch (e) { console.warn('Failed to add favorite to API:', e) }
     }
   }
 
@@ -88,11 +152,8 @@ export const useLibraryStore = defineStore('library', () => {
 
     const authStore = useAuthStore()
     if (authStore.token) {
-      try {
-        await api.removeFromFavorites([titleId])
-      } catch (e) {
-        console.warn('Failed to remove favorite from API:', e)
-      }
+      try { await api.removeFromFavorites([titleId]) }
+      catch (e) { console.warn('Failed to remove favorite from API:', e) }
     }
   }
 
@@ -232,6 +293,9 @@ export const useLibraryStore = defineStore('library', () => {
     collections,
     apiLoading,
     continueWatching,
+    watchLaterIds,
+    watchLaterTitles,
+    userRatings,
     loadFavorites,
     addToFavorites,
     removeFromFavorites,
@@ -242,5 +306,11 @@ export const useLibraryStore = defineStore('library', () => {
     createPlaylist,
     addToPlaylist,
     syncWithApi,
+    isInWatchLater,
+    toggleWatchLater,
+    addToWatchLater,
+    removeFromWatchLater,
+    getUserRating,
+    setUserRating,
   }
 })
