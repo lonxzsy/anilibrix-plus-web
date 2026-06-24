@@ -273,12 +273,23 @@ function getEpisodeOrdinal(episodeId: string) {
   return ep ? `Серия ${ep.ordinal}${ep.name ? ` — ${ep.name}` : ''}` : episodeId
 }
 
+const QUALITY_KEY = 'anilibrixplus-quality'
+
+function loadSavedQuality(): string {
+  try { return localStorage.getItem(QUALITY_KEY) || 'auto' } catch { return 'auto' }
+}
+
+function saveQuality(val: string) {
+  try { localStorage.setItem(QUALITY_KEY, val) } catch {}
+}
+
 const qualityOptions = [
+  { value: 'auto', label: 'Auto' },
   { value: 'hls1080', label: '1080p' },
   { value: 'hls720', label: '720p' },
   { value: 'hls480', label: '480p' },
 ]
-const currentQuality = ref('hls720')
+const currentQuality = ref(loadSavedQuality())
 const currentQualityLabel = computed(
   () => qualityOptions.find((q) => q.value === currentQuality.value)?.label || 'Auto'
 )
@@ -287,6 +298,7 @@ function getHlsUrl(ep: Episode, quality: string): string {
   if (quality === 'hls1080' && ep.hls1080) return ep.hls1080
   if (quality === 'hls720' && ep.hls720) return ep.hls720
   if (quality === 'hls480' && ep.hls480) return ep.hls480
+  if (quality === 'auto') return ep.hls1080 || ep.hls720 || ep.hls480 || ''
   return ep.hls720 || ep.hls480 || ep.hls1080 || ''
 }
 
@@ -561,6 +573,7 @@ function setSpeed(rate: number) {
 
 function setQuality(quality: string) {
   currentQuality.value = quality
+  saveQuality(quality)
   const currentTime = videoRef.value?.currentTime || 0
   loadVideo()
   nextTick(() => {
