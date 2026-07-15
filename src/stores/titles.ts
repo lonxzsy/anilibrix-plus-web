@@ -14,6 +14,7 @@ export const useTitleStore = defineStore('titles', () => {
   const searchQuery = ref('')
   const externalTitles = ref<Title[]>([])
   const paginationMeta = ref<any>(null)
+  const hasMore = ref(true)
 
   const searchEngine = createSearchEngine(() => [
     ...titles.value,
@@ -34,9 +35,31 @@ export const useTitleStore = defineStore('titles', () => {
     loading.value = true
     try {
       const result = await api.getCatalogReleases(page, limit, search)
-      if (page === 1) titles.value = result.data
-      else titles.value.push(...result.data)
+      if (page === 1) {
+        titles.value = result.data
+        hasMore.value = true
+      } else {
+        const existingIds = new Set(titles.value.map((t: Title) => t.id))
+        const unique = result.data.filter((t: Title) => !existingIds.has(t.id))
+        titles.value.push(...unique)
+      }
       paginationMeta.value = result.meta
+
+      const meta = result.meta
+      if (meta) {
+        if (
+          typeof meta.current_page === 'number' &&
+          typeof meta.last_page === 'number'
+        ) {
+          hasMore.value = meta.current_page < meta.last_page
+        } else if (meta.total != null && meta.per_page != null) {
+          hasMore.value = page * limit < meta.total
+        } else {
+          hasMore.value = result.data.length >= limit
+        }
+      } else {
+        hasMore.value = result.data.length >= limit
+      }
     } finally {
       loading.value = false
     }
@@ -100,6 +123,7 @@ export const useTitleStore = defineStore('titles', () => {
     searchQuery,
     externalTitles,
     paginationMeta,
+    hasMore,
     filteredTitles,
     recentUpdates,
     searchEngine,

@@ -45,6 +45,22 @@ export function useGsap() {
     return tl
   }
 
+  function staggerNodes(
+    nodes: Element[],
+    options?: { stagger?: number; fromVars?: Record<string, any> }
+  ) {
+    if (!nodes.length) return
+    return gsap.from(nodes, {
+      opacity: 0,
+      y: 30,
+      scale: 0.96,
+      duration: 0.45,
+      stagger: options?.stagger ?? 0.05,
+      ease: 'power2.out',
+      ...options?.fromVars,
+    })
+  }
+
   function parallax(
     el: string | Element,
     options?: { speed?: number; trigger?: string | Element }
@@ -172,6 +188,7 @@ export function useGsap() {
   return {
     animateIn,
     staggerCards,
+    staggerNodes,
     parallax,
     animateCount,
     flipLayout,

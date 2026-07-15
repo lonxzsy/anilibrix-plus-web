@@ -98,13 +98,25 @@ const router = useRouter()
 const titleStore = useTitleStore()
 const libraryStore = useLibraryStore()
 const { info } = useToast()
-const { staggerCards } = useGsap()
+const { staggerNodes } = useGsap()
+
+const animatedNodes = new WeakSet<Element>()
 
 function triggerStagger() {
   nextTick(() => {
-    document.querySelectorAll('.home__grid, .home__scroll, .home__grid--compact').forEach((grid) => {
-      staggerCards(grid as HTMLElement, { stagger: 0.05 })
-    })
+    const newNodes: HTMLElement[] = []
+    document
+      .querySelectorAll('.home__grid, .home__scroll, .home__grid--compact')
+      .forEach((grid) => {
+        grid.querySelectorAll('[data-stagger]').forEach((node) => {
+          const el = node as HTMLElement
+          if (!animatedNodes.has(el) && el.querySelector('.title-card__name')) {
+            animatedNodes.add(el)
+            newNodes.push(el)
+          }
+        })
+      })
+    if (newNodes.length) staggerNodes(newNodes, { stagger: 0.05 })
   })
 }
 
@@ -180,15 +192,10 @@ function surpriseMe() {
   router.push(`/title/${pick.id}`)
 }
 
-let watchSkipped = true
-
-watch([recentUpdates, continueWatching, recommendations, scheduleToday], () => {
-  if (watchSkipped) { watchSkipped = false; return }
-  triggerStagger()
-})
+watch([recentUpdates, continueWatching, recommendations, scheduleToday], triggerStagger)
 
 onMounted(() => {
-  titleStore.fetchTitles(1, 20)
+  titleStore.fetchTitles(1, 20).then(() => triggerStagger())
   titleStore.fetchSchedule()
   libraryStore.loadHistory()
   libraryStore.loadFavorites()

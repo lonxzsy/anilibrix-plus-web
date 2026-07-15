@@ -222,6 +222,7 @@ import { useLibraryStore } from '@/stores/library'
 import { useDecoderStore } from '@/stores/decoder'
 import { useGsap } from '@/composables/useGsap'
 import SearchBar from '@/components/SearchBar.vue'
+
 import TitleCard from '@/components/TitleCard.vue'
 import { debounce } from '@/utils/helpers'
 import { addSearchHistory } from '@/utils/search'
@@ -233,7 +234,7 @@ const router = useRouter()
 const titleStore = useTitleStore()
 const libraryStore = useLibraryStore()
 const decoderStore = useDecoderStore()
-const { staggerCards } = useGsap()
+const { staggerNodes } = useGsap()
 
 const decoderLoading = computed(() => decoderStore.loading)
 
@@ -255,6 +256,7 @@ const filters = ref({ year: '', type: '' })
 const activeGenre = ref('')
 const currentPage = ref(1)
 const loadMoreTrigger = ref<HTMLElement>()
+const loadingMore = ref(false)
 
 const loading = computed(() => titleStore.loading)
 const externalLoading = computed(() => titleStore.externalLoading)
@@ -348,36 +350,60 @@ function onSearch(q: string) {
 }
 
 function loadMore() {
-  if (loading.value) return
+  if (loading.value || loadingMore.value) return
+  if (!titleStore.hasMore) return
+  loadingMore.value = true
   currentPage.value++
-  if (searchQuery.value.length >= 2) {
-    titleStore.fetchTitles(currentPage.value, 20, searchQuery.value)
-  } else {
-    titleStore.fetchTitles(currentPage.value, 20)
-  }
+  const page = currentPage.value
+  const query = searchQuery.value.length >= 2 ? searchQuery.value : undefined
+  titleStore
+    .fetchTitles(page, 20, query)
+    .catch(() => {})
+    .finally(() => {
+      loadingMore.value = false
+      nextTick().then(() => {
+        if (titleStore.hasMore && isSentinelInView()) loadMore()
+      })
+    })
+}
+
+function isSentinelInView() {
+  const el = loadMoreTrigger.value
+  if (!el) return false
+  const rect = el.getBoundingClientRect()
+  const vh = window.innerHeight || document.documentElement.clientHeight
+  return rect.top <= vh + 200
 }
 
 watch(searchQuery, (val) => {
   titleStore.setSearchQuery(val)
 })
 
-let titleWatchSkipped = true
+const animatedNodes = new WeakSet<Element>()
 
 function triggerStagger() {
   nextTick(() => {
-    const grid = document.querySelector('.catalog__grid') || document.querySelector('.catalog__list')
-    if (grid) staggerCards(grid as HTMLElement)
+    const grids = document.querySelectorAll('.catalog__grid, .catalog__list')
+    if (!grids.length) return
+    const newNodes: HTMLElement[] = []
+    grids.forEach((grid) => {
+      grid.querySelectorAll('[data-stagger]').forEach((node) => {
+        const el = node as HTMLElement
+        if (!animatedNodes.has(el) && el.querySelector('.title-card__name')) {
+          animatedNodes.add(el)
+          newNodes.push(el)
+        }
+      })
+    })
+    if (newNodes.length) staggerNodes(newNodes, { stagger: 0.04 })
   })
 }
 
-watch(filteredTitles, () => {
-  if (titleWatchSkipped) { titleWatchSkipped = false; return }
-  triggerStagger()
-})
+watch(filteredTitles, triggerStagger)
 watch(viewMode, triggerStagger)
 
 onMounted(() => {
-  titleStore.fetchTitles(1, 20)
+  titleStore.fetchTitles(1, 20).then(() => triggerStagger())
   libraryStore.loadHistory()
   if (loadMoreTrigger.value) {
     const observer = new IntersectionObserver(
