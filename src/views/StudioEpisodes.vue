@@ -4,19 +4,19 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M19 12H5M12 19l-7-7 7-7" />
       </svg>
-      <span class="md3-label-large">Назад</span>
+      <span>Назад</span>
     </button>
 
     <div v-if="loading" class="studio-episodes__loading">
-      <div v-for="n in 3" :key="n" class="md3-skeleton" style="height: 120px; border-radius: 8px" />
+      <div v-for="n in 3" :key="n" class="md3-skeleton" style="height: 120px; border-radius: 12px" />
     </div>
 
     <template v-else-if="anime">
-      <div class="studio-episodes__header">
+      <div class="studio-episodes__header glass-strong">
         <img class="studio-episodes__poster" :src="anime.thumbnail" alt="" />
         <div class="studio-episodes__info">
-          <h2 class="md3-title-large">{{ anime.title }}</h2>
-          <p class="md3-body-medium" style="color: var(--md-sys-color-on-surface-variant)">
+          <h2 class="studio-episodes__title">{{ anime.title }}</h2>
+          <p class="studio-episodes__meta">
             {{ sourceLabel }} · {{ anime.episodes.length }} эпизодов
           </p>
         </div>
@@ -31,9 +31,9 @@
         >
           <div class="studio-episodes__item-num">{{ ep.ordinal }}</div>
           <div class="studio-episodes__item-info">
-            <span class="md3-label-large">{{ ep.title }}</span>
+            <span class="studio-episodes__item-name">{{ ep.title }}</span>
           </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0;color:var(--md-sys-color-primary)">
+          <svg class="studio-episodes__item-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z" />
           </svg>
         </button>
@@ -81,43 +81,106 @@ onMounted(load)
 @use "@/styles/responsive.scss" as *;
 
 .studio-episodes {
-  display: flex; flex-direction: column; gap: 20px;
+  display: flex; flex-direction: column; gap: 24px;
+  padding-bottom: 48px;
 
   &__back {
     display: inline-flex; align-items: center; gap: 8px;
-    background: transparent; border: none; color: var(--md-sys-color-on-surface-variant);
-    cursor: pointer; padding: 4px 0; width: fit-content;
-    &:hover { color: var(--md-sys-color-on-surface); }
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--md-sys-shape-corner-full);
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 7px 16px; width: fit-content;
+    transition: background 150ms ease, transform 150ms ease;
+    &:hover { background: var(--md-sys-color-surface-container-high); transform: translateX(-2px); }
   }
 
   &__loading { display: flex; flex-direction: column; gap: 12px; }
 
   &__header {
-    display: flex; gap: 20px; align-items: flex-start;
-    img { width: 120px; height: 170px; object-fit: cover; border-radius: var(--md-sys-shape-corner-small); flex-shrink: 0; }
+    display: flex; gap: 20px; align-items: center;
+    padding: 20px; border-radius: var(--md-sys-shape-corner-large);
+    border: 1px solid var(--glass-border);
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 16px;
+      gap: 14px;
+    }
+  }
+
+  &__poster {
+    width: 110px; height: 155px; object-fit: cover;
+    border-radius: var(--md-sys-shape-corner-medium);
+    flex-shrink: 0;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--md-sys-elevation-2);
+
+    @include mobile {
+      width: 84px;
+      height: 120px;
+    }
   }
 
   &__info { display: flex; flex-direction: column; gap: 6px; }
+
+  &__title {
+    font-family: var(--font-family-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.25;
+
+    @include mobile {
+      font-size: 17px;
+    }
+  }
+
+  &__meta {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 12.5px;
+    font-weight: 500;
+  }
 
   &__list { display: flex; flex-direction: column; gap: 8px; }
 
   &__item {
     display: flex; align-items: center; gap: 14px;
-    padding: 12px 16px; border-radius: var(--md-sys-shape-corner-small);
-    border: none; background: var(--md-sys-color-surface-container);
+    padding: 12px 16px; border-radius: var(--md-sys-shape-corner-medium);
+    border: 1px solid var(--glass-border); background: var(--md-sys-color-surface-container);
     color: var(--md-sys-color-on-surface); cursor: pointer; width: 100%; text-align: left;
-    transition: transform 200ms, box-shadow 200ms;
-    &:hover { transform: translateX(4px); box-shadow: var(--glow-primary); }
+    transition: transform 150ms ease, border-color 150ms ease;
+    &:hover {
+      transform: translateX(3px);
+      border-color: var(--glass-border-hover);
+    }
   }
 
   &__item-num {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 32px; height: 32px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    background: var(--md-sys-color-surface-container-high);
-    color: var(--md-sys-color-primary);
-    font: var(--md-sys-typescale-title-medium); flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
   }
 
   &__item-info { flex: 1; min-width: 0; }
+
+  &__item-name {
+    font-family: var(--font-family-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+  }
+
+  &__item-play {
+    flex-shrink: 0;
+    color: var(--md-sys-color-on-surface-variant);
+  }
 }
 </style>

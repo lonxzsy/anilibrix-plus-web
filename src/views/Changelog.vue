@@ -1,13 +1,13 @@
 <template>
   <div class="changelog">
-    <h1 class="changelog__title md3-headline-medium">История обновлений</h1>
+    <h1 class="changelog__title">История обновлений</h1>
 
     <div v-if="store.loading" class="changelog__loading">
       <div v-for="n in 3" :key="n" class="changelog__skeleton md3-skeleton" />
     </div>
 
     <div v-else-if="store.releases.length === 0" class="changelog__empty">
-      <span class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
+      <span class="changelog__empty-text">
         Нет данных об обновлениях.
       </span>
     </div>
@@ -24,12 +24,12 @@
 
         <div class="changelog__card glass-strong" :class="{ 'changelog__card--current': i === 0 }">
           <div class="changelog__card-header">
-            <span class="changelog__version md3-title-medium">v{{ release.version }}</span>
-            <span class="changelog__date md3-body-small">{{ release.date }}</span>
-            <span v-if="i === 0" class="changelog__badge md3-label-small">Текущая</span>
+            <span class="changelog__version">v{{ release.version }}</span>
+            <span class="changelog__date">{{ release.date }}</span>
+            <span v-if="i === 0" class="changelog__badge">Текущая</span>
           </div>
 
-          <p v-if="release.title" class="changelog__card-title md3-body-large">
+          <p v-if="release.title" class="changelog__card-title">
             {{ release.title }}
           </p>
 
@@ -37,7 +37,7 @@
             <li
               v-for="(change, ci) in release.changes"
               :key="ci"
-              class="changelog__change md3-body-medium"
+              class="changelog__change"
             >
               {{ change }}
             </li>
@@ -69,7 +69,11 @@ onMounted(() => {
   padding-bottom: 48px;
 
   &__title {
+    font-family: var(--font-family-display);
+    font-size: 28px;
+    font-weight: 800;
     color: var(--md-sys-color-on-surface);
+    letter-spacing: -0.02em;
   }
 
   &__loading {
@@ -90,6 +94,11 @@ onMounted(() => {
     min-height: 200px;
   }
 
+  &__empty-text {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 14px;
+  }
+
   &__timeline {
     display: flex;
     flex-direction: column;
@@ -102,10 +111,10 @@ onMounted(() => {
     align-items: flex-start;
     gap: 20px;
     position: relative;
-    padding-bottom: 32px;
+    padding-bottom: 28px;
 
     &--current {
-      padding-bottom: 16px;
+      padding-bottom: 20px;
     }
   }
 
@@ -113,81 +122,93 @@ onMounted(() => {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--md-sys-color-surface-container-highest);
-    border: 2px solid var(--md-sys-color-outline-variant);
+    background: var(--md-sys-color-surface-container-high);
+    border: 2px solid var(--glass-border);
     flex-shrink: 0;
     margin-top: 6px;
     z-index: 1;
 
     &--current {
-      width: 16px;
-      height: 16px;
-      margin-top: 4px;
+      width: 14px;
+      height: 14px;
+      margin-top: 5px;
       background: var(--md-sys-color-primary);
-      border-color: var(--md-sys-color-primary);
-      box-shadow: 0 0 12px rgba(184, 165, 232, 0.4);
+      border: 2px solid #ffffff;
     }
   }
 
   &__line {
     position: absolute;
-    left: 5px;
-    top: 20px;
+    left: 7px;
+    top: 24px;
     width: 2px;
     bottom: 0;
-    background: var(--md-sys-color-outline-variant);
+    background: var(--glass-border);
   }
 
   &__card {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     padding: 20px 24px;
     border-radius: var(--md-sys-shape-corner-large);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    background: var(--md-sys-color-surface-container);
 
     &--current {
-      border-color: rgba(184, 165, 232, 0.2);
-      box-shadow: var(--glow-primary);
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow: var(--md-sys-elevation-2);
     }
   }
 
   &__card-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
   &__version {
-    color: var(--md-sys-color-primary);
+    font-family: var(--font-family-body);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
   }
 
   &__date {
     color: var(--md-sys-color-on-surface-variant);
+    font-size: 12.5px;
+    font-weight: 500;
   }
 
   &__badge {
     padding: 2px 8px;
     background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    border-radius: var(--md-sys-shape-corner-small);
+    color: #ffffff;
+    border-radius: var(--md-sys-shape-corner-full);
+    font-family: var(--font-family-body);
+    font-size: 11px;
+    font-weight: 600;
   }
 
   &__card-title {
     color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 15px;
+    font-weight: 600;
   }
 
   &__changes {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    padding-left: 20px;
+    gap: 6px;
+    padding-left: 18px;
   }
 
   &__change {
     color: var(--md-sys-color-on-surface-variant);
-    line-height: 1.5;
+    font-size: 13.5px;
+    line-height: 1.45;
 
     &::marker {
       color: var(--md-sys-color-primary);
@@ -197,8 +218,20 @@ onMounted(() => {
 
 @media (max-width: 599px) {
   .changelog {
+    &__release {
+      gap: 12px;
+    }
+
+    &__dot {
+      margin-top: 6px;
+    }
+
+    &__line {
+      left: 6px;
+    }
+
     &__card {
-      padding: 16px;
+      padding: 14px;
     }
 
     &__card-header {

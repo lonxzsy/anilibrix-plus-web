@@ -5,7 +5,7 @@
         <div
           v-for="toast in toasts"
           :key="toast.id"
-          class="toast"
+          class="toast glass-strong"
           :class="[`toast--${toast.type}`, { 'toast--exiting': toast.exiting }]"
           @click="remove(toast.id)"
         >
@@ -20,7 +20,7 @@
               <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
           </div>
-          <span class="toast__message md3-body-medium">{{ toast.message }}</span>
+          <span class="toast__message">{{ toast.message }}</span>
           <div class="toast__progress" :style="{ animationDuration: `${toast.duration}ms` }" />
         </div>
       </TransitionGroup>
@@ -37,7 +37,7 @@ const { toasts, remove } = useToast()
 <style scoped lang="scss">
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 99999;
@@ -48,7 +48,7 @@ const { toasts, remove } = useToast()
   &__list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
   }
 }
@@ -56,14 +56,11 @@ const { toasts, remove } = useToast()
 .toast {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-radius: var(--md-sys-shape-corner-small);
-  background: var(--md-sys-color-surface-container-high);
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: var(--md-sys-shape-corner-medium);
   border: 1px solid var(--glass-border);
-  backdrop-filter: blur(24px) saturate(1.3);
-  -webkit-backdrop-filter: blur(24px) saturate(1.3);
-  box-shadow: var(--md-sys-elevation-3), 0 0 24px rgba(0,0,0,0.3);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
   pointer-events: auto;
   cursor: pointer;
   position: relative;
@@ -80,14 +77,17 @@ const { toasts, remove } = useToast()
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
   }
 
   &__message {
     flex: 1;
     color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 14px;
+    font-weight: 500;
     line-height: 1.3;
   }
 
@@ -95,49 +95,51 @@ const { toasts, remove } = useToast()
     position: absolute;
     bottom: 0;
     left: 0;
-    height: 2px;
+    height: 2.5px;
     background: var(--md-sys-color-primary);
     animation: toastProgress linear forwards;
-    border-radius: 0 1px 0 0;
   }
 
   &--success {
-    border-color: rgba(139, 195, 74, 0.2);
-    .toast__icon { color: #8bc34a; }
-    .toast__progress { background: #8bc34a; }
+    border-color: rgba(48, 209, 88, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    .toast__icon { color: #30D158; background: rgba(48, 209, 88, 0.12); }
+    .toast__progress { background: #30D158; }
   }
 
   &--error {
-    border-color: rgba(224, 138, 133, 0.2);
-    .toast__icon { color: var(--md-sys-color-error); }
-    .toast__progress { background: var(--md-sys-color-error); }
+    border-color: rgba(255, 69, 58, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    .toast__icon { color: #FF453A; background: rgba(255, 69, 58, 0.12); }
+    .toast__progress { background: #FF453A; }
   }
 
   &--info {
-    border-color: rgba(184, 165, 232, 0.15);
-    .toast__icon { color: var(--md-sys-color-primary); }
-    .toast__progress { background: var(--md-sys-color-primary); }
+    border-color: rgba(10, 132, 255, 0.3);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    .toast__icon { color: #0A84FF; background: rgba(10, 132, 255, 0.12); }
+    .toast__progress { background: #0A84FF; }
   }
 
   &--exiting {
     opacity: 0;
-    transform: translateY(12px) scale(0.95);
+    transform: translateY(10px) scale(0.96);
   }
 }
 
 .toast-enter-active {
-  transition: all 350ms var(--md-sys-motion-easing-spring);
+  transition: all 250ms var(--md-sys-motion-easing-spring);
 }
 .toast-leave-active {
-  transition: all 250ms var(--md-sys-motion-easing-accelerate);
+  transition: all 180ms var(--md-sys-motion-easing-accelerate);
 }
 .toast-enter-from {
   opacity: 0;
-  transform: translateY(16px) scale(0.92);
+  transform: translateY(12px) scale(0.95);
 }
 .toast-leave-to {
   opacity: 0;
-  transform: translateY(-8px) scale(0.95);
+  transform: translateY(-6px) scale(0.97);
 }
 
 @keyframes toastProgress {

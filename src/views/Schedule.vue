@@ -145,15 +145,20 @@ watch(currentDayItems, () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding-bottom: 36px;
 
   &__title {
+    font-family: var(--font-family-display);
+    font-size: 26px;
+    font-weight: 700;
     color: var(--md-sys-color-on-surface);
+    letter-spacing: -0.025em;
   }
 
   &__tabs {
     display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    gap: 4px;
+    border-bottom: 1px solid var(--glass-border);
     position: relative;
     overflow-x: auto;
 
@@ -168,13 +173,12 @@ watch(currentDayItems, () => {
     position: absolute;
     bottom: -1px;
     left: 0;
-    height: 2px;
+    height: 2.5px;
     background: var(--md-sys-color-primary);
-    border-radius: 2px 2px 0 0;
-    box-shadow: 0 0 8px rgba(184, 165, 232, 0.4);
+    border-radius: 4px 4px 0 0;
     transition:
-      transform 300ms var(--md-sys-motion-easing-spring),
-      width 300ms var(--md-sys-motion-easing-spring);
+      transform 250ms var(--md-sys-motion-easing-spring),
+      width 250ms var(--md-sys-motion-easing-spring);
     pointer-events: none;
   }
 
@@ -182,13 +186,16 @@ watch(currentDayItems, () => {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 20px;
+    padding: 10px 18px;
     background: transparent;
     border: none;
     color: var(--md-sys-color-on-surface-variant);
     cursor: pointer;
     position: relative;
-    transition: color 200ms var(--md-sys-motion-easing-standard);
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: color 150ms ease;
     white-space: nowrap;
 
     &:hover {
@@ -196,40 +203,42 @@ watch(currentDayItems, () => {
     }
 
     &--active {
-      color: var(--md-sys-color-primary);
+      color: var(--md-sys-color-on-surface);
+      font-weight: 600;
     }
 
     @include mobile {
-      padding: 10px 14px;
+      padding: 8px 12px;
       gap: 6px;
     }
   }
 
   &__tab-label {
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
 
     @include mobile {
-      font-size: 12px;
+      font-size: 12.5px;
     }
   }
 
   &__tab-count {
-    padding: 2px 8px;
+    padding: 1px 7px;
     background: var(--md-sys-color-surface-container);
-    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--md-sys-shape-corner-full);
     color: var(--md-sys-color-on-surface-variant);
     font-size: 11px;
-    transition:
-      background-color 200ms,
-      color 200ms;
+    font-weight: 600;
+    transition: background-color 150ms ease, color 150ms ease;
 
     .schedule__tab--active & {
-      background: var(--md-sys-color-primary-container);
-      color: var(--md-sys-color-on-primary-container);
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--md-sys-color-on-surface);
+      border-color: rgba(255, 255, 255, 0.15);
     }
 
     @include mobile {
-      padding: 1px 6px;
+      padding: 1px 5px;
       font-size: 10px;
     }
   }
@@ -240,7 +249,7 @@ watch(currentDayItems, () => {
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 16px;
 
     @include mobile {
@@ -251,7 +260,7 @@ watch(currentDayItems, () => {
 
   &__skeletons {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 16px;
 
     @include mobile {

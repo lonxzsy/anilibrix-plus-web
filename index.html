@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#0f0e12" />
-    <meta name="description" content="Anilibrix Plus — PWA для просмотра аниме с Material Design 3" />
+    <meta name="theme-color" content="#09090c" />
+    <meta name="description" content="Anilibrix Plus — Премиальный сервис для просмотра аниме онлайн" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Anilibrix+" />
@@ -14,13 +14,14 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <title>Anilibrix Plus</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>Anilibrix Plus — Аниме Онлайн</title>
     <style>
       html, body, #app {
         height: 100%;
         width: 100%;
         margin: 0;
-        background: #0f0e12;
+        background: #09090c;
         overflow: hidden;
       }
       #splash {
@@ -30,72 +31,72 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 24px;
-        background: #0f0e12;
+        gap: 16px;
+        background: #09090c;
         z-index: 9999;
-        transition: opacity 800ms ease, visibility 800ms ease;
+        transition: opacity 450ms cubic-bezier(0.25, 1, 0.5, 1), visibility 450ms cubic-bezier(0.25, 1, 0.5, 1);
       }
       #splash.splash--done {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
       }
+      .splash__logo-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
       .splash__logo {
-        width: 64px;
-        height: 64px;
-        color: #b8a5e8;
-        animation: splashPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        width: 52px;
+        height: 52px;
+        color: #5e5ce6;
+        animation: splashFadeIn 0.8s ease-out;
       }
       .splash__track {
         width: 120px;
         height: 2px;
-        background: rgba(255,255,255,0.06);
-        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
         overflow: hidden;
+        margin-top: 8px;
       }
       .splash__bar {
         width: 40%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, #b8a5e8, transparent);
-        border-radius: 2px;
-        animation: splashSlide 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        background: #5e5ce6;
+        border-radius: 999px;
+        animation: splashSlide 1.5s cubic-bezier(0.25, 1, 0.5, 1) infinite;
       }
       .splash__text {
-        color: #a8a3ad;
-        font-family: 'Inter', system-ui, sans-serif;
-        font-size: 13px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        animation: splashText 5s ease forwards;
+        color: #f5f5f7;
+        font-family: -apple-system, BlinkMacSystemFont, 'Plus Jakarta Sans', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: -0.02em;
+        animation: splashFadeIn 1s ease-out;
       }
-      @keyframes splashPulse {
-        0%, 100% { transform: scale(1); opacity: 0.85; }
-        50% { transform: scale(1.12); opacity: 1; }
+      @keyframes splashFadeIn {
+        from { opacity: 0; transform: scale(0.96); }
+        to { opacity: 1; transform: scale(1); }
       }
       @keyframes splashSlide {
-        0% { transform: translateX(-160%); }
-        100% { transform: translateX(260%); }
-      }
-      @keyframes splashText {
-        0% { opacity: 0; transform: translateY(6px); }
-        10% { opacity: 0; transform: translateY(6px); }
-        20% { opacity: 1; transform: translateY(0); }
-        85% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-4px); }
+        0% { transform: translateX(-150%); }
+        100% { transform: translateX(250%); }
       }
     </style>
   </head>
   <body>
     <div id="splash">
-      <svg class="splash__logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.6"/>
-        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
-        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <div class="splash__logo-wrap">
+        <svg class="splash__logo" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" fill-opacity="0.12" stroke="currentColor" stroke-width="1.8" />
+          <path d="M10 8L16 12L10 16V8Z" fill="currentColor" />
+        </svg>
+      </div>
+      <span class="splash__text">Anilibrix+</span>
       <div class="splash__track">
         <div class="splash__bar"></div>
       </div>
-      <span class="splash__text">Anilibrix Plus</span>
     </div>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>

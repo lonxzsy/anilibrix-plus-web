@@ -12,14 +12,14 @@
           cy="11"
           r="8"
           stroke="currentColor"
-          stroke-width="1.5"
+          stroke-width="1.8"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
         <path
-          d="M21 21l-4.3-4.3"
+          d="M21 21l-4.35-4.35"
           stroke="currentColor"
-          stroke-width="1.5"
+          stroke-width="1.8"
           stroke-linecap="round"
           stroke-linejoin="round"
         />
@@ -28,20 +28,24 @@
         ref="inputRef"
         v-model="query"
         type="text"
-        class="search-bar__input md3-body-large"
+        class="search-bar__input"
         :placeholder="placeholder"
         @input="onInput"
+        @focus="onFocus"
         @keydown.enter="onEnter"
         @keydown.down.prevent="onArrowDown"
         @keydown.up.prevent="onArrowUp"
         @keydown.escape="closeSuggestions"
       />
+      <div v-if="!query" class="search-bar__kbd-badge">
+        <span>⌘K</span>
+      </div>
       <button v-if="query" class="search-bar__clear" @click="clear" title="Очистить">
         <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
           <path
             d="M18 6L6 18M6 6l12 12"
             stroke="currentColor"
-            stroke-width="1.5"
+            stroke-width="1.8"
             stroke-linecap="round"
             stroke-linejoin="round"
           />
@@ -61,17 +65,18 @@
             @mouseenter="activeIndex = index"
           >
             <img
-              v-if="item.poster?.thumbnail"
+              v-if="item.poster?.thumbnail || item.poster?.preview"
               class="search-dropdown__poster"
-              :src="item.poster.thumbnail"
+              :src="item.poster.thumbnail || item.poster.preview"
               alt=""
               loading="lazy"
             />
             <div class="search-dropdown__info">
-              <span class="search-dropdown__title md3-body-medium">{{ item.name.main }}</span>
-              <span v-if="item.name.english" class="search-dropdown__sub md3-body-small">{{
-                item.name.english
-              }}</span>
+              <span class="search-dropdown__title">{{ item.name.main }}</span>
+              <span v-if="item.name.english" class="search-dropdown__sub">{{ item.name.english }}</span>
+            </div>
+            <div v-if="item.year" class="search-dropdown__year-pill">
+              {{ item.year }}
             </div>
           </div>
           <div
@@ -81,17 +86,17 @@
             @mousedown.prevent="submitSearch"
             @mouseenter="activeIndex = suggestions.length"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <span>Поиск «{{ query }}»</span>
+            <span>Искать все результаты для «{{ query }}»</span>
           </div>
         </div>
 
         <div v-if="externalSuggestions.length > 0" class="search-dropdown__group">
           <div class="search-dropdown__header">
-            <span class="md3-label-small">Нет в Anilibria</span>
+            <span>Нет в Anilibria</span>
           </div>
           <div
             v-for="(item, index) in externalSuggestions"
@@ -109,17 +114,17 @@
               loading="lazy"
             />
             <div class="search-dropdown__info">
-              <span class="search-dropdown__title" style="color: var(--md-sys-color-on-surface-variant)">{{ item.name.main }}</span>
-              <span v-if="item.score" class="search-dropdown__sub md3-body-small">⭐ {{ item.score.toFixed(1) }}</span>
+              <span class="search-dropdown__title">{{ item.name.main }}</span>
+              <span v-if="item.score" class="search-dropdown__sub">⭐ {{ item.score.toFixed(1) }}</span>
             </div>
           </div>
         </div>
 
         <div v-else-if="historyItems.length > 0 && !query" class="search-dropdown__group">
           <div class="search-dropdown__header">
-            <span class="md3-label-small">Недавние запросы</span>
-            <button class="search-dropdown__clear-btn md3-label-small" @click="clearSearchHistory">
-              Очистить
+            <span>Недавние запросы</span>
+            <button class="search-dropdown__clear-btn" @click="clearSearchHistory">
+              Очистить историю
             </button>
           </div>
           <div
@@ -140,7 +145,7 @@
 
         <div
           v-else-if="query.length >= 2 && suggestions.length === 0"
-          class="search-dropdown__empty md3-body-medium"
+          class="search-dropdown__empty"
         >
           Нет результатов для «{{ query }}»
         </div>
@@ -218,6 +223,14 @@ function onInput() {
   debouncedEmit(query.value)
 }
 
+function onFocus() {
+  if (!query.value && historyItems.value.length > 0) {
+    showDropdown.value = true
+  } else if (query.value.length >= 1 && suggestions.value.length > 0) {
+    showDropdown.value = true
+  }
+}
+
 const debouncedEmit = debounce((val: string) => {
   emit('update:modelValue', val)
   emit('search', val)
@@ -289,12 +302,6 @@ function clear() {
   inputRef.value?.focus()
 }
 
-function onHistoryClick() {
-  if (!query.value) {
-    showDropdown.value = !showDropdown.value
-  }
-}
-
 function handleClickOutside(e: MouseEvent) {
   if (wrapperRef.value && !wrapperRef.value.contains(e.target as Node)) {
     closeSuggestions()
@@ -324,6 +331,8 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .search-bar-wrapper {
   position: relative;
   width: 100%;
@@ -332,17 +341,25 @@ onUnmounted(() => {
 .search-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  border-radius: var(--md-sys-shape-corner-small);
-  padding: 12px 16px;
-  border: 1px solid transparent;
+  gap: 10px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 10px 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--md-sys-color-surface-container);
   transition:
-    border-color 200ms var(--md-sys-motion-easing-standard),
-    box-shadow 200ms var(--md-sys-motion-easing-standard);
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
 
   &:focus-within {
-    border-color: rgba(184, 165, 232, 0.2);
-    box-shadow: var(--glow-primary);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    background: var(--md-sys-color-surface-container-high);
+  }
+
+  .md3-light &:focus-within {
+    border-color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   }
 
   &__icon {
@@ -350,6 +367,11 @@ onUnmounted(() => {
     height: 18px;
     color: var(--md-sys-color-on-surface-variant);
     flex-shrink: 0;
+    transition: color 150ms ease;
+
+    .search-bar:focus-within & {
+      color: var(--md-sys-color-on-surface);
+    }
   }
 
   &__input {
@@ -358,11 +380,34 @@ onUnmounted(() => {
     border: none;
     color: var(--md-sys-color-on-surface);
     outline: none;
-    font-size: 15px;
+    font-family: var(--font-family-body);
+    font-size: 14px;
+    font-weight: 500;
     letter-spacing: -0.01em;
 
     &::placeholder {
       color: var(--md-sys-color-on-surface-variant);
+      opacity: 0.7;
+    }
+  }
+
+  &__kbd-badge {
+    padding: 2px 6px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+
+    .md3-light & {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    @include mobile {
+      display: none;
     }
   }
 
@@ -372,16 +417,14 @@ onUnmounted(() => {
     color: var(--md-sys-color-on-surface-variant);
     cursor: pointer;
     padding: 4px;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition:
-      background 150ms,
-      color 150ms;
+    transition: background 150ms ease, color 150ms ease;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.06);
+      background-color: rgba(255, 255, 255, 0.1);
       color: var(--md-sys-color-on-surface);
     }
   }
@@ -392,10 +435,12 @@ onUnmounted(() => {
   top: calc(100% + 6px);
   left: 0;
   right: 0;
-  border-radius: var(--md-sys-shape-corner-small);
+  border-radius: var(--md-sys-shape-corner-medium);
   overflow: hidden;
   z-index: 100;
   padding: 6px 0;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--md-sys-elevation-4);
 
   &__group {
     display: flex;
@@ -406,8 +451,12 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 16px 4px;
+    padding: 6px 16px 4px;
     color: var(--md-sys-color-on-surface-variant);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   &__clear-btn {
@@ -415,12 +464,14 @@ onUnmounted(() => {
     border: none;
     color: var(--md-sys-color-primary);
     cursor: pointer;
-    padding: 4px 8px;
+    padding: 2px 4px;
     border-radius: var(--md-sys-shape-corner-extra-small);
-    transition: background 150ms;
+    font-size: 11px;
+    font-weight: 500;
+    transition: opacity 150ms ease;
 
     &:hover {
-      background: rgba(184, 165, 232, 0.1);
+      opacity: 0.7;
     }
   }
 
@@ -428,45 +479,58 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 16px;
+    padding: 8px 16px;
     cursor: pointer;
-    transition: background 100ms;
+    transition: background 100ms ease;
     user-select: none;
 
     &:hover,
     &--active {
-      background: rgba(184, 165, 232, 0.12);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .md3-light &:hover,
+    .md3-light &--active {
+      background: rgba(0, 0, 0, 0.05);
     }
   }
 
   &__show-all {
-    gap: 8px;
+    gap: 10px;
     color: var(--md-sys-color-primary);
+    font-weight: 500;
+    font-size: 13px;
     border-top: 1px solid var(--glass-border);
-    margin-top: 2px;
+    margin-top: 4px;
     padding-top: 10px;
   }
 
   &__history-item {
     gap: 10px;
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--md-sys-color-on-surface);
     font-size: 13px;
+    font-weight: 500;
+
+    svg {
+      color: var(--md-sys-color-on-surface-variant);
+    }
   }
 
   &__item--external {
-    opacity: 0.6;
+    opacity: 0.7;
   }
 
   &__poster {
     width: 36px;
-    height: 52px;
+    height: 50px;
     object-fit: cover;
     border-radius: var(--md-sys-shape-corner-extra-small);
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 
     &--external {
-      filter: grayscale(0.6);
-      opacity: 0.6;
+      filter: grayscale(0.5);
+      opacity: 0.7;
     }
   }
 
@@ -480,6 +544,9 @@ onUnmounted(() => {
 
   &__title {
     color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -487,28 +554,39 @@ onUnmounted(() => {
 
   &__sub {
     color: var(--md-sys-color-on-surface-variant);
+    font-size: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
+  &__year-pill {
+    padding: 2px 7px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
   &__empty {
-    padding: 16px;
+    padding: 20px;
     text-align: center;
     color: var(--md-sys-color-on-surface-variant);
+    font-size: 13.5px;
   }
 }
 
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition:
-    opacity 150ms,
+    opacity 150ms ease,
     transform 150ms var(--md-sys-motion-easing-standard);
 }
 
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
+  transform: translateY(-4px);
 }
 </style>

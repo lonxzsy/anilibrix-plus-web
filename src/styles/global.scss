@@ -1,7 +1,7 @@
 @use "sass:string";
 @use "light-theme" as *;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 * {
   box-sizing: border-box;
@@ -13,7 +13,7 @@ html, body, #app {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-family-body);
   background-color: var(--md-sys-color-background);
   color: var(--md-sys-color-on-background);
   -webkit-font-smoothing: antialiased;
@@ -21,27 +21,37 @@ html, body, #app {
   letter-spacing: -0.01em;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+  letter-spacing: -0.02em;
 }
 
-::-webkit-scrollbar-track { background: transparent; }
+// Clean Apple-style scrollbar
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
 
 ::-webkit-scrollbar-thumb {
-  background: var(--md-sys-color-surface-container-highest);
-  border-radius: 3px;
-  border: 1px solid transparent;
-  background-clip: content-box;
-  transition: background 200ms var(--md-sys-motion-easing-standard);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  transition: background 200ms ease;
+}
+
+.md3-light ::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--md-sys-color-primary);
+  background: rgba(255, 255, 255, 0.3);
 }
 
-::-webkit-scrollbar-thumb:active {
-  background: var(--md-sys-color-primary-container);
+.md3-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 }
 
 ::-webkit-scrollbar-corner {
@@ -51,21 +61,25 @@ html, body, #app {
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--md-sys-color-surface-container-highest) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.md3-light * {
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 ::selection {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  background: rgba(94, 92, 230, 0.35);
+  color: #ffffff;
 }
 
 :focus-visible {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: var(--md-sys-shape-corner-small);
 }
 
-// Utility classes
+// Typescale Utilities
 @each $name, $value in (
   'display-large': var(--md-sys-typescale-display-large),
   'display-medium': var(--md-sys-typescale-display-medium),
@@ -85,43 +99,30 @@ html, body, #app {
 ) {
   .md3-#{$name} {
     font: $value;
-    @if string.index($name, 'display') or string.index($name, 'label') {
-      letter-spacing: -0.02em;
+    @if string.index($name, 'display') or string.index($name, 'headline') {
+      letter-spacing: -0.025em;
+    } @else if string.index($name, 'label') {
+      letter-spacing: -0.005em;
     } @else {
-      letter-spacing: normal;
+      letter-spacing: -0.01em;
     }
   }
 }
 
-// Animations
+// Clean Animations
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
-@keyframes shimmerPulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.96); }
+  from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes glowPulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(184, 165, 232, 0.08); }
-  50% { box-shadow: 0 0 32px rgba(184, 165, 232, 0.16); }
 }
 
 @keyframes overlayFade {
@@ -129,29 +130,17 @@ html, body, #app {
   to { opacity: 1; }
 }
 
-@keyframes bounceIn {
-  0% { transform: scale(0); }
-  50% { transform: scale(1.15); }
-  70% { transform: scale(0.95); }
-  100% { transform: scale(1); }
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 1; }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-@keyframes rippleExpand {
-  from { width: 0; height: 0; opacity: 0.5; }
-  to { width: 300%; height: 300%; opacity: 0; }
-}
-
-// Enhanced skeleton with pulse
+// Clean Apple Skeleton Loader
 .md3-skeleton {
   position: relative;
   overflow: hidden;
   background: var(--md-sys-color-surface-container);
-  border-radius: var(--md-sys-shape-corner-small);
+  border-radius: var(--md-sys-shape-corner-medium);
 
   &::before {
     content: '';
@@ -160,46 +149,46 @@ html, body, #app {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      var(--md-sys-color-surface-container-high) 40%,
-      var(--md-sys-color-surface-container-highest) 50%,
-      var(--md-sys-color-surface-container-high) 60%,
+      rgba(255, 255, 255, 0.04) 40%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.04) 60%,
       transparent 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.8s ease-in-out infinite;
     border-radius: inherit;
   }
-
-  &--pulse {
-    &::before {
-      background: var(--md-sys-color-surface-container-high);
-      animation: shimmerPulse 1.2s ease-in-out infinite;
-    }
-  }
 }
 
+// Apple Glass Morphism
 .glass {
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
+  box-shadow: var(--md-sys-elevation-1);
 }
 
 .glass-strong {
-  background: rgba(15, 14, 18, 0.75);
-  backdrop-filter: blur(32px) saturate(1.3);
-  -webkit-backdrop-filter: blur(32px) saturate(1.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(14, 15, 21, 0.85);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--md-sys-elevation-2);
 }
 
 .md3-light .glass-strong {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .glow-hover {
-  transition: box-shadow 300ms var(--md-sys-motion-easing-standard);
-  &:hover { box-shadow: var(--glow-primary); }
+  transition: transform 250ms var(--md-sys-motion-easing-spring), box-shadow 250ms ease, border-color 200ms ease;
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--md-sys-elevation-2);
+  }
 }
 
 .md3-ripple {
@@ -210,21 +199,21 @@ html, body, #app {
     position: absolute;
     top: 50%; left: 50%;
     width: 0; height: 0;
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.08);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    transition: width 0.6s var(--md-sys-motion-easing-standard), height 0.6s var(--md-sys-motion-easing-standard), opacity 0.6s var(--md-sys-motion-easing-standard);
+    transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
     pointer-events: none;
     opacity: 0;
   }
   &:active::after {
-    width: 200%; height: 200%;
+    width: 250%; height: 250%;
     opacity: 1;
-    transition-duration: 0.3s;
+    transition-duration: 0.2s;
   }
 }
 
-// Mobile-safe tap targets
+// Touch targets
 @supports (-webkit-touch-callout: none) {
   button, a, .clickable {
     min-height: 44px;

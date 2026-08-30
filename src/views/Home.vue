@@ -8,23 +8,34 @@
     />
 
     <div class="home__quick-actions">
-      <button class="home__quick-btn" @click="surpriseMe">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+      <button class="home__quick-btn home__quick-btn--random glow-hover" @click="surpriseMe">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+          <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+          <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor" />
+          <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor" />
+          <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
         </svg>
-        <span class="md3-label-large">Случайное аниме</span>
+        <span>Случайное аниме</span>
       </button>
-      <router-link to="/trending" class="home__quick-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+      <router-link to="/trending" class="home__quick-btn home__quick-btn--trending glow-hover-cyan">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
-        <span class="md3-label-large">Популярное</span>
+        <span>Популярное</span>
       </router-link>
     </div>
 
+    <!-- Continue Watching -->
     <section v-if="continueWatching.length > 0" class="home__section">
-      <h2 class="home__section-title md3-title-large">Продолжить просмотр</h2>
+      <div class="home__section-header">
+        <h2 class="home__section-title">
+          <span class="home__section-accent" />
+          Продолжить просмотр
+        </h2>
+        <router-link to="/library" class="home__section-link">Вся история →</router-link>
+      </div>
       <div class="home__grid home__grid--compact">
         <TitleCard
           v-for="entry in continueWatching"
@@ -40,7 +51,10 @@
     <!-- Recommendations -->
     <section v-if="recommendations.length > 0" class="home__section">
       <div class="home__section-header">
-        <h2 class="home__section-title md3-title-large">Рекомендуем</h2>
+        <h2 class="home__section-title">
+          <span class="home__section-accent" />
+          Рекомендуем вам
+        </h2>
       </div>
       <div class="home__grid">
         <TitleCard
@@ -52,10 +66,14 @@
       </div>
     </section>
 
+    <!-- Recent Updates -->
     <section class="home__section">
       <div class="home__section-header">
-        <h2 class="home__section-title md3-title-large">Новые эпизоды</h2>
-        <router-link to="/catalog" class="home__section-link md3-label-large"> Все → </router-link>
+        <h2 class="home__section-title">
+          <span class="home__section-accent" />
+          Новые эпизоды
+        </h2>
+        <router-link to="/catalog" class="home__section-link">Смотреть все →</router-link>
       </div>
       <div class="home__grid">
         <TitleCard
@@ -69,8 +87,15 @@
       </div>
     </section>
 
+    <!-- Today's Schedule -->
     <section v-if="scheduleToday.length > 0" class="home__section">
-      <h2 class="home__section-title md3-title-large">Сегодня в расписании</h2>
+      <div class="home__section-header">
+        <h2 class="home__section-title">
+          <span class="home__section-accent" />
+          Сегодня в расписании
+        </h2>
+        <router-link to="/schedule" class="home__section-link">Расписание недели →</router-link>
+      </div>
       <div class="home__scroll">
         <TitleCard
           v-for="item in scheduleToday"
@@ -208,63 +233,79 @@ onMounted(() => {
 .home {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 36px;
   padding-bottom: 48px;
 
-  @include mobile { gap: 24px; padding-bottom: 24px; }
+  @include mobile {
+    gap: 22px;
+    padding-bottom: 24px;
+  }
 
   &__quick-actions {
     display: flex;
     gap: 10px;
 
-    @include mobile { gap: 8px; }
+    @include mobile {
+      gap: 8px;
+    }
   }
 
   &__quick-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 20px;
-    border-radius: var(--md-sys-shape-corner-small);
+    padding: 10px 18px;
+    border-radius: var(--md-sys-shape-corner-medium);
     border: 1px solid var(--glass-border);
     background: var(--md-sys-color-surface-container);
     color: var(--md-sys-color-on-surface);
     cursor: pointer;
     text-decoration: none;
-    font: var(--md-sys-typescale-label-large);
-    transition: background 150ms, transform 200ms var(--md-sys-motion-easing-spring), box-shadow 200ms;
+    font-family: var(--font-family-body);
+    font-size: 13px;
+    font-weight: 600;
+    transition:
+      background 150ms ease,
+      border-color 150ms ease,
+      transform 180ms var(--md-sys-motion-easing-spring);
+
+    svg {
+      flex-shrink: 0;
+      color: var(--md-sys-color-on-surface-variant);
+      transition: color 150ms ease;
+    }
 
     &:hover {
       background: var(--md-sys-color-surface-container-high);
+      border-color: var(--glass-border-hover);
       transform: translateY(-2px);
-      box-shadow: var(--glow-primary);
+
+      svg {
+        color: var(--md-sys-color-primary);
+      }
     }
 
-    &:active { transform: scale(0.97); }
-
-    svg { color: var(--md-sys-color-primary); flex-shrink: 0; }
+    &:active {
+      transform: scale(0.97);
+    }
 
     @include mobile {
       flex: 1;
       justify-content: center;
-      padding: 10px 14px;
+      padding: 9px 12px;
       font-size: 12px;
+      gap: 6px;
     }
   }
 
   &__section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
 
-    &:nth-child(1) { animation: fadeUp 500ms backwards; }
-    &:nth-child(2) { animation: fadeUp 500ms 80ms backwards; }
-    &:nth-child(3) { animation: fadeUp 500ms 160ms backwards; }
-    &:nth-child(4) { animation: fadeUp 500ms 240ms backwards; }
-    &:nth-child(5) { animation: fadeUp 500ms 320ms backwards; }
-    &:nth-child(6) { animation: fadeUp 500ms 400ms backwards; }
-
-    @include mobile { gap: 12px; }
+    @include mobile {
+      gap: 10px;
+    }
   }
 
   &__section-header {
@@ -273,42 +314,75 @@ onMounted(() => {
     align-items: baseline;
   }
 
-  &__section-title { color: var(--md-sys-color-on-surface); }
+  &__section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-family-display);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+    letter-spacing: -0.02em;
+
+    @include mobile {
+      font-size: 16px;
+    }
+  }
+
+  &__section-accent {
+    width: 3.5px;
+    height: 16px;
+    border-radius: 999px;
+    background: var(--md-sys-color-primary);
+  }
 
   &__section-link {
     color: var(--md-sys-color-primary);
+    font-family: var(--font-family-body);
+    font-size: 12.5px;
+    font-weight: 600;
     text-decoration: none;
-    transition: opacity 150ms;
-    &:hover { opacity: 0.8; }
+    transition: opacity 150ms ease;
+
+    &:hover {
+      opacity: 0.75;
+    }
   }
 
   &__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 16px;
 
     &--compact {
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     }
 
     @include mobile {
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      &--compact { grid-template-columns: repeat(2, 1fr); }
+      &--compact {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   }
 
   &__scroll {
     display: flex;
-    gap: 16px;
+    gap: 14px;
     overflow-x: auto;
     padding-bottom: 8px;
 
-    > * { flex-shrink: 0; width: 160px; }
+    > * {
+      flex-shrink: 0;
+      width: 170px;
+    }
 
     @include mobile {
       gap: 10px;
-      > * { width: 140px; }
+      > * {
+        width: 135px;
+      }
     }
   }
 }

@@ -1,27 +1,15 @@
 <template>
-  <nav class="navigation-rail glass-strong">
+  <nav class="navigation-rail glass">
     <div class="navigation-rail__header">
-      <div class="logo">
-        <svg class="logo__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" opacity="0.6" />
-          <path
-            d="M2 17L12 22L22 17"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            opacity="0.4"
-          />
-          <path
-            d="M2 12L12 17L22 12"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span class="logo__text md3-label-small">Anilibrix Plus</span>
-      </div>
+      <router-link to="/" class="logo">
+        <div class="logo__icon-wrap">
+          <svg class="logo__icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" fill-opacity="0.12" stroke="currentColor" stroke-width="1.8" />
+            <path d="M10 8L16 12L10 16V8Z" fill="currentColor" />
+          </svg>
+        </div>
+        <span class="logo__text">Anilibrix</span>
+      </router-link>
     </div>
 
     <div class="navigation-rail__items" ref="itemsRef">
@@ -43,13 +31,13 @@
           <path
             :d="item.iconPath"
             stroke="currentColor"
-            stroke-width="1.5"
+            stroke-width="1.8"
             stroke-linecap="round"
             stroke-linejoin="round"
             fill="none"
           />
         </svg>
-        <span class="navigation-rail__item-label md3-label-small">{{ item.label }}</span>
+        <span class="navigation-rail__item-label">{{ item.label }}</span>
       </router-link>
     </div>
 
@@ -57,7 +45,7 @@
       <router-link
         v-if="authStore.user"
         to="/profile"
-        class="navigation-rail__item"
+        class="navigation-rail__item navigation-rail__item--profile"
         :class="{ 'navigation-rail__item--active': isActive('/profile') }"
         title="Профиль"
       >
@@ -67,28 +55,30 @@
         <div v-else class="navigation-rail__avatar-fallback">
           {{ authStore.user.name.charAt(0).toUpperCase() }}
         </div>
-        <span class="navigation-rail__item-label md3-label-small">{{ authStore.user.name }}</span>
+        <span class="navigation-rail__item-label">{{ authStore.user.name }}</span>
       </router-link>
-      <button v-else class="navigation-rail__item" title="Войти" @click="$emit('openAuth')">
-        <svg
-          class="navigation-rail__item-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-        >
-          <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-          <path d="M10 17l5-5-5-5" />
-          <path d="M15 12H3" />
-        </svg>
-        <span class="navigation-rail__item-label md3-label-small">Войти</span>
+      <button v-else class="navigation-rail__item navigation-rail__item--login" title="Войти" @click="$emit('openAuth')">
+        <div class="navigation-rail__login-icon-wrap">
+          <svg
+            class="navigation-rail__item-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+          >
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
+            <path d="M10 17l5-5-5-5" />
+            <path d="M15 12H3" />
+          </svg>
+        </div>
+        <span class="navigation-rail__item-label">Войти</span>
       </button>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -157,7 +147,7 @@ onMounted(() => nextTick(updateIndicator))
 
 <style scoped lang="scss">
 .navigation-rail {
-  width: 72px;
+  width: 74px;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -166,28 +156,46 @@ onMounted(() => nextTick(updateIndicator))
   gap: 8px;
   border-right: 1px solid var(--glass-border);
   flex-shrink: 0;
+  z-index: 20;
 
   &__header {
-    padding: 4px 0 20px;
+    padding: 0 0 14px;
   }
 
   .logo {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
+    text-decoration: none;
+    cursor: pointer;
+
+    &__icon-wrap {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--md-sys-shape-corner-small);
+      color: var(--md-sys-color-primary);
+      transition: transform 200ms var(--md-sys-motion-easing-spring);
+
+      &:hover {
+        transform: scale(1.06);
+      }
+    }
 
     &__icon {
-      width: 24px;
-      height: 24px;
-      color: var(--md-sys-color-primary);
-      filter: drop-shadow(0 0 6px rgba(184, 165, 232, 0.3));
+      width: 26px;
+      height: 26px;
     }
 
     &__text {
-      color: var(--md-sys-color-on-surface-variant);
-      font-size: 10px;
-      letter-spacing: 0.02em;
+      color: var(--md-sys-color-on-surface);
+      font-family: var(--font-family-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
   }
 
@@ -196,78 +204,79 @@ onMounted(() => nextTick(updateIndicator))
     flex-direction: column;
     gap: 4px;
     width: 100%;
-    padding: 0 10px;
+    padding: 0 6px;
     flex: 1;
     position: relative;
   }
 
   &__active-indicator {
     position: absolute;
-    left: 10px;
-    width: calc(100% - 20px);
-    background: rgba(184, 165, 232, 0.08);
+    left: 6px;
+    width: calc(100% - 12px);
+    background: rgba(255, 255, 255, 0.07);
     border-radius: var(--md-sys-shape-corner-small);
-    border: 1px solid rgba(184, 165, 232, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     transition:
-      transform 350ms var(--md-sys-motion-easing-spring),
-      height 350ms var(--md-sys-motion-easing-spring);
+      transform 280ms var(--md-sys-motion-easing-spring),
+      height 280ms var(--md-sys-motion-easing-spring);
     pointer-events: none;
     z-index: 0;
+  }
+
+  .md3-light &__active-indicator {
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   &__item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 5px;
-    padding: 10px 0;
+    gap: 3px;
+    padding: 9px 0;
     border-radius: var(--md-sys-shape-corner-small);
     text-decoration: none;
     color: var(--md-sys-color-on-surface-variant);
     transition:
-      background-color 200ms var(--md-sys-motion-easing-standard),
-      color 200ms var(--md-sys-motion-easing-standard),
-      transform 200ms var(--md-sys-motion-easing-spring);
+      color 150ms ease,
+      transform 150ms var(--md-sys-motion-easing-spring);
     cursor: pointer;
     position: relative;
     background: transparent;
     border: none;
     width: 100%;
-
-    &-icon {
-      width: 20px;
-      height: 20px;
-      transition: color 200ms var(--md-sys-motion-easing-standard);
-    }
-
     z-index: 1;
 
+    &-icon {
+      width: 19px;
+      height: 19px;
+      transition: color 150ms ease;
+    }
+
     &-label {
-      font-size: 10px;
-      letter-spacing: 0.01em;
+      font-family: var(--font-family-body);
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
     }
 
     &:hover {
       color: var(--md-sys-color-on-surface);
-      background-color: rgba(255, 255, 255, 0.04);
-      transform: scale(1.05);
     }
 
     &--active {
       color: var(--md-sys-color-primary);
-      background: rgba(184, 165, 232, 0.08);
-      box-shadow: 0 0 12px rgba(184, 165, 232, 0.1);
 
-      .navigation-rail__item-icon {
-        color: var(--md-sys-color-primary);
-        filter: drop-shadow(0 0 4px rgba(184, 165, 232, 0.4));
+      .navigation-rail__item-label {
+        font-weight: 600;
       }
     }
   }
 
   &__bottom {
-    padding: 0 10px 16px;
+    padding: 0 6px 6px;
     margin-top: auto;
+    width: 100%;
   }
 
   &__avatar-wrap {
@@ -276,7 +285,6 @@ onMounted(() => nextTick(updateIndicator))
     border-radius: 50%;
     overflow: hidden;
     border: 1.5px solid var(--md-sys-color-primary);
-    box-shadow: 0 0 8px rgba(184, 165, 232, 0.25);
   }
 
   &__avatar {
@@ -292,12 +300,27 @@ onMounted(() => nextTick(updateIndicator))
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
-    font: var(--md-sys-typescale-label-medium);
+    background: var(--md-sys-color-primary);
+    color: #ffffff;
     font-size: 12px;
-    border: 1.5px solid var(--md-sys-color-primary);
-    box-shadow: 0 0 8px rgba(184, 165, 232, 0.25);
+    font-weight: 700;
+  }
+
+  &__login-icon-wrap {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    transition: background 150ms ease;
+
+    .navigation-rail__item--login:hover & {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--md-sys-color-on-surface);
+    }
   }
 }
 </style>

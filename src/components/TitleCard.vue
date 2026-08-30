@@ -23,15 +23,24 @@
         loading="lazy"
         @load="posterLoaded = true"
       />
-      <div v-if="!loading && title?.isOngoing && !external" class="title-card__badge">
-        <span class="md3-label-small">Онгоинг</span>
+
+      <!-- Ongoing badge -->
+      <div v-if="!loading && title?.isOngoing && !external" class="title-card__badge title-card__badge--ongoing">
+        <span class="title-card__badge-dot" />
+        <span class="title-card__badge-text">Онгоинг</span>
       </div>
+
+      <!-- External badge -->
       <div v-if="external && !loading" class="title-card__badge title-card__badge--external">
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        <span class="title-card__badge-text">Нет в Anilibria</span>
+      </div>
+
+      <!-- Score badge -->
+      <div v-if="title?.score && !loading" class="title-card__score">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
-        <span class="md3-label-small">Нет в Anilibria</span>
+        <span>{{ Number(title.score).toFixed(1) }}</span>
       </div>
 
       <!-- Progress bar -->
@@ -47,39 +56,40 @@
         :title="isWatchLater ? 'Убрать из списка' : 'Добавить в список'"
         @click.stop="toggleWatchLater"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-          <circle cx="12" cy="12" r="10" />
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
         </svg>
       </button>
 
-      <div v-if="!loading && !external" class="title-card__overlay">
-        <svg class="title-card__play" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M8 5v14l11-7z" />
+      <!-- User rating badge -->
+      <div v-if="userRating && !loading" class="title-card__user-rating">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
+        <span>{{ userRating }}</span>
       </div>
-    </div>
-    <div v-if="external && title?.score" class="title-card__score">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-      <span>{{ title.score.toFixed(1) }}</span>
-    </div>
 
-    <!-- User rating badge -->
-    <div v-if="userRating && !loading" class="title-card__user-rating">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
-      <span>{{ userRating }}</span>
+      <!-- Play overlay -->
+      <div v-if="!loading && !external" class="title-card__overlay">
+        <div class="title-card__play-btn">
+          <svg class="title-card__play-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      </div>
     </div>
 
     <div class="title-card__info">
-      <h3 v-if="!loading" class="title-card__name md3-body-medium">{{ title?.name.main }}</h3>
+      <h3 v-if="!loading" class="title-card__name">{{ title?.name.main }}</h3>
       <div v-else class="title-card__skeleton title-card__skeleton--text md3-skeleton" />
-      <p v-if="!loading && subtitle" class="title-card__subtitle md3-body-small">
+
+      <p v-if="!loading && subtitle" class="title-card__subtitle">
         {{ subtitle }}
       </p>
-      <p v-else-if="!loading && title?.year" class="title-card__meta md3-body-small">
-        {{ title.year }}<span v-if="title.type?.description"> · {{ title.type.description }}</span>
+      <p v-else-if="!loading && (title?.year || title?.type?.description)" class="title-card__meta">
+        <span v-if="title.year">{{ title.year }}</span>
+        <span v-if="title.year && title.type?.description" class="title-card__meta-dot">·</span>
+        <span v-if="title.type?.description">{{ title.type.description }}</span>
       </p>
       <div
         v-else-if="loading"
@@ -139,37 +149,42 @@ const skeletonStyle = computed(() => ({
 .title-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
-  border-radius: var(--md-sys-shape-corner-small);
+  border-radius: var(--md-sys-shape-corner-medium);
+  user-select: none;
 
   &--compact {
-    gap: 6px;
+    gap: 5px;
     .title-card__info { padding: 0; }
-    .title-card__name { font-size: 12px; -webkit-line-clamp: 1; }
+    .title-card__name { font-size: 13px; -webkit-line-clamp: 1; }
     .title-card__meta { font-size: 11px; }
   }
 
   &--hoverable {
     .title-card__poster {
       transition:
-        transform 350ms var(--md-sys-motion-easing-spring),
-        box-shadow 350ms var(--md-sys-motion-easing-standard);
+        transform 280ms var(--md-sys-motion-easing-spring),
+        box-shadow 280ms ease,
+        border-color 200ms ease;
     }
 
     &:hover .title-card__poster {
-      transform: translateY(-4px) scale(1.01);
-      box-shadow:
-        var(--glow-primary),
-        0 12px 40px rgba(0, 0, 0, 0.5);
+      transform: translateY(-4px);
+      border-color: var(--glass-border-hover);
+      box-shadow: var(--md-sys-elevation-3);
     }
 
     &:hover .title-card__overlay {
       opacity: 1;
     }
 
+    &:hover .title-card__play-btn {
+      transform: scale(1);
+    }
+
     &:hover .title-card__image {
-      transform: scale(1.05);
+      transform: scale(1.04);
     }
 
     &:active .title-card__poster {
@@ -179,14 +194,16 @@ const skeletonStyle = computed(() => ({
 
   &__poster {
     position: relative;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: var(--md-sys-shape-corner-medium);
     overflow: hidden;
     background-color: var(--md-sys-color-surface-container);
     aspect-ratio: 2/3;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--md-sys-elevation-1);
 
     &--external {
-      opacity: 0.6;
-      filter: grayscale(0.65);
+      opacity: 0.65;
+      filter: grayscale(0.5);
     }
   }
 
@@ -196,8 +213,8 @@ const skeletonStyle = computed(() => ({
     object-fit: cover;
     opacity: 0;
     transition:
-      opacity 400ms var(--md-sys-motion-easing-standard),
-      transform 500ms var(--md-sys-motion-easing-standard);
+      opacity 300ms ease,
+      transform 400ms cubic-bezier(0.25, 1, 0.5, 1);
 
     &.loaded {
       opacity: 1;
@@ -210,46 +227,82 @@ const skeletonStyle = computed(() => ({
 
     &--text {
       position: relative;
-      height: 18px;
-      width: 75%;
+      height: 16px;
+      width: 80%;
+      border-radius: var(--md-sys-shape-corner-extra-small);
       margin-top: 4px;
     }
 
     &--meta {
       position: relative;
-      height: 14px;
-      width: 45%;
-      margin-top: 4px;
+      height: 13px;
+      width: 50%;
+      border-radius: var(--md-sys-shape-corner-extra-small);
+      margin-top: 3px;
     }
   }
 
   &__badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(0, 0, 0, 0.55);
-    color: var(--md-sys-color-tertiary);
-    padding: 3px 10px;
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    letter-spacing: 0.03em;
+    top: 8px;
+    right: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: rgba(18, 19, 26, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+
+    &--ongoing {
+      color: #ffffff;
+    }
 
     &--external {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      left: 10px;
-      right: 10px;
-      width: auto;
+      left: 8px;
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(18, 19, 26, 0.9);
       color: var(--md-sys-color-on-surface-variant);
-      border-color: rgba(255, 255, 255, 0.08);
       justify-content: center;
-      backdrop-filter: blur(12px);
     }
+  }
+
+  &__badge-text {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  &__badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--md-sys-color-tertiary);
+    animation: pulseDot 2s infinite ease-in-out;
+  }
+
+  &__score {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(18, 19, 26, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--color-score-gold);
+    padding: 3px 7px;
+    border-radius: var(--md-sys-shape-corner-small);
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
   }
 
   &__progress {
@@ -258,35 +311,33 @@ const skeletonStyle = computed(() => ({
     left: 0;
     right: 0;
     height: 3px;
-    background: rgba(0, 0, 0, 0.25);
-    z-index: 2;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 3;
   }
 
   &__progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-tertiary));
-    border-radius: 0 2px 0 0;
-    transition: width 400ms var(--md-sys-motion-easing-spring);
-    box-shadow: 0 0 6px rgba(184, 165, 232, 0.3);
+    background: var(--md-sys-color-primary);
+    border-radius: 0 2px 2px 0;
   }
 
   &__watch-later {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 3;
+    bottom: 8px;
+    right: 8px;
+    z-index: 4;
     width: 30px;
     height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    border: none;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(8px);
-    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(18, 19, 26, 0.8);
+    backdrop-filter: blur(16px);
+    color: #ffffff;
     cursor: pointer;
-    transition: background 150ms, color 150ms, transform 200ms var(--md-sys-motion-easing-spring);
+    transition: background 150ms, transform 200ms var(--md-sys-motion-easing-spring), opacity 150ms;
     opacity: 0;
 
     .title-card--hoverable:hover & {
@@ -294,50 +345,33 @@ const skeletonStyle = computed(() => ({
     }
 
     &:hover {
-      background: rgba(0, 0, 0, 0.75);
-      color: #fff;
-      transform: scale(1.1);
+      background: var(--md-sys-color-primary);
+      transform: scale(1.08);
     }
 
     &--active {
       opacity: 1;
-      color: var(--md-sys-color-primary);
-      background: rgba(184, 165, 232, 0.2);
+      background: var(--md-sys-color-primary);
+      border-color: transparent;
     }
-  }
-
-  &__score {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #ffc107;
-    padding: 2px 7px;
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    font-size: 11px;
-    letter-spacing: 0.02em;
-    backdrop-filter: blur(8px);
   }
 
   &__user-rating {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    z-index: 2;
+    bottom: 8px;
+    left: 8px;
+    z-index: 3;
     display: flex;
     align-items: center;
     gap: 3px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(8px);
-    color: var(--md-sys-color-primary);
-    padding: 2px 7px;
+    background: rgba(18, 19, 26, 0.85);
+    backdrop-filter: blur(10px);
+    color: var(--color-score-gold);
+    padding: 2px 6px;
     border-radius: var(--md-sys-shape-corner-extra-small);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   &__overlay {
@@ -346,53 +380,70 @@ const skeletonStyle = computed(() => ({
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(0, 0, 0, 0.35);
     opacity: 0;
-    transition: opacity 300ms var(--md-sys-motion-easing-standard);
+    transition: opacity 250ms ease;
   }
 
-  &__play {
+  &__play-btn {
     width: 44px;
     height: 44px;
-    color: #fff;
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
-    transition: transform 300ms var(--md-sys-motion-easing-spring);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 250ms var(--md-sys-motion-easing-spring);
+  }
+
+  &__play-icon {
+    width: 20px;
+    height: 20px;
+    color: #12131a;
+    margin-left: 2px;
   }
 
   &__info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
     padding: 0 2px;
   }
 
   &__name {
     color: var(--md-sys-color-on-surface);
-    font-weight: 500;
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    letter-spacing: -0.01em;
   }
 
   &--external &__name {
     color: var(--md-sys-color-on-surface-variant);
   }
 
-  &--external &__meta {
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     color: var(--md-sys-color-on-surface-variant);
-    opacity: 0.6;
+    font-size: 12px;
+    font-weight: 500;
   }
 
-  &__meta {
-    color: var(--md-sys-color-on-surface-variant);
-    letter-spacing: 0.01em;
+  &__meta-dot {
+    opacity: 0.5;
   }
 
   &__subtitle {
     color: var(--md-sys-color-primary);
-    letter-spacing: 0.01em;
+    font-size: 12px;
     font-weight: 500;
   }
 }

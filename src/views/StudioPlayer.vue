@@ -5,9 +5,9 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        <span class="md3-label-large">Назад</span>
+        <span>Назад</span>
       </button>
-      <h2 class="studio-player__title md3-title-small">{{ titleName }}</h2>
+      <h2 class="studio-player__title">{{ titleName }}</h2>
     </div>
 
     <div class="player-container" @mousemove="showControls" @mouseleave="hideControlsDelayed">
@@ -30,7 +30,7 @@
               <div class="player-controls__progress-thumb" :style="{ left: `${progressPercent}%` }" />
             </div>
             <div class="player-controls__time">
-              <span class="md3-body-small">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+              <span>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@
           <div class="player-controls__right">
             <div class="player-controls__dropdown">
               <button class="player-controls__btn player-controls__btn--text" @click="showQuality = !showQuality">
-                <span class="md3-label-small">{{ currentQualityLabel }}</span>
+                <span>{{ currentQualityLabel }}</span>
               </button>
               <div v-if="showQuality" class="player-controls__menu">
                 <button v-for="v in videos" :key="v.quality" class="player-controls__menu-item"
@@ -215,47 +215,71 @@ onUnmounted(() => { if (hls) hls.destroy() })
 </script>
 
 <style scoped lang="scss">
+@use "@/styles/responsive.scss" as *;
+
 .studio-player {
   display: flex; flex-direction: column; gap: 16px;
-  margin: -28px -36px; padding: 28px 36px;
+  margin: -24px -32px; padding: 20px 32px 48px;
   background: var(--md-sys-color-background);
 
+  @include mobile {
+    margin: -12px -16px;
+    padding: 12px 16px 36px;
+    gap: 12px;
+  }
+
   &__header {
-    display: flex; align-items: center; gap: 16px;
+    display: flex; align-items: center; gap: 14px;
   }
 
   &__back {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: transparent; border: none;
-    color: var(--md-sys-color-on-surface-variant); cursor: pointer; padding: 6px 0;
-    &:hover { color: var(--md-sys-color-on-surface); }
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--md-sys-shape-corner-full);
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 7px 16px;
+    transition: background 150ms ease, transform 150ms ease;
+    &:hover { background: var(--md-sys-color-surface-container-high); transform: translateX(-2px); }
     span { @media (max-width: 599px) { display: none; } }
   }
 
-  &__title { color: var(--md-sys-color-on-surface); flex: 1; }
+  &__title {
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    flex: 1;
+  }
 }
 
 .player-container {
   position: relative; width: 100%; aspect-ratio: 16/9;
   max-height: calc(100vh - 180px);
-  background: var(--md-sys-color-surface-container);
-  border-radius: var(--md-sys-shape-corner-small);
-  overflow: hidden; box-shadow: var(--md-sys-elevation-3);
+  background: #000000;
+  border-radius: var(--md-sys-shape-corner-large);
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
 
-  &:fullscreen { max-height: 100vh; border-radius: 0; }
+  &:fullscreen { max-height: 100vh; border-radius: 0; border: none; box-shadow: none; }
 
   &__video { width: 100%; height: 100%; object-fit: contain; }
   &__buffering {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.3); z-index: 2;
+    background: rgba(0, 0, 0, 0.4); z-index: 2;
+    backdrop-filter: blur(4px);
   }
 }
 
 .spinner {
   width: 40px; height: 40px;
-  border: 2px solid rgba(255,255,255,0.15);
-  border-top-color: var(--md-sys-color-primary);
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #ffffff;
   border-radius: 50%; animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -263,50 +287,60 @@ onUnmounted(() => { if (hls) hls.destroy() })
 .player-controls {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
   display: flex; flex-direction: column; justify-content: flex-end;
-  transition: opacity 300ms;
-  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%);
-  padding-top: 40px;
+  transition: opacity 250ms ease;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 50%, transparent 100%);
+  padding-top: 60px;
   &--hidden { opacity: 0; pointer-events: none; }
 
-  &__progress-area { padding: 0 16px; }
-  &__progress-wrapper { padding: 16px 0 6px; }
-  &__progress-bar { position: relative; height: 3px; cursor: pointer; }
-  &__progress-track { position: absolute; inset: 0; background: rgba(255,255,255,0.12); border-radius: 2px; }
-  &__progress-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--md-sys-color-primary); border-radius: 2px; }
-  &__progress-thumb { position: absolute; top: 50%; width: 14px; height: 14px; background: var(--md-sys-color-primary); border: 2px solid #fff; border-radius: 50%; transform: translate(-50%,-50%) scale(0); }
-  &__progress-bar:hover &__progress-thumb { transform: translate(-50%,-50%) scale(1); }
-  &__time { padding: 2px 0 10px; color: rgba(255,255,255,0.6); font-size: 12px; }
+  &__progress-area { padding: 0 20px; }
+  &__progress-wrapper { position: relative; padding: 14px 0 6px; }
+  &__progress-bar { position: relative; height: 4px; cursor: pointer; border-radius: 4px; }
+  &__progress-track { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+  &__progress-fill {
+    position: absolute; top: 0; left: 0; height: 100%;
+    background: var(--md-sys-color-primary); border-radius: 4px;
+  }
+  &__progress-thumb {
+    position: absolute; top: 50%; width: 13px; height: 13px;
+    background: #ffffff;
+    border-radius: 50%; transform: translate(-50%, -50%) scale(0);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    transition: transform 180ms var(--md-sys-motion-easing-spring);
+  }
+  &__progress-bar:hover &__progress-thumb { transform: translate(-50%, -50%) scale(1); }
+  &__time { padding: 3px 0 8px; color: rgba(255, 255, 255, 0.7); font-size: 12px; font-weight: 500; }
 
-  &__bottom { display: flex; justify-content: space-between; align-items: center; padding: 0 16px 16px; gap: 8px; }
-  &__left, &__right { display: flex; align-items: center; gap: 4px; }
+  &__bottom { display: flex; justify-content: space-between; align-items: center; padding: 0 20px 16px; gap: 8px; }
+  &__left, &__right { display: flex; align-items: center; gap: 6px; }
 
   &__btn {
     display: inline-flex; align-items: center; justify-content: center;
     width: 36px; height: 36px; background: transparent; border: none;
-    color: rgba(255,255,255,0.85); cursor: pointer;
+    color: rgba(255, 255, 255, 0.85); cursor: pointer;
     border-radius: var(--md-sys-shape-corner-small);
     transition: background 150ms, color 150ms;
-    &:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    &--text { width: auto; padding: 0 10px; font-weight: 500; }
+    &:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+    &--text { width: auto; padding: 0 10px; font-weight: 600; font-size: 12px; }
   }
 
   &__dropdown { position: relative; }
 
   &__menu {
     position: absolute; bottom: 44px; right: 0;
-    background: rgba(15,14,18,0.92); backdrop-filter: blur(24px);
-    border: 1px solid rgba(255,255,255,0.06); border-radius: var(--md-sys-shape-corner-small);
-    padding: 4px; min-width: 120px;
+    background: rgba(18, 19, 26, 0.92); backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border); border-radius: var(--md-sys-shape-corner-small);
+    padding: 4px; min-width: 110px;
     display: flex; flex-direction: column; gap: 2px; z-index: 10;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    box-shadow: var(--md-sys-elevation-3);
   }
 
   &__menu-item {
-    padding: 8px 12px; border-radius: var(--md-sys-shape-corner-extra-small);
-    border: none; background: transparent; color: rgba(255,255,255,0.75);
-    cursor: pointer; font-size: 13px; text-align: left;
-    &:hover { background: rgba(255,255,255,0.06); color: #fff; }
-    &.active { color: var(--md-sys-color-primary); background: rgba(184,165,232,0.08); }
+    padding: 7px 12px; border-radius: var(--md-sys-shape-corner-extra-small);
+    border: none; background: transparent; color: rgba(255, 255, 255, 0.8);
+    cursor: pointer; font-size: 12.5px; font-weight: 500; text-align: left;
+    transition: background 150ms, color 150ms;
+    &:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    &.active { color: #ffffff; background: rgba(255, 255, 255, 0.15); font-weight: 600; }
   }
 }
 </style>

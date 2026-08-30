@@ -11,31 +11,39 @@
         <div class="hero-carousel__vignette" />
         <div class="hero-carousel__content">
           <div class="hero-carousel__metadata">
-            <span v-if="title.year" class="hero-carousel__year">{{ title.year }}</span>
-            <span v-if="title.type?.description" class="hero-carousel__type">{{
+            <span v-if="title.year" class="hero-carousel__tag">{{ title.year }}</span>
+            <span v-if="title.type?.description" class="hero-carousel__tag">{{
               title.type.description
             }}</span>
-            <span v-if="title.isOngoing" class="hero-carousel__ongoing">Онгоинг</span>
+            <span v-if="title.isOngoing" class="hero-carousel__tag hero-carousel__tag--ongoing">
+              <span class="hero-carousel__dot" />
+              Онгоинг
+            </span>
           </div>
-          <h2 class="hero-carousel__title md3-headline-large">{{ title.name.main }}</h2>
-          <p v-if="title.description" class="hero-carousel__desc md3-body-large">
+          <h2 class="hero-carousel__title">{{ title.name.main }}</h2>
+          <p v-if="title.description" class="hero-carousel__desc">
             {{ truncate(title.description, 180) }}
           </p>
           <div class="hero-carousel__actions">
             <button
-              class="hero-carousel__btn hero-carousel__btn--primary glow-hover"
+              class="hero-carousel__btn hero-carousel__btn--primary"
               @click="$emit('play', title)"
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
                 <path d="M8 5v14l11-7z" />
               </svg>
-              <span class="md3-label-large">Смотреть</span>
+              <span>Смотреть</span>
             </button>
             <button
               class="hero-carousel__btn hero-carousel__btn--secondary"
               @click="$emit('details', title)"
             >
-              <span class="md3-label-large">Подробнее</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <span>Подробнее</span>
             </button>
           </div>
         </div>
@@ -49,11 +57,15 @@
           :key="index"
           class="hero-carousel__indicator"
           :class="{ 'hero-carousel__indicator--active': index === activeIndex }"
+          :title="`Слайд ${index + 1}`"
           @click="goTo(index)"
-        />
-      </div>
-      <div class="hero-carousel__progress">
-        <div class="hero-carousel__progress-bar" :style="{ width: `${progress}%` }" />
+        >
+          <div
+            v-if="index === activeIndex"
+            class="hero-carousel__indicator-fill"
+            :style="{ width: `${progress}%` }"
+          />
+        </button>
       </div>
     </div>
   </div>
@@ -77,7 +89,7 @@ const progress = ref(0)
 let autoPlayInterval: ReturnType<typeof setInterval> | null = null
 let progressInterval: ReturnType<typeof setInterval> | null = null
 
-const SLIDE_DURATION = 8000
+const SLIDE_DURATION = 7500
 
 function bgUrl(title: Title) {
   return title.poster?.src || title.poster?.preview || ''
@@ -93,8 +105,8 @@ function startAutoPlay() {
   if (progressInterval) clearInterval(progressInterval)
   resetProgress()
   progressInterval = setInterval(() => {
-    progress.value += 100 / (SLIDE_DURATION / 50)
-  }, 50)
+    progress.value += 100 / (SLIDE_DURATION / 40)
+  }, 40)
   autoPlayInterval = setInterval(() => {
     activeIndex.value = (activeIndex.value + 1) % props.titles.length
     resetProgress()
@@ -131,15 +143,16 @@ onUnmounted(() => pauseAutoPlay())
 .hero-carousel {
   position: relative;
   width: 100%;
-  height: 480px;
-  border-radius: var(--md-sys-shape-corner-small);
+  height: 440px;
+  border-radius: var(--md-sys-shape-corner-large);
   overflow: hidden;
   background-color: var(--md-sys-color-surface-container);
   box-shadow: var(--md-sys-elevation-3);
+  border: 1px solid var(--glass-border);
 
   @include mobile {
-    height: 240px;
-    border-radius: var(--md-sys-shape-corner-extra-small);
+    height: 270px;
+    border-radius: var(--md-sys-shape-corner-medium);
   }
 
   &__slides {
@@ -152,7 +165,7 @@ onUnmounted(() => pauseAutoPlay())
     position: absolute;
     inset: 0;
     opacity: 0;
-    transition: opacity 800ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 700ms cubic-bezier(0.25, 1, 0.5, 1);
     display: flex;
     align-items: flex-end;
     overflow: hidden;
@@ -169,9 +182,10 @@ onUnmounted(() => pauseAutoPlay())
     width: calc(100% + 20px);
     height: calc(100% + 20px);
     object-fit: cover;
-    filter: blur(10px) brightness(0.35) saturate(0.7);
-    transform: scale(1.08);
-    transition: transform 12s ease-out;
+    object-position: center 25%;
+    filter: brightness(0.42) saturate(1.05);
+    transform: scale(1.03);
+    transition: transform 8s cubic-bezier(0.1, 0, 0.2, 1);
 
     .hero-carousel__slide--active & {
       transform: scale(1);
@@ -182,8 +196,8 @@ onUnmounted(() => pauseAutoPlay())
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(to top, var(--md-sys-color-background) 0%, transparent 50%),
-      linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, transparent 40%);
+      linear-gradient(to top, var(--md-sys-color-background) 0%, rgba(9, 9, 12, 0.65) 45%, transparent 85%),
+      linear-gradient(to right, rgba(9, 9, 12, 0.85) 0%, rgba(9, 9, 12, 0.35) 55%, transparent 85%);
     z-index: 1;
   }
 
@@ -193,71 +207,76 @@ onUnmounted(() => pauseAutoPlay())
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding: 48px;
+    padding: 44px 48px;
     width: 100%;
-    max-width: 650px;
-    animation: fadeUp 600ms var(--md-sys-motion-easing-decelerate) backwards;
+    max-width: 660px;
 
     .hero-carousel__slide--active & {
-      animation: fadeUp 600ms var(--md-sys-motion-easing-decelerate) backwards;
+      animation: fadeUp 450ms var(--md-sys-motion-easing-decelerate) backwards;
     }
 
     @include mobile {
       padding: 16px;
-      gap: 6px;
+      gap: 8px;
       max-width: 100%;
     }
   }
 
   &__metadata {
     display: flex;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
 
     @include mobile {
-      gap: 8px;
+      gap: 6px;
     }
   }
 
-  &__year,
-  &__type {
-    font: var(--md-sys-typescale-label-large);
-    color: rgba(255, 255, 255, 0.75);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-size: 11px;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  &__tag {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 3px 9px;
+    border-radius: var(--md-sys-shape-corner-full);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: -0.01em;
+
+    &--ongoing {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
 
     @include mobile {
       font-size: 10px;
+      padding: 2px 7px;
     }
   }
 
-  &__ongoing {
-    font: var(--md-sys-typescale-label-medium);
-    color: var(--md-sys-color-tertiary);
-    background: rgba(232, 165, 184, 0.1);
-    padding: 3px 10px;
-    border-radius: var(--md-sys-shape-corner-extra-small);
-    letter-spacing: 0.03em;
-    font-size: 11px;
-    border: 1px solid rgba(232, 165, 184, 0.15);
-
-    @include mobile {
-      padding: 2px 8px;
-      font-size: 10px;
-    }
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--md-sys-color-tertiary);
   }
 
   &__title {
-    color: var(--md-sys-color-on-background);
-    letter-spacing: -0.03em;
-    line-height: 1.05;
-    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+    font-family: var(--font-family-display);
+    font-size: 32px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
 
     @include mobile {
-      font-size: 16px;
-      line-height: 1.2;
+      font-size: 18px;
+      line-height: 1.25;
       display: -webkit-box;
       -webkit-line-clamp: 1;
       -webkit-box-orient: vertical;
@@ -266,12 +285,13 @@ onUnmounted(() => pauseAutoPlay())
   }
 
   &__desc {
-    color: rgba(226, 224, 230, 0.65);
+    color: rgba(245, 245, 247, 0.7);
+    font-size: 14px;
+    line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    line-height: 1.5;
     max-width: 520px;
 
     @include mobile {
@@ -281,12 +301,12 @@ onUnmounted(() => pauseAutoPlay())
 
   &__actions {
     display: flex;
-    gap: 12px;
-    margin-top: 8px;
+    gap: 10px;
+    margin-top: 6px;
 
     @include mobile {
       gap: 8px;
-      margin-top: 4px;
+      margin-top: 2px;
     }
   }
 
@@ -295,39 +315,48 @@ onUnmounted(() => pauseAutoPlay())
     align-items: center;
     gap: 8px;
     padding: 10px 22px;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: var(--md-sys-shape-corner-full);
     border: none;
     cursor: pointer;
-    font: var(--md-sys-typescale-label-large);
-    letter-spacing: 0.01em;
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 600;
     transition:
       transform 200ms var(--md-sys-motion-easing-spring),
-      box-shadow 200ms var(--md-sys-motion-easing-standard),
-      opacity 150ms var(--md-sys-motion-easing-standard);
+      background 150ms ease;
 
     &:hover {
       transform: translateY(-2px);
     }
 
     &:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
     }
 
     &--primary {
-      background-color: var(--md-sys-color-primary);
-      color: var(--md-sys-color-on-primary);
-      box-shadow: 0 2px 12px rgba(184, 165, 232, 0.25);
+      background: #ffffff;
+      color: #09090c;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+
+      &:hover {
+        background: #f0f0f2;
+      }
     }
 
     &--secondary {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--md-sys-color-on-surface);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
     }
 
     @include mobile {
-      padding: 6px 14px;
+      padding: 7px 15px;
       font-size: 12px;
       gap: 6px;
     }
@@ -335,73 +364,51 @@ onUnmounted(() => pauseAutoPlay())
 
   &__controls {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 24px;
+    right: 48px;
     z-index: 3;
-    padding: 0 48px 28px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
 
     @include mobile {
-      padding: 0 16px 16px;
-      gap: 8px;
+      bottom: 12px;
+      right: 16px;
     }
   }
 
   &__indicators {
     display: flex;
-    gap: 10px;
-
-    @include mobile {
-      gap: 6px;
-    }
+    gap: 6px;
   }
 
   &__indicator {
+    position: relative;
     width: 28px;
-    height: 3px;
-    border-radius: 2px;
+    height: 3.5px;
+    border-radius: 999px;
     border: none;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.18);
     cursor: pointer;
-    transition:
-      background 300ms var(--md-sys-motion-easing-standard),
-      width 300ms var(--md-sys-motion-easing-spring);
+    overflow: hidden;
+    padding: 0;
+    transition: width 300ms var(--md-sys-motion-easing-spring);
 
     &--active {
-      background: var(--md-sys-color-primary);
       width: 48px;
-      box-shadow: 0 0 8px rgba(184, 165, 232, 0.3);
+      background: rgba(255, 255, 255, 0.28);
     }
 
     @include mobile {
-      width: 20px;
-      height: 2px;
+      width: 18px;
+      height: 3px;
       &--active {
         width: 32px;
       }
     }
   }
 
-  &__progress {
-    height: 2px;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 1px;
-    overflow: hidden;
-
-    @include mobile {
-      display: none;
-    }
-  }
-
-  &__progress-bar {
+  &__indicator-fill {
     height: 100%;
-    background: var(--md-sys-color-primary);
-    transition: width 50ms linear;
-    border-radius: 1px;
-    box-shadow: 0 0 6px rgba(184, 165, 232, 0.3);
+    background: #ffffff;
+    border-radius: 999px;
   }
 }
 </style>

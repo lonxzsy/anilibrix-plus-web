@@ -1,28 +1,43 @@
 <template>
   <div v-if="title" ref="detailRef" class="title-detail">
     <div ref="headerRef" class="title-detail__header" :style="headerBgStyle">
+      <div class="title-detail__glow" />
       <div class="title-detail__overlay" />
       <div class="title-detail__header-content">
-        <img ref="posterRef" class="title-detail__poster" :src="posterUrl" :alt="title.name.main" />
+        <div class="title-detail__poster-wrap">
+          <img ref="posterRef" class="title-detail__poster" :src="posterUrl" :alt="title.name.main" />
+        </div>
         <div class="title-detail__info">
           <div class="title-detail__metadata">
-            <span v-if="title.year" class="title-detail__meta-tag md3-label-large">{{ title.year }}</span>
-            <span v-if="title.type?.description" class="title-detail__meta-tag md3-label-large">{{ title.type.description }}</span>
-            <span v-if="title.isOngoing" class="title-detail__meta-tag title-detail__meta-tag--ongoing md3-label-large">Онгоинг</span>
-            <a v-if="jikanData?.anime.score" :href="jikanData.anime.url" target="_blank" rel="noopener noreferrer" class="title-detail__meta-tag title-detail__mal-score md3-label-large" :title="`MAL рейтинг на основе ${jikanData.anime.scoredBy.toLocaleString('ru')} голосов`">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-              {{ jikanData.anime.score.toFixed(2) }}
+            <span v-if="title.year" class="title-detail__meta-tag">{{ title.year }}</span>
+            <span v-if="title.type?.description" class="title-detail__meta-tag">{{ title.type.description }}</span>
+            <span v-if="title.isOngoing" class="title-detail__meta-tag title-detail__meta-tag--ongoing">
+              <span class="title-detail__dot" />
+              Онгоинг
+            </span>
+            <a
+              v-if="jikanData?.anime.score"
+              :href="jikanData.anime.url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="title-detail__meta-tag title-detail__mal-score"
+              :title="`MAL рейтинг на основе ${jikanData.anime.scoredBy.toLocaleString('ru')} голосов`"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+              </svg>
+              <span>{{ jikanData.anime.score.toFixed(2) }}</span>
             </a>
           </div>
-          <h1 class="title-detail__name md3-display-small">{{ title.name.main }}</h1>
-          <p v-if="title.name.english" class="title-detail__english md3-title-medium">{{ title.name.english }}</p>
+          <h1 class="title-detail__name">{{ title.name.main }}</h1>
+          <p v-if="title.name.english" class="title-detail__english">{{ title.name.english }}</p>
           <div v-if="title.genres?.length" class="title-detail__genres">
-            <span v-for="genre in title.genres" :key="genre.id" class="title-detail__genre md3-label-medium">{{ genre.name }}</span>
+            <span v-for="genre in title.genres" :key="genre.id" class="title-detail__genre">{{ genre.name }}</span>
           </div>
           <div class="title-detail__actions">
-            <button class="title-detail__fab" @click="play">
+            <button class="title-detail__fab title-detail__fab--primary" @click="play">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-              <span class="md3-label-large">Смотреть</span>
+              <span>Смотреть</span>
             </button>
             <button class="title-detail__fab title-detail__fab--secondary" :class="{ 'title-detail__fab--active': isFav }" @click="toggleFavorite">
               <svg class="title-detail__star" width="18" height="18" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
@@ -32,13 +47,13 @@
               </span>
             </button>
             <button class="title-detail__fab title-detail__fab--secondary" @click="shareTitle">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
-              <span class="md3-label-large">Поделиться</span>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8" /><polyline points="16 6 12 2 8 6" /><line x1="12" y1="2" x2="12" y2="15" /></svg>
+              <span>Поделиться</span>
             </button>
           </div>
           <!-- User rating -->
           <div class="title-detail__user-rating">
-            <span class="md3-label-medium">Моя оценка</span>
+            <span class="title-detail__rating-label">Моя оценка</span>
             <div class="title-detail__stars">
               <button
                 v-for="star in 10"
@@ -48,51 +63,62 @@
                 :title="`${star}/10`"
                 @click="setRating(star)"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" :fill="userRating >= star ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" :fill="userRating >= star ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
               </button>
             </div>
+            <span v-if="userRating" class="title-detail__rating-val">{{ userRating }}/10</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="title-detail__tabs" ref="tabsRef">
-      <button v-for="tab in tabs" :key="tab.id" class="title-detail__tab md3-label-large" :class="{ 'title-detail__tab--active': activeTab === tab.id }" @click="activeTab = tab.id">{{ tab.label }}</button>
+    <div class="title-detail__tabs-wrapper">
+      <div class="title-detail__tabs" ref="tabsRef">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          class="title-detail__tab"
+          :class="{ 'title-detail__tab--active': activeTab === tab.id }"
+          @click="activeTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
+      </div>
     </div>
 
     <div class="title-detail__content">
       <Transition name="tab-fade" mode="out-in">
         <div :key="activeTab">
           <div v-if="activeTab === 'description'" class="title-detail__description">
-            <p class="md3-body-large" style="line-height: 1.7; color: var(--md-sys-color-on-surface-variant)">
+            <p class="title-detail__desc-text">
               {{ title.description || 'Описание отсутствует.' }}
             </p>
 
             <div v-if="jikanData" class="title-detail__mal-section">
               <div v-if="jikanData.anime.trailer.embedUrl" class="title-detail__trailer">
-                <h3 class="md3-title-medium" style="margin-bottom: 12px; color: var(--md-sys-color-on-surface)">Трейлер</h3>
+                <h3 class="title-detail__section-title">Трейлер</h3>
                 <div class="title-detail__trailer-embed">
                   <iframe :src="jikanData.anime.trailer.embedUrl" allow="autoplay; fullscreen" allowfullscreen loading="lazy" title="Трейлер" />
                 </div>
               </div>
 
               <div v-if="jikanData.stats" class="title-detail__stats">
-                <h3 class="md3-title-medium" style="margin-bottom: 12px; color: var(--md-sys-color-on-surface)">Распределение оценок MAL</h3>
+                <h3 class="title-detail__section-title">Распределение оценок MAL</h3>
                 <div class="title-detail__stats-bar">
                   <div v-for="s in jikanData.stats.scores" :key="s.score" class="title-detail__stats-item" :title="`${s.score} — ${s.votes.toLocaleString('ru')} голосов (${s.percentage}%)`">
-                    <span class="title-detail__stats-label md3-label-small">{{ s.score }}</span>
+                    <span class="title-detail__stats-label">{{ s.score }}</span>
                     <div class="title-detail__stats-track">
                       <div class="title-detail__stats-fill" :style="{ height: `${s.percentage * 1.8}%` }" :class="{ 'title-detail__stats-fill--high': s.score >= 8, 'title-detail__stats-fill--mid': s.score >= 5 && s.score < 8 }" />
                     </div>
                   </div>
                 </div>
-                <div class="title-detail__stats-total md3-body-small">
+                <div class="title-detail__stats-total">
                   На основе {{ jikanData.stats.total.toLocaleString('ru') }} оценок
                 </div>
               </div>
             </div>
             <div v-if="jikanLoading" class="title-detail__mal-loading">
-              <div class="md3-skeleton" style="height: 60px; border-radius: 8px; max-width: 400px" />
+              <div class="md3-skeleton" style="height: 60px; border-radius: 12px; max-width: 400px" />
             </div>
           </div>
 
@@ -100,13 +126,13 @@
             <div v-for="ep in episodes" :key="ep.id" class="title-detail__episode" @click="playEpisode(ep)">
               <div class="title-detail__episode-thumb">
                 <img v-if="ep.preview?.src" :src="ep.preview.src" loading="lazy" alt="" />
-                <div v-else class="title-detail__episode-placeholder"><span class="md3-headline-small">{{ ep.ordinal }}</span></div>
+                <div v-else class="title-detail__episode-placeholder"><span>{{ ep.ordinal }}</span></div>
                 <div class="title-detail__episode-progress"><div class="title-detail__episode-progress-bar" :style="{ width: `${getProgress(ep)}%` }" /></div>
                 <div class="title-detail__episode-overlay"><svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg></div>
               </div>
               <div class="title-detail__episode-info">
-                <span class="md3-title-medium">{{ ep.name }}</span>
-                <span class="md3-body-small" style="color: var(--md-sys-color-on-surface-variant)">Серия {{ ep.ordinal }}</span>
+                <span class="title-detail__episode-name">{{ ep.name }}</span>
+                <span class="title-detail__episode-meta">Серия {{ ep.ordinal }}</span>
               </div>
             </div>
           </div>
@@ -116,9 +142,9 @@
               <CharacterCard v-for="(entry, i) in jikanData.characters" :key="entry.character.malId" :entry="entry" :style="{ animationDelay: `${i * 40}ms` }" />
             </div>
             <div v-else-if="jikanLoading" class="title-detail__character-skeletons">
-              <div v-for="n in 8" :key="n" class="md3-skeleton" style="height: 280px; border-radius: 6px" />
+              <div v-for="n in 8" :key="n" class="md3-skeleton" style="height: 280px; border-radius: 14px" />
             </div>
-            <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">
+            <p v-else class="title-detail__desc-text">
               {{ jikanStore.error || 'Информация о персонажах не найдена.' }}
             </p>
           </div>
@@ -128,9 +154,9 @@
               <TitleCard v-for="t in relatedTitles" :key="t.id" :title="t" @click="goToDetails(t)" />
             </div>
             <div v-else-if="relatedLoading" class="title-detail__grid">
-              <div v-for="n in 6" :key="n" class="md3-skeleton" style="height: 260px; border-radius: 4px" />
+              <div v-for="n in 6" :key="n" class="md3-skeleton" style="height: 260px; border-radius: 14px" />
             </div>
-            <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">Похожие тайтлы не найдены.</p>
+            <p v-else class="title-detail__desc-text">Похожие тайтлы не найдены.</p>
           </div>
 
           <div v-else-if="activeTab === 'torrents'" class="title-detail__torrents">
@@ -138,48 +164,45 @@
               <div v-for="t in torrents" :key="t.id" class="title-detail__torrent-item">
                 <div class="title-detail__torrent-info">
                   <div class="title-detail__torrent-header">
-                    <span class="title-detail__torrent-quality md3-label-large">{{ t.quality.value }}</span>
-                    <span v-if="bestTorrent?.id === t.id" class="title-detail__torrent-best md3-label-small">Лучшее</span>
+                    <span class="title-detail__torrent-quality">{{ t.quality.value }}</span>
+                    <span v-if="bestTorrent?.id === t.id" class="title-detail__torrent-best">Лучшее качество</span>
                   </div>
-                  <span class="title-detail__torrent-meta md3-body-small">{{ t.type.value }} · {{ t.codec.value }} · {{ t.color.value }} · {{ formatBytes(t.size) }}</span>
-                  <span class="title-detail__torrent-seeders md3-body-small">{{ t.seeders }} сидов · {{ t.leechers }} личей</span>
-                  <span v-if="t.description" class="title-detail__torrent-desc md3-body-small">{{ t.description }}</span>
+                  <span class="title-detail__torrent-meta">{{ t.type.value }} · {{ t.codec.value }} · {{ t.color.value }} · {{ formatBytes(t.size) }}</span>
+                  <span class="title-detail__torrent-seeders">{{ t.seeders }} сидов · {{ t.leechers }} личей</span>
+                  <span v-if="t.description" class="title-detail__torrent-desc">{{ t.description }}</span>
                 </div>
                 <div class="title-detail__torrent-actions">
-                  <button class="title-detail__torrent-btn md3-label-large" @click="openTorrent(t)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                  <button class="title-detail__torrent-btn" @click="openTorrent(t)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
                     .torrent
                   </button>
-                  <button class="title-detail__torrent-btn title-detail__torrent-btn--magnet md3-label-large" @click="openMagnet(t)">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
+                  <button class="title-detail__torrent-btn title-detail__torrent-btn--magnet" @click="openMagnet(t)">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
                     Magnet
                   </button>
                 </div>
               </div>
             </div>
             <div v-else-if="torrentsLoading" class="title-detail__torrent-skeletons">
-              <div v-for="n in 4" :key="n" class="md3-skeleton" style="height: 80px; border-radius: 8px" />
+              <div v-for="n in 3" :key="n" class="md3-skeleton" style="height: 90px; border-radius: 12px; margin-bottom: 12px" />
             </div>
-            <p v-else class="md3-body-large" style="color: var(--md-sys-color-on-surface-variant)">Торренты для этого релиза не найдены.</p>
+            <p v-else class="title-detail__desc-text">Торренты не найдены.</p>
           </div>
         </div>
       </Transition>
     </div>
   </div>
-  <div v-else-if="loading" class="title-detail__skeleton">
-    <div class="md3-skeleton" style="height: 420px; border-radius: 0" />
-  </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useTitleStore } from '@/stores/titles'
 import { useLibraryStore } from '@/stores/library'
 import { useJikanStore } from '@/stores/jikan'
-import { api } from '@/api/client'
-import { useGsap } from '@/composables/useGsap'
 import { useToast } from '@/composables/useToast'
+import { useGsap } from '@/composables/useGsap'
+import { api } from '@/api/client'
 import TitleCard from '@/components/TitleCard.vue'
 import CharacterCard from '@/components/CharacterCard.vue'
 import type { Title, Episode, Torrent, JikanFullData } from '@/types'
@@ -188,115 +211,107 @@ const props = defineProps<{ id: string }>()
 const router = useRouter()
 const titleStore = useTitleStore()
 const libraryStore = useLibraryStore()
-const { parallax, animateCount } = useGsap()
-const { success, info } = useToast()
+const jikanStore = useJikanStore()
+const { success } = useToast()
+const { parallax } = useGsap()
 
 const title = ref<Title | null>(null)
 const loading = ref(true)
-const activeTab = ref<'description' | 'episodes' | 'characters' | 'related' | 'torrents'>('description')
-const jikanStore = useJikanStore()
+const activeTab = ref('description')
+const userRating = ref(0)
 const jikanData = ref<JikanFullData | null>(null)
 const jikanLoading = ref(false)
 const relatedTitles = ref<Title[]>([])
 const relatedLoading = ref(false)
 const torrents = ref<Torrent[]>([])
 const torrentsLoading = ref(false)
-const detailRef = ref<HTMLElement | null>(null)
-const headerRef = ref<HTMLElement | null>(null)
-const posterRef = ref<HTMLElement | null>(null)
-const userRating = ref(libraryStore.getUserRating(Number(props.id)))
 
-const isFav = computed(() => (title.value ? libraryStore.isFavorite(title.value.id) : false))
+const detailRef = ref<HTMLElement>()
+const headerRef = ref<HTMLElement>()
+const posterRef = ref<HTMLElement>()
+const tabsRef = ref<HTMLElement>()
 
-const tabs = [
-  { id: 'description' as const, label: 'Описание' },
-  { id: 'episodes' as const, label: 'Эпизоды' },
-  { id: 'characters' as const, label: 'Персонажи' },
-  { id: 'related' as const, label: 'Похожие' },
-  { id: 'torrents' as const, label: 'Торренты' },
-]
+const isFav = computed(() => {
+  if (!title.value) return false
+  return libraryStore.isFavorite(title.value.id)
+})
 
-const episodes = computed(() => title.value?.episodes || [])
+const episodes = computed<Episode[]>(() => title.value?.episodes || [])
 
 const posterUrl = computed(() => {
   if (!title.value?.poster) return ''
-  return title.value.poster.preview || title.value.poster.src || ''
+  return title.value.poster.src || title.value.poster.preview || ''
 })
 
-const headerBgStyle = computed(() => ({
-  backgroundImage: `url(${posterUrl.value})`,
-}))
+const headerBgStyle = computed(() => {
+  if (!posterUrl.value) return {}
+  return { backgroundImage: `url(${posterUrl.value})` }
+})
+
+const tabs = [
+  { id: 'description', label: 'О тайтле' },
+  { id: 'episodes', label: 'Эпизоды' },
+  { id: 'characters', label: 'Персонажи' },
+  { id: 'related', label: 'Похожие' },
+  { id: 'torrents', label: 'Торренты' },
+]
+
+function getProgress(ep: Episode) {
+  if (!title.value) return 0
+  const hist = libraryStore.history.find(h => h.titleId === title.value!.id && h.episodeId === ep.id)
+  if (!hist?.duration) return 0
+  return Math.round((hist.timestamp / hist.duration) * 100)
+}
 
 function play() {
   if (title.value) router.push(`/player/${title.value.id}`)
 }
 
 function playEpisode(ep: Episode) {
-  router.push(`/player/${props.id}/${ep.id}`)
-}
-
-function goToDetails(t: Title) {
-  router.push(`/title/${t.id}`)
+  if (title.value) router.push(`/player/${title.value.id}/${ep.id}`)
 }
 
 function toggleFavorite() {
   if (!title.value) return
   if (isFav.value) {
     libraryStore.removeFromFavorites(title.value.id)
-    info('Удалено из избранного')
+    success('Удалено из избранного')
   } else {
     libraryStore.addToFavorites(title.value)
     success('Добавлено в избранное')
   }
 }
 
-function setRating(star: number) {
-  userRating.value = star
-  libraryStore.setUserRating(Number(props.id), star)
-  success(`Оценка ${star}/10 сохранена`)
+function shareTitle() {
+  if (navigator.share && title.value) {
+    navigator.share({ title: title.value.name.main, url: window.location.href })
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+    success('Ссылка скопирована')
+  }
 }
 
-async function shareTitle() {
+function setRating(val: number) {
   if (!title.value) return
-  const url = window.location.href
-  const shareData = { title: title.value.name.main, text: `Смотри аниме "${title.value.name.main}" на Anilibrix Plus`, url }
-
-  if (navigator.share) {
-    try { await navigator.share(shareData); return }
-    catch (err) { if (err instanceof DOMException && err.name === 'AbortError') return }
-  }
-
-  try {
-    await navigator.clipboard.writeText(url)
-    success('Ссылка скопирована в буфер обмена!')
-  } catch {
-    info('Скопируйте ссылку вручную: ' + url)
-  }
+  userRating.value = val === userRating.value ? 0 : val
+  libraryStore.setUserRating(title.value.id, userRating.value)
 }
 
-function getProgress(ep: Episode) {
-  const entry = libraryStore.history.find((h) => h.titleId === Number(props.id) && h.episodeId === ep.id)
-  if (!entry || !entry.duration) return 0
-  return Math.round((entry.timestamp / entry.duration) * 100)
+function goToDetails(t: Title) {
+  router.push(`/title/${t.id}`)
 }
 
 async function loadRelated() {
-  if (relatedLoading.value) return
+  if (!title.value?.genres?.length) return
   relatedLoading.value = true
   try {
-    const id = Number(props.id)
-    const [franchise, recommended] = await Promise.allSettled([
-      api.getFranchiseByRelease(id),
-      api.getRecommendedReleases(id, 12),
-    ])
-    const results = new Map<number, Title>()
-    if (franchise.status === 'fulfilled') franchise.value.forEach((t) => results.set(t.id, t))
-    if (recommended.status === 'fulfilled') (recommended.value as Title[]).forEach((t: Title) => results.set(t.id, t))
-    relatedTitles.value = Array.from(results.values()).filter((t) => t.id !== id)
+    const genreNames = title.value.genres.map(g => g.name)
+    const all = titleStore.titles.filter(t => t.id !== title.value!.id && t.genres?.some(g => genreNames.includes(g.name)))
+    relatedTitles.value = all.slice(0, 12)
   } finally { relatedLoading.value = false }
 }
 
-const QUALITY_RANK: Record<string, number> = { '360p': 1, '480p': 2, '576p': 3, '720p': 4, '1080p': 5, '2k': 6, '4k': 7, '8k': 8 }
+const QUALITY_RANK: Record<string, number> = { '480p': 1, '720p': 2, '1080p': 3, '2160p': 4, '4K': 4 }
 
 const bestTorrent = computed(() => {
   if (!torrents.value.length) return null
@@ -374,46 +389,336 @@ onMounted(() => loadData())
 @use "@/styles/responsive.scss" as *;
 
 .title-detail {
-  display: flex; flex-direction: column; gap: 24px; margin: -28px -36px;
-  will-change: transform;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin: -28px -36px;
+  padding-bottom: 48px;
 
   @include mobile {
-    margin: -12px -16px;
-    gap: 16px;
+    margin: -12px -12px;
+    gap: 20px;
+    padding-bottom: 32px;
   }
 
   &__header {
-    position: relative; min-height: 440px; background-size: cover; background-position: center;
-    display: flex; align-items: flex-end; overflow: hidden;
-    &::before { content: ''; position: absolute; inset: 0; background-image: inherit; background-size: cover; background-position: center; filter: blur(10px) saturate(0.7); transform: scale(1.08); z-index: 0; }
-    @include mobile { min-height: 280px; }
+    position: relative;
+    min-height: 460px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background-image: inherit;
+      background-size: cover;
+      background-position: center;
+      filter: blur(36px) brightness(0.32) saturate(1.1);
+      transform: scale(1.1);
+      z-index: 0;
+    }
+
+    @include mobile {
+      min-height: 300px;
+    }
   }
-  &__overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--md-sys-color-background) 0%, transparent 50%), linear-gradient(to right, rgba(0,0,0,0.75) 0%, transparent 50%); backdrop-filter: blur(1px); z-index: 1; }
-  &__header-content { position: relative; z-index: 2; display: flex; gap: 28px; padding: 36px; width: 100%; align-items: flex-end; will-change: transform; @include mobile { flex-direction: column; gap: 12px; padding: 16px; align-items: flex-start; } }
-  &__poster { width: 190px; height: 285px; object-fit: cover; border-radius: var(--md-sys-shape-corner-small); box-shadow: var(--md-sys-elevation-4); flex-shrink: 0; transition: transform 300ms var(--md-sys-motion-easing-spring); &:hover { transform: translateY(-4px) scale(1.02); } @include mobile { width: 100px; height: 150px; } }
-  &__info { display: flex; flex-direction: column; gap: 8px; flex: 1; padding-bottom: 4px; @include mobile { width: 100%; } }
-  &__metadata { display: flex; gap: 10px; align-items: center; @include mobile { flex-wrap: wrap; gap: 6px; } }
-  &__meta-tag { padding: 4px 12px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--md-sys-shape-corner-extra-small); color: rgba(255,255,255,0.85); font-size: 12px; letter-spacing: 0.02em; text-shadow: 0 1px 4px rgba(0,0,0,0.4); &--ongoing { color: #e8a5b8; border-color: rgba(232,165,184,0.3); background: rgba(232,165,184,0.12); } @include mobile { font-size: 11px; padding: 3px 8px; } }
-  &__name { color: var(--md-sys-color-on-background); text-shadow: 0 2px 16px rgba(0,0,0,0.5); @include mobile { font-size: 20px; line-height: 1.1; } }
-  &__english { color: var(--md-sys-color-on-surface-variant); @include mobile { font-size: 13px; } }
-  &__genres { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; @include mobile { gap: 6px; } }
-  &__genre { padding: 3px 12px; border-radius: var(--md-sys-shape-corner-extra-small); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface-variant); border: 1px solid var(--md-sys-color-outline-variant); font-size: 12px; transition: background 150ms, color 150ms; &:hover { background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); } @include mobile { font-size: 11px; padding: 2px 10px; } }
-  &__actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; @include mobile { flex-direction: column; gap: 8px; } }
+
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, var(--md-sys-color-background) 0%, rgba(9, 9, 12, 0.7) 50%, rgba(9, 9, 12, 0.25) 100%),
+      linear-gradient(to right, rgba(9, 9, 12, 0.85) 0%, rgba(9, 9, 12, 0.4) 60%, transparent 100%);
+    z-index: 1;
+  }
+
+  &__header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 32px;
+    padding: 36px 48px;
+    width: 100%;
+    align-items: flex-end;
+
+    @include mobile {
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px;
+      align-items: flex-start;
+    }
+  }
+
+  &__poster-wrap {
+    flex-shrink: 0;
+  }
+
+  &__poster {
+    width: 200px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: var(--md-sys-shape-corner-medium);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: transform 250ms var(--md-sys-motion-easing-spring);
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+
+    @include mobile {
+      width: 110px;
+      height: 165px;
+      border-radius: var(--md-sys-shape-corner-small);
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    padding-bottom: 4px;
+
+    @include mobile {
+      width: 100%;
+      gap: 8px;
+    }
+  }
+
+  &__metadata {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+
+    @include mobile {
+      gap: 6px;
+    }
+  }
+
+  &__meta-tag {
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--md-sys-shape-corner-full);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+
+    &--ongoing {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    @include mobile {
+      font-size: 11px;
+      padding: 2px 7px;
+    }
+  }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--md-sys-color-tertiary);
+  }
+
+  &__mal-score {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-score-gold);
+    border-color: rgba(255, 184, 0, 0.25);
+    background: rgba(255, 184, 0, 0.1);
+    text-decoration: none;
+  }
+
+  &__name {
+    color: #ffffff;
+    font-family: var(--font-family-display);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+
+    @include mobile {
+      font-size: 20px;
+      line-height: 1.2;
+    }
+  }
+
+  &__english {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 14px;
+    font-weight: 500;
+
+    @include mobile {
+      font-size: 12.5px;
+    }
+  }
+
+  &__genres {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+
+  &__genre {
+    padding: 3px 10px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--glass-border);
+    font-size: 11.5px;
+    font-weight: 500;
+    transition: background 150ms ease, color 150ms ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+    }
+
+    @include mobile {
+      font-size: 11px;
+      padding: 2px 7px;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+
+    @include mobile {
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+  }
+
+  &__fab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: var(--md-sys-shape-corner-full);
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: transform 180ms var(--md-sys-motion-easing-spring), background 150ms ease;
+
+    &:hover {
+      transform: translateY(-2px);
+    }
+
+    &:active {
+      transform: scale(0.97);
+    }
+
+    &--primary {
+      background: #ffffff;
+      color: #09090c;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+      &:hover {
+        background: #f0f0f2;
+      }
+    }
+
+    &--secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(16px);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.16);
+      }
+    }
+
+    &--active {
+      background: rgba(94, 92, 230, 0.25);
+      border-color: rgba(94, 92, 230, 0.4);
+      color: #ffffff;
+    }
+
+    @include mobile {
+      width: 100%;
+      justify-content: center;
+      padding: 10px 18px;
+    }
+  }
+
+  &__star {
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    transition: fill 200ms, stroke 200ms;
+  }
+
+  &__fab--active &__star {
+    fill: #ffb800;
+    stroke: #ffb800;
+  }
+
+  &__label-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-width: 95px;
+    height: 20px;
+  }
+
+  &__label {
+    position: absolute;
+    left: 0;
+    white-space: nowrap;
+    transition: opacity 180ms, transform 180ms;
+
+    &--off { opacity: 1; transform: translateY(0); }
+    &--on { opacity: 0; transform: translateY(4px); }
+  }
+
+  &__fab--active &__label--off { opacity: 0; transform: translateY(-4px); }
+  &__fab--active &__label--on { opacity: 1; transform: translateY(0); }
 
   &__user-rating {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 12px;
-    padding: 10px 16px;
-    background: rgba(0,0,0,0.2);
-    border-radius: var(--md-sys-shape-corner-small);
-    border: 1px solid rgba(255,255,255,0.04);
-    backdrop-filter: blur(8px);
+    margin-top: 6px;
+    padding: 8px 14px;
+    background: rgba(18, 19, 26, 0.7);
+    border-radius: var(--md-sys-shape-corner-medium);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
     align-self: flex-start;
 
-    span { color: rgba(255,255,255,0.6); }
-    @include mobile { align-self: stretch; }
+    @include mobile {
+      align-self: stretch;
+      justify-content: space-between;
+    }
+  }
+
+  &__rating-label {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 12.5px;
+    font-weight: 500;
   }
 
   &__stars {
@@ -425,77 +730,427 @@ onMounted(() => loadData())
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     background: transparent;
     border: none;
-    color: rgba(255,255,255,0.15);
+    color: rgba(255, 255, 255, 0.2);
     cursor: pointer;
-    transition: color 150ms, transform 200ms var(--md-sys-motion-easing-spring);
+    transition: color 150ms ease;
     padding: 0;
 
-    &:hover { transform: scale(1.2); color: rgba(255,255,255,0.4); }
-    &--active { color: #ffc107; }
-    &--active:hover { color: #ffd54f; }
+    &:hover {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    &--active {
+      color: var(--color-score-gold);
+    }
   }
 
-  &__fab { display: flex; align-items: center; gap: 8px; padding: 11px 24px; border-radius: var(--md-sys-shape-corner-small); border: none; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); cursor: pointer; font: var(--md-sys-typescale-label-large); transition: transform 200ms var(--md-sys-motion-easing-spring), box-shadow 200ms, color 300ms; position: relative; overflow: hidden; &::after { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%; background: rgba(255,255,255,0.18); transform: translate(-50%,-50%); transition: width 350ms, height 350ms, border-radius 350ms; pointer-events: none; z-index: 0; } & > * { position: relative; z-index: 1; } &:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(184,165,232,0.3); } &:active { transform: scale(0.97); } &--secondary { background: rgba(255,255,255,0.06); color: var(--md-sys-color-on-surface); border: 1px solid rgba(255,255,255,0.08); &:hover { box-shadow: none; } &.title-detail__fab--active { border-color: rgba(255,255,255,0.3); &::after { background: rgba(255,255,255,0.28); width: 120%; height: 250%; border-radius: var(--md-sys-shape-corner-small); } } } @include mobile { width: 100%; justify-content: center; padding: 12px 20px; } }
-  &__star { fill: transparent; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; transition: fill 300ms, stroke 300ms, transform 300ms var(--md-sys-motion-easing-spring); transform-origin: center; }
-  &__fab--active &__star { fill: currentColor; stroke: currentColor; transform: scale(1.25); }
-  &__label-wrap { position: relative; display: inline-flex; align-items: center; min-width: 105px; height: 20px; }
-  &__label { position: absolute; left: 0; white-space: nowrap; transition: opacity 200ms, transform 200ms; &--off { opacity: 1; transform: translateY(0); } &--on { opacity: 0; transform: translateY(5px); } }
-  &__fab--active &__label--off { opacity: 0; transform: translateY(-5px); }
-  &__fab--active &__label--on { opacity: 1; transform: translateY(0); }
-  &__tabs { display: flex; gap: 0; padding: 0 36px; border-bottom: 1px solid var(--md-sys-color-outline-variant); overflow-x: auto; @include mobile { padding: 0 16px; } }
-  &__tab { padding: 14px 24px; background: transparent; border: none; color: var(--md-sys-color-on-surface-variant); cursor: pointer; position: relative; font: var(--md-sys-typescale-label-large); white-space: nowrap; transition: color 200ms; &::after { content: ''; position: absolute; bottom: 0; left: 24px; right: 24px; height: 2px; background: var(--md-sys-color-primary); border-radius: 2px 2px 0 0; transform: scaleX(0); transition: transform 250ms var(--md-sys-motion-easing-spring); box-shadow: 0 0 8px rgba(184,165,232,0.3); } &:hover { color: var(--md-sys-color-on-surface); } &--active { color: var(--md-sys-color-primary); &::after { transform: scaleX(1); } } @include mobile { padding: 12px 14px; font-size: 13px; } }
-  &__content { padding: 28px 36px; @include mobile { padding: 16px; } }
-  &__episodes { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; @include mobile { grid-template-columns: 1fr; gap: 12px; } }
-  &__episode { display: flex; flex-direction: column; gap: 8px; cursor: pointer; border-radius: var(--md-sys-shape-corner-small); overflow: hidden; background: var(--md-sys-color-surface-container); transition: transform 250ms var(--md-sys-motion-easing-spring), box-shadow 250ms; &:hover { transform: translateY(-4px); box-shadow: var(--glow-primary), 0 8px 24px rgba(0,0,0,0.4); } &:hover .title-detail__episode-overlay { opacity: 1; } }
-  &__episode-thumb { position: relative; aspect-ratio: 16/9; background: var(--md-sys-color-surface-container-high); overflow: hidden; img { width: 100%; height: 100%; object-fit: cover; transition: transform 400ms; } &:hover img { transform: scale(1.06); } }
-  &__episode-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--md-sys-color-on-surface-variant); }
-  &__episode-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(0,0,0,0.3); }
-  &__episode-progress-bar { height: 100%; background: var(--md-sys-color-primary); transition: width 300ms; box-shadow: 0 0 4px rgba(184,165,232,0.4); }
-  &__episode-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); opacity: 0; transition: opacity 250ms; svg { color: #fff; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); } }
-  &__episode-info { padding: 8px 14px 14px; display: flex; flex-direction: column; gap: 4px; @include mobile { padding: 8px 12px 12px; } }
-  &__skeleton { margin: -28px -36px; @include mobile { margin: -12px -16px; } }
-  &__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; @include mobile { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
-  &__torrents { display: flex; flex-direction: column; gap: 12px; }
-  &__torrent-list { display: flex; flex-direction: column; gap: 12px; }
-  &__torrent-item { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 20px; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container); transition: background-color 200ms, transform 200ms; &:hover { background: var(--md-sys-color-surface-container-high); transform: translateX(4px); } @include mobile { flex-direction: column; align-items: flex-start; gap: 10px; padding: 12px 16px; } }
-  &__torrent-info { display: flex; flex-direction: column; gap: 4px; }
-  &__torrent-quality { color: var(--md-sys-color-primary); }
-  &__torrent-meta { color: var(--md-sys-color-on-surface-variant); }
-  &__torrent-seeders { color: var(--md-sys-color-on-surface-variant); }
-  &__torrent-desc { color: var(--md-sys-color-on-surface-variant); margin-top: 2px; }
-  &__torrent-actions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; @include mobile { width: 100%; } }
-  &__torrent-btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: var(--md-sys-shape-corner-small); border: 1px solid var(--md-sys-color-outline); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-primary); cursor: pointer; font: var(--md-sys-typescale-label-large); transition: background-color 150ms, border-color 150ms, box-shadow 150ms; &:hover { background: var(--md-sys-color-primary-container); border-color: var(--md-sys-color-primary); box-shadow: var(--glow-primary); } &:active { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); } &--magnet { color: var(--md-sys-color-tertiary); border-color: rgba(232,165,184,0.2); &:hover { background: rgba(232,165,184,0.08); border-color: rgba(232,165,184,0.3); box-shadow: 0 0 12px rgba(232,165,184,0.15); } } @include mobile { flex: 1; justify-content: center; } }
-  &__torrent-header { display: flex; align-items: center; gap: 10px; }
-  &__torrent-best { padding: 2px 8px; border-radius: var(--md-sys-shape-corner-extra-small); background: rgba(139,195,74,0.15); color: #8bc34a; border: 1px solid rgba(139,195,74,0.25); font-size: 11px; letter-spacing: 0.02em; }
-  &__torrent-skeletons { display: flex; flex-direction: column; gap: 12px; }
-  &__mal-score { display: inline-flex; align-items: center; gap: 4px; color: #ffb300 !important; border-color: rgba(255, 179, 0, 0.3) !important; background: rgba(255, 179, 0, 0.12) !important; text-decoration: none; cursor: pointer; transition: box-shadow 200ms; &:hover { box-shadow: 0 0 12px rgba(255, 179, 0, 0.2); } }
+  &__rating-val {
+    color: var(--color-score-gold);
+    font-family: var(--font-family-body);
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  &__tabs-wrapper {
+    padding: 0 48px;
+    border-bottom: 1px solid var(--glass-border);
+
+    @include mobile {
+      padding: 0 16px;
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+  }
+
+  &__tab {
+    padding: 12px 18px;
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-on-surface-variant);
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    white-space: nowrap;
+    transition: color 150ms ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 14px;
+      right: 14px;
+      height: 2.5px;
+      background: var(--md-sys-color-primary);
+      border-radius: 4px 4px 0 0;
+      transform: scaleX(0);
+      transition: transform 200ms var(--md-sys-motion-easing-spring);
+    }
+
+    &:hover {
+      color: var(--md-sys-color-on-surface);
+    }
+
+    &--active {
+      color: var(--md-sys-color-on-surface);
+      font-weight: 600;
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+
+    @include mobile {
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+  }
+
+  &__content {
+    padding: 0 48px;
+
+    @include mobile {
+      padding: 0 16px;
+    }
+  }
+
+  &__desc-text {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--md-sys-color-on-surface-variant);
+    max-width: 880px;
+  }
 
   &__mal-section {
-    display: flex; flex-direction: column; gap: 28px; margin-top: 32px;
-    padding-top: 28px; border-top: 1px solid var(--md-sys-color-outline-variant);
-    @include mobile { gap: 20px; margin-top: 24px; padding-top: 20px; }
+    margin-top: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
   }
-  &__mal-loading { margin-top: 24px; }
-  &__trailer { display: flex; flex-direction: column; }
-  &__trailer-embed { position: relative; width: 100%; max-width: 640px; aspect-ratio: 16 / 9; border-radius: var(--md-sys-shape-corner-medium); overflow: hidden; box-shadow: var(--md-sys-elevation-2); iframe { width: 100%; height: 100%; border: none; } }
-  &__stats { display: flex; flex-direction: column; }
-  &__stats-bar { display: flex; align-items: flex-end; gap: 4px; height: 140px; padding-bottom: 4px; @include mobile { height: 100px; } }
-  &__stats-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
-  &__stats-label { color: var(--md-sys-color-on-surface-variant); font-size: 10px; line-height: 1; order: 2; }
-  &__stats-track { flex: 1; width: 100%; max-width: 24px; background: var(--md-sys-color-surface-container-high); border-radius: 2px 2px 0 0; position: relative; order: 1; @include mobile { max-width: 16px; } }
-  &__stats-fill { position: absolute; bottom: 0; left: 0; right: 0; border-radius: 2px 2px 0 0; background: var(--md-sys-color-on-surface-variant); transition: height 600ms var(--md-sys-motion-easing-spring); &--high { background: var(--md-sys-color-primary); } &--mid { background: var(--md-sys-color-tertiary); } }
-  &__stats-total { color: var(--md-sys-color-on-surface-variant); }
-  &__characters { min-height: 200px; }
-  &__character-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; > * { animation: fadeUp 400ms var(--md-sys-motion-easing-decelerate) backwards; } @include mobile { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
-  &__character-skeletons { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; @include mobile { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
-}
 
-.tab-fade-enter-active { transition: all 250ms var(--md-sys-motion-easing-decelerate); }
-.tab-fade-leave-active { transition: all 150ms var(--md-sys-motion-easing-accelerate); }
-.tab-fade-enter-from { opacity: 0; transform: translateY(8px); }
-.tab-fade-leave-to { opacity: 0; transform: translateY(-4px); }
+  &__section-title {
+    font-family: var(--font-family-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 12px;
+  }
+
+  &__trailer-embed {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    aspect-ratio: 16/9;
+    border-radius: var(--md-sys-shape-corner-medium);
+    overflow: hidden;
+    box-shadow: var(--md-sys-elevation-2);
+    border: 1px solid var(--glass-border);
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  }
+
+  &__stats {
+    max-width: 640px;
+  }
+
+  &__stats-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 130px;
+    padding: 16px;
+    background: var(--md-sys-color-surface-container);
+    border-radius: var(--md-sys-shape-corner-medium);
+    border: 1px solid var(--glass-border);
+  }
+
+  &__stats-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  &__stats-track {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  &__stats-fill {
+    width: 100%;
+    border-radius: 3px 3px 0 0;
+    background: rgba(255, 255, 255, 0.18);
+    min-height: 4px;
+    transition: height 400ms ease;
+
+    &--high {
+      background: var(--md-sys-color-primary);
+    }
+
+    &--mid {
+      background: var(--md-sys-color-secondary);
+    }
+  }
+
+  &__stats-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  &__stats-total {
+    font-size: 12.5px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-top: 8px;
+  }
+
+  &__episodes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__episode {
+    display: flex;
+    gap: 12px;
+    padding: 8px;
+    border-radius: var(--md-sys-shape-corner-medium);
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: transform 180ms ease, border-color 150ms ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: var(--glass-border-hover);
+
+      .title-detail__episode-overlay { opacity: 1; }
+    }
+  }
+
+  &__episode-thumb {
+    position: relative;
+    width: 115px;
+    height: 72px;
+    border-radius: var(--md-sys-shape-corner-small);
+    overflow: hidden;
+    background: var(--md-sys-color-surface-container-high);
+    flex-shrink: 0;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__episode-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface-variant);
+    font-family: var(--font-family-body);
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  &__episode-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  &__episode-progress-bar {
+    height: 100%;
+    background: var(--md-sys-color-primary);
+  }
+
+  &__episode-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 150ms ease;
+    color: #ffffff;
+  }
+
+  &__episode-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  &__episode-name {
+    font-family: var(--font-family-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__episode-meta {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  &__character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  &__character-skeletons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 16px;
+
+    @include mobile {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+  }
+
+  &__torrent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__torrent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-radius: var(--md-sys-shape-corner-medium);
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--glass-border);
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+  }
+
+  &__torrent-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+  }
+
+  &__torrent-quality {
+    font-family: var(--font-family-body);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+  }
+
+  &__torrent-best {
+    padding: 2px 7px;
+    border-radius: var(--md-sys-shape-corner-full);
+    background: rgba(48, 209, 88, 0.15);
+    color: var(--md-sys-color-tertiary);
+    border: 1px solid rgba(48, 209, 88, 0.25);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  &__torrent-meta {
+    display: block;
+    font-size: 12.5px;
+    color: var(--md-sys-color-on-surface-variant);
+  }
+
+  &__torrent-seeders {
+    display: block;
+    font-size: 12px;
+    color: var(--md-sys-color-tertiary);
+    margin-top: 2px;
+  }
+
+  &__torrent-desc {
+    display: block;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.8;
+  }
+
+  &__torrent-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__torrent-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--glass-border);
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    font-family: var(--font-family-body);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    &--magnet {
+      border-color: rgba(94, 92, 230, 0.25);
+      color: var(--md-sys-color-primary);
+      background: var(--md-sys-color-primary-container);
+
+      &:hover {
+        background: rgba(94, 92, 230, 0.2);
+      }
+    }
+  }
+}
 </style>
